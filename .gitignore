@@ -1,0 +1,16 @@
+# 忽略所有 .csv 文件
+*.csv
+# 忽略所有 .txt 文件
+*.txt
+# 忽略所有 .rar 文件
+*.rar
+# 忽略所有 .jpg 文件
+*.jpg
+# 忽略所有 .png 文件
+*.png
+# 忽略所有 .pdf 文件
+*.pdf
+# 忽略所有 .npy 文件
+*.npy
+# 忽略"data" 資料夾下所有csv文件
+/data/*.csv
