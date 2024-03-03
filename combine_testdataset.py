@@ -71,24 +71,32 @@ def ReplaceMorethanTenthousandQuantity(df):
     return extracted_df
 
 # Loading datasets
-cicids2017_testdataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\test_CICIDS2017_dataframes_20240110.csv")
-TONIOT_testdataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\test_ToN-IoT_dataframes_20240110.csv")
+# cicids2017_testdataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\test_CICIDS2017_dataframes_20240110.csv")
+# TONIOT_testdataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\test_ToN-IoT_dataframes_20240110.csv")
 
 
 # 加载 .npy 文件
-# 载入第一组数据
-cicids2017_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/x_test_CICIDS2017_20240110.npy")
-cicids2017_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/y_test_CICIDS2017_20240110.npy")
+# 载入Monday_and_Firday test
+cicids2017_Monday_and_Firday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/x_Monday_and_Firday_test_cicids2017_AfterFeatureSelect44_20240304.npy")
+cicids2017_Monday_and_Firday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/y_Monday_and_Firday_test_cicids2017_AfterFeatureSelect44_20240304.npy")
 
-# 载入第二组数据
-TONIOT_x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_test_ToN-IoT_20240110.npy")
-TONIOT_y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_test_ToN-IoT_20240110.npy")
+# 载入Tuesday_and_Wednesday_and_Thursday test
+cicids2017_Tuesday_and_Wednesday_and_Thursday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/x_Tuesday_and_Wednesday_and_Thursday_test_cicids2017_AfterFeatureSelect44_20240304.npy")
+cicids2017_Tuesday_and_Wednesday_and_Thursday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/y_Tuesday_and_Wednesday_and_Thursday_test_cicids2017_AfterFeatureSelect44_20240304.npy")
+
+# 载入TONIOT test
+TONIOT_x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_test_ToN-IoT_20240304.npy")
+TONIOT_y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_test_ToN-IoT_20240304.npy")
 
 # 合并 x_test 和 x1_test
-merged_x = np.concatenate((cicids2017_x_test, TONIOT_x_test), axis=0)
+merged_x = np.concatenate((cicids2017_Monday_and_Firday_x_test,
+                           cicids2017_Tuesday_and_Wednesday_and_Thursday_x_test,
+                           TONIOT_x_test), axis=0)
 
 # 合并 y_test 和 y1_test
-merged_y = np.concatenate((cicids2017_y_test, TONIOT_y_test), axis=0)
+merged_y = np.concatenate((cicids2017_Monday_and_Firday_y_test,
+                           cicids2017_Tuesday_and_Wednesday_and_Thursday_y_test,
+                           TONIOT_y_test), axis=0)
 
 # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\TONIOT_test_and_CICIDS2017_test_combine\20240110
 # 保存合并后的数组
@@ -110,60 +118,3 @@ merged_df = pd.DataFrame(data=np.column_stack((merged_x, merged_y)), columns=[f'
 merged_df.to_csv(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/TONIOT_test_and_CICIDS2017_test_merged.csv", index=False)
 
 
-
-# Loading datasets
-# 第一次訓練後有client1和client2有缺Label如下，所以要補，不然訓練會失敗
-# cicids2017 client1少 15 19先要補值
-# TONIOT client2 少 4 12要補值
-
-def AddLabelToCICIDS2017(df):
-    values_to_insert = ['15', '19']
-     # 获取 'Label' 列前的所有列的列名
-    columns_before_type = df.columns.tolist()[:df.columns.get_loc('Label')]
-
-    # 將新資料插入 DataFrame
-    for value in values_to_insert:
-        new_data = {'Label': value}  # 這裡 'another_type' 是範例，您可以根據實際需求修改
-        
-        # 设置 'type' 列前的所有列的值为0
-        for column in columns_before_type:
-            new_data[column] = 0
-
-        # 添加新数据到 DataFrame
-        df = df.append(new_data, ignore_index=True)
-    
-    return df
-
-### add 沒有的Label到TONIOT
-def AddLabelToTONIOT(df):
-    values_to_insert = ['4', '12']
-     # 获取 'type' 列前的所有列的列名
-    columns_before_type = df.columns.tolist()[:df.columns.get_loc('type')]
-
-    # 將新資料插入 DataFrame
-    for value in values_to_insert:
-        new_data = {'type': value}  # 這裡 'another_type' 是範例，您可以根據實際需求修改
-        
-        # 设置 'type' 列前的所有列的值为0
-        for column in columns_before_type:
-            new_data[column] = 0
-        
-        # 设置'label'列的值为1因為TONIOT的攻擊在label列都視為1，種類用type表示
-        new_data['label'] = 1
-
-        # 添加新数据到 DataFrame
-        df = df.append(new_data, ignore_index=True)
-
-    return df
-
-cicids2017_traindataset = pd.read_csv(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\{today}\\train_CICIDS2017_dataframes_20240110.csv")
-TONIOT_traindataset = pd.read_csv(filepath + f"\\dataset_AfterProcessed\\TONIOT\\{today}\\train_ToN-IoT_dataframes_20240110.csv")
-
-cicids2017_traindataset = AddLabelToCICIDS2017(cicids2017_traindataset)
-TONIOT_traindataset = AddLabelToTONIOT(TONIOT_traindataset)
-# client1少Label 15
-SaveDataToCsvfile(cicids2017_traindataset, f"./data/dataset_AfterProcessed/CICIDS2017/{today}", f"train_CICIDS2017_dataframes_addlossvalue_{today}")
-SaveDataframeTonpArray(cicids2017_traindataset, f"./data/dataset_AfterProcessed/CICIDS2017/{today}", "train_CICIDS2017_addlossvalue",today)
-
-SaveDataToCsvfile(TONIOT_traindataset, f"./data/dataset_AfterProcessed/TONIOT/{today}", f"train_ToN-IoT_dataframes_addlossvalue_{today}")
-SaveDataframeTonpArray(TONIOT_traindataset, f"./data/dataset_AfterProcessed/TONIOT/{today}", "train_ToN-IoT_addlossvalue",today)

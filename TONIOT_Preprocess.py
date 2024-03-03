@@ -243,6 +243,14 @@ train_dataframes, test_dataframes = train_test_split(afterprocess_dataset, test_
 
 
 
+# 篩選test_dataframes中標籤為2、3、5和19的行加回去train
+train_dataframes_add = test_dataframes[test_dataframes['type'].isin([4,12])]
+# test刪除Label相當於2,3,5,19的行，因為這些是因為noniid要加到train的Label
+test_dataframes = test_dataframes[~test_dataframes['type'].isin([4,12])]
+# 合併Label2,3,5,19回去到train
+train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
+
+
 # train_dataframes = clearDirtyData(train_dataframes)
 # test_dataframes = clearDirtyData(test_dataframes)
 label_counts = test_dataframes['type'].value_counts()

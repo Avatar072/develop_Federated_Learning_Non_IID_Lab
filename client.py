@@ -37,6 +37,7 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 #python client.py --dataset train_half1 --epochs 500 --method normal
 #python client.py --dataset train_half2 --epochs 500 --method normal
+#python client.py --dataset train_half3 --epochs 500 --method normal
 file, num_epochs,Choose_method = ParseCommandLineArgs(["dataset", "epochs", "method"])
 print(f"Dataset: {file}")
 print(f"Number of epochs: {num_epochs}")

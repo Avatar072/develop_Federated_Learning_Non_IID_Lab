@@ -108,8 +108,8 @@ def ParseCommandLineArgs(commands):
     parser = argparse.ArgumentParser(description='Federated Learning Client')
 
     # 添加一个参数来选择数据集
-    parser.add_argument('--dataset', type=str, choices=['total_train','train_half1', 'train_half2'], default='total_train',
-                        help='Choose the dataset for training (total_train or train_half1 or train_half2)')
+    parser.add_argument('--dataset', type=str, choices=['total_train','train_half1', 'train_half2', 'train_half3'], default='total_train',
+                        help='Choose the dataset for training (total_train or train_half1 or train_half2 or train_half3)')
 
     # 添加一个参数来设置训练的轮数
     parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs')
@@ -221,8 +221,12 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # # 20240110 non iid client1 use cicids2017 after chi-square
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\x_train_CICIDS2017_20240110.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\y_train_CICIDS2017_20240110.npy", allow_pickle=True)
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\x_train_CICIDS2017_addlossvalue_20240110.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\y_train_CICIDS2017_addlossvalue_20240110.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\x_train_CICIDS2017_addlossvalue_20240110.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\y_train_CICIDS2017_addlossvalue_20240110.npy", allow_pickle=True)
+            # # 20240304 non iid client1 use cicids2017 Monday_and_Firday after chi-square
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\x_Monday_and_Firday_train_cicids2017_AfterFeatureSelect44_20240304.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\y_Monday_and_Firday_train_cicids2017_AfterFeatureSelect44_20240304.npy", allow_pickle=True)
+
         elif (Choose_method == 'SMOTE'):
             # # # 20231226 borderLineSMOTE2 Lable1  Label 3 Label 4 Label6 Label9 k=5  M = 10 
             x_train = np.load(filepath + "x_train_half1_BorederlineSMOTE_borderline-2_Label1_and_Label3_Label4_Label6_Label9_20231226.npy", allow_pickle=True)
@@ -242,8 +246,12 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # # 20240110 non iid client2 use TONIOT
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240110.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240110.npy", allow_pickle=True)
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
+            # # 20240304 non iid client1 use cicids2017 Tuesday_and_Wednesday_and_Thursday after chi-square
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_cicids2017_AfterFeatureSelect44_20240304.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_cicids2017_AfterFeatureSelect44_20240304.npy", allow_pickle=True)
+
         elif (Choose_method == 'SMOTE'):
             # # # 20231226 borderLineSMOTE2 Lable1  Label 3 Label 4 Label6 Label9 k=5  M = 10 
             x_train = np.load(filepath + "x_train_half2_BorederlineSMOTE_borderline-2_Label1_and_Label3_Label4_Label6_Label9_20231226.npy", allow_pickle=True)
@@ -257,6 +265,31 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
         print("train_half2 y_train 的形狀:", y_train.shape)
         client_str = "client2"
         print("使用 train_half2 進行訓練")
+
+    elif file == 'train_half3':
+        if (Choose_method == 'normal'):
+            # # 20240110 non iid client2 use TONIOT
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240110.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240110.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
+            # # 20240110 non iid client3 use TONIOT
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240304.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240304.npy", allow_pickle=True)
+        elif (Choose_method == 'SMOTE'):
+            # # # 20231226 borderLineSMOTE2 Lable1  Label 3 Label 4 Label6 Label9 k=5  M = 10 
+            x_train = np.load(filepath + "x_train_half2_BorederlineSMOTE_borderline-2_Label1_and_Label3_Label4_Label6_Label9_20231226.npy", allow_pickle=True)
+            y_train = np.load(filepath + "y_train_half2_BorederlineSMOTE_borderline-2_Label1_and_Label3_Label4_Label6_Label9_20231226.npy", allow_pickle=True)
+            print("train_half2 SMOTE")
+        elif (Choose_method == 'GAN'):
+            # 20231114 after 百分百PCAonly do labelencode and minmax
+            x_train = np.load(filepath + "x_train_half2_20231114.npy", allow_pickle=True)
+            y_train = np.load(filepath + "y_train_half2_20231114.npy", allow_pickle=True)
+        print("train_half3 x_train 的形狀:", x_train.shape)
+        print("train_half3 y_train 的形狀:", y_train.shape)
+        client_str = "client3"
+        print("使用 train_half2 進行訓練")
+
 
     print("use file", file)
     return x_train, y_train,client_str

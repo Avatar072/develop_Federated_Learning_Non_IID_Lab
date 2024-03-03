@@ -25,7 +25,9 @@ today = today.strftime("%Y%m%d")
 generatefolder(filepath + "\\", "dataset_AfterProcessed")
 # generatefolder(filepath + "\\dataset_AfterProcessed\\", today)
 generatefolder(filepath + "\\dataset_AfterProcessed\\", "CICIDS2017")
-generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\", today)
+generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\", today)
+generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\", today)
+generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\", today)
 #############################################################################  variable  ###################
 
 #############################################################################  funcion宣告與實作  ###########
@@ -40,19 +42,30 @@ def writeData(file_path):
     return df
 
 ### merge多個DataFrame
-def mergeData(folder_path):
+def mergeData(folder_path, choose_merge_days):
     # 创建要合并的DataFrame列表
     dataframes_to_merge = []
 
     # 添加每个CSV文件的DataFrame到列表
-    dataframes_to_merge.append(writeData(folder_path + "\\Monday-WorkingHours.pcap_ISCX.csv"))
-    dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"))
-    dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"))
-    dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Morning.pcap_ISCX.csv"))
-    dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"))
-    dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv"))
-    dataframes_to_merge.append(writeData(folder_path + "\\Tuesday-WorkingHours.pcap_ISCX.csv"))
-    dataframes_to_merge.append(writeData(folder_path + "\\Wednesday-workingHours.pcap_ISCX.csv"))
+    if choose_merge_days == "Monday_and_Firday":
+        dataframes_to_merge.append(writeData(folder_path + "\\Monday-WorkingHours.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Morning.pcap_ISCX.csv"))
+    elif choose_merge_days == "Tuesday_and_Wednesday_and_Thursday":
+        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Tuesday-WorkingHours.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Wednesday-workingHours.pcap_ISCX.csv"))
+    elif choose_merge_days == "ALLday":
+        dataframes_to_merge.append(writeData(folder_path + "\\Monday-WorkingHours.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Morning.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Tuesday-WorkingHours.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Wednesday-workingHours.pcap_ISCX.csv"))
 
     # 检查特征名是否一致
     if check_column_names(dataframes_to_merge):
@@ -83,11 +96,11 @@ def check_column_names(dataframes):
 
 
 ### 检查CSV文件是否存在，如果不存在，则合并数据并保存到CSV文件中
-def ChecktotalCsvFileIsexists(file):
+def ChecktotalCsvFileIsexists(file,choose_merge_days):
     if not os.path.exists(file):
         # 如果文件不存在，执行数据合并    
         # data = mergeData("D:\\Labtest20230911\\data\\MachineLearningCVE")
-        data = mergeData(filepath + "\\CICIDS2017_Original\\TrafficLabelling")#完整的資料
+        data = mergeData(filepath + "\\CICIDS2017_Original\\TrafficLabelling",choose_merge_days)#完整的資料
         
         # data = clearDirtyData(data)
        
@@ -104,12 +117,14 @@ def ChecktotalCsvFileIsexists(file):
     else:
         print(f"文件 {file} 已存在，不执行合并和保存操作。")
 
+    return file
 
 ### label encoding
-def label_Encoding(label):
+def label_Encoding(label,df):
     label_encoder = preprocessing.LabelEncoder()
-    mergecompelete_dataset[label] = label_encoder.fit_transform(mergecompelete_dataset[label])
-    mergecompelete_dataset[label].unique()
+    df[label] = label_encoder.fit_transform(df[label])
+    df[label].unique()
+    return df
 
 ### show original label name and after labelenocode
 def label_encoding(label, dataset):
@@ -136,21 +151,6 @@ def OneHot_Encoding(feature, data):
     # 刪除原始特徵列
     data = data.drop(feature, axis=1)
     return data
-### do Label Encoding
-# def DoLabelEncoding(df):
-#     #將 Source IP、Source Port、Destination IP、Destination Port、Timestamp 等特徵做 one-hot 形式轉換
-#     # Flow ID	 Source IP	 Source Port	 Destination IP	 Destination Port	 Protocol	 Timestamp
-#     df = df.drop('FlowID', axis=1)
-#     label_Encoding('Label',df)
-#     label_Encoding('SourceIP',df)
-#     label_Encoding('SourcePort',df)
-#     label_Encoding('DestinationIP',df)
-#     label_Encoding('DestinationPort',df)
-#     label_Encoding('Protocol',df)
-#     label_Encoding('Timestamp',df)
-    # 保存編碼后的 DataFrame 回到 CSV 文件
-    # df.to_csv(filepath + "\\dataset_AfterProcessed\\total_encoded.csv", index=False)
-    # return df
     
 ### label Encoding And Replace the number of greater than 10,000
 def ReplaceMorethanTenthousandQuantity(df):
@@ -193,30 +193,76 @@ def ReplaceMorethanTenthousandQuantity(df):
 
 
 # CheckCsvFileIsexists檢查file存不存在，若file不存在產生新檔
-ChecktotalCsvFileIsexists(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_original.csv")
-# Loading datasets after megre complete
-mergecompelete_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_original.csv")
-# DoLabelEncoding(mergecompelete_dataset)
-mergecompelete_dataset = ReplaceMorethanTenthousandQuantity(mergecompelete_dataset)
-mergecompelete_dataset = mergecompelete_dataset.drop('FlowID', axis=1)
-# 去除所有非数字、字母和下划线的字符
-mergecompelete_dataset['Label'] = mergecompelete_dataset['Label'].replace({r'[^\w]': ''}, regex=True)
-mergecompelete_dataset.to_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_updated_10000.csv", index=False)
-mergecompelete_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_updated_10000.csv")
-# print(mergecompelete_dataset["Web Attack – Brute Force"])
+# ChecktotalCsvFileIsexists(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_original.csv")
+def GetAtferMergeFinishFilepath(choose_merge_days):
+    if choose_merge_days == "Monday_and_Firday":
+        Csv_AtferMergeFinish_Filepath = ChecktotalCsvFileIsexists(filepath + 
+                                                                  "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\CICIDS2017_Monday_and_Firday.csv",
+                                                                  choose_merge_days)
+    elif choose_merge_days == "Tuesday_and_Wednesday_and_Thursday":
+        Csv_AtferMergeFinish_Filepath = ChecktotalCsvFileIsexists(filepath + 
+                                                                  "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\CICIDS2017_Tuesday_and_Wednesday_and_Thursday.csv",
+                                                                  choose_merge_days)
+    elif choose_merge_days == "ALLday":
+        Csv_AtferMergeFinish_Filepath = ChecktotalCsvFileIsexists(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\CICIDS2017_ALLday.csv",
+                                                                  choose_merge_days)
 
-### add 沒有的Label到TONIOT
-def AddLabelToCICIDS2017(df):
-    values_to_insert = ['backdoor', 'dos', 'injection', 'mitm', 'password', 
-                        'ransomware', 'scanning']
+    return Csv_AtferMergeFinish_Filepath
+# Loading datasets after megre complete
+# mergecompelete_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_original.csv")
+
+def LoadingDatasetAfterMegreComplete(choose_merge_days):
+    if choose_merge_days == "Monday_and_Firday":
+        mergecompelete_dataset = pd.read_csv(GetAtferMergeFinishFilepath(choose_merge_days))
+        # print("路徑",GetAtferMergeFinishFilepath(choose_merge_days))
+    elif choose_merge_days == "Tuesday_and_Wednesday_and_Thursday":
+        mergecompelete_dataset = pd.read_csv(GetAtferMergeFinishFilepath(choose_merge_days))
+    elif choose_merge_days == "ALLday":
+        mergecompelete_dataset = pd.read_csv(GetAtferMergeFinishFilepath(choose_merge_days))   
+    
+    # DoLabelEncoding(mergecompelete_dataset)
+    mergecompelete_dataset = ReplaceMorethanTenthousandQuantity(mergecompelete_dataset)
+    mergecompelete_dataset = mergecompelete_dataset.drop('FlowID', axis=1)
+    # 去除所有非数字、字母和下划线的字符
+    mergecompelete_dataset['Label'] = mergecompelete_dataset['Label'].replace({r'[^\w]': ''}, regex=True)
+
+    if(CheckFileExists(filepath + 
+                       "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_"+choose_merge_days+"_updated_10000.csv")
+                       !=True):
+        # dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv", index=False)
+        mergecompelete_dataset.to_csv(filepath + 
+                                      "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_"+choose_merge_days+"_updated_10000.csv",
+                                      index=False)
+        mergecompelete_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_"+choose_merge_days+"_updated_10000.csv")
+
+    else:
+        mergecompelete_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_"+choose_merge_days+"_updated_10000.csv")
+
+
+
+    return mergecompelete_dataset
+
+
+### add TONIOT的Label到CICIDS2017
+def AddLabelToCICIDS2017(df,add_mergedays_label_or_dataset_label):
+    
+    if add_mergedays_label_or_dataset_label == "TONIOT":
+            values_to_insert = ['backdoor', 'dos', 'injection', 'mitm', 'password', 
+                                'ransomware', 'scanning']
+    elif add_mergedays_label_or_dataset_label == "Monday_and_Firday":
+            values_to_insert = ['DoSGoldenEye', 'DoSHulk', 'DoSSlowhttptest', 'DoSslowloris', 
+                                 'FTPPatator', 'Heartbleed', 'Infiltration', 'SSHPatator', 
+                                 'WebAttackBruteForce','WebAttackSqlInjection','WebAttackXSS']
+    elif add_mergedays_label_or_dataset_label == "Tuesday_and_Wednesday_and_Thursday":
+            values_to_insert = ['Bot', 'DDoS', 'PortScan']
      # 获取 'Label' 列前的所有列的列名
     columns_before_type = df.columns.tolist()[:df.columns.get_loc('Label')]
 
     # 將新資料插入 DataFrame
     for value in values_to_insert:
-        new_data = {'Label': value}  # 這裡 'another_type' 是範例，您可以根據實際需求修改
+        new_data = {'Label': value} 
         
-        # 设置 'type' 列前的所有列的值为0
+        # 设置 'Label' 列前的所有列的值为0
         for column in columns_before_type:
             new_data[column] = 0
 
@@ -226,114 +272,558 @@ def AddLabelToCICIDS2017(df):
     df['Label'] = df['Label'].replace({'BENIGN': 'normal'})
     return df
 
-mergecompelete_dataset = AddLabelToCICIDS2017(mergecompelete_dataset)
+### train dataframe做就好
+def DoAddLabel(df,choose_mergedays_or_dataset,bool_Add_TONIOT_Label):
+    if choose_mergedays_or_dataset == "Monday_and_Firday":
+        #載入Monday_and_Firday 要add TONIOT和Tuesday_and_Wednesday_and_Thursday的Label
+        df = AddLabelToCICIDS2017(df,choose_mergedays_or_dataset)
+    elif choose_mergedays_or_dataset == "Tuesday_and_Wednesday_and_Thursday":
+        #Tuesday_and_Wednesday_and_Thursday 要add TONIOT和載入Monday_and_Firday的Label
+        df = AddLabelToCICIDS2017(df,choose_mergedays_or_dataset)
 
-if(CheckFileExists(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_AfterProcessed_updated_10000_add_Label.csv")!=True):
-    # dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv", index=False)
-    mergecompelete_dataset.to_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_AfterProcessed_updated_10000_add_Label.csv", index=False)
-    mergecompelete_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_AfterProcessed_updated_10000_add_Label.csv")
+    if(bool_Add_TONIOT_Label!=False):
+        df = AddLabelToCICIDS2017(df,"TONIOT")
 
-else:
-    mergecompelete_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_AfterProcessed_updated_10000_add_Label.csv")
-
-
-label_Encoding('SourceIP')
-label_Encoding('SourcePort')
-label_Encoding('DestinationIP')
-label_Encoding('DestinationPort')
-label_Encoding('Protocol')
-label_Encoding('Timestamp')
-# label_Encoding('Label')
-
-## extracting features
-# 除了Label外的特徵
-crop_dataset=mergecompelete_dataset.iloc[:,:-1]
-# 列出要排除的列名
-columns_to_exclude = ['SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp']
-# 使用条件选择不等于这些列名的列
-doScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col not in columns_to_exclude]]
-undoScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col  in columns_to_exclude]]
-# print(doScalerdataset.info)
-# print(mergecompelete_dataset.info)
-# print(undoScalerdataset.info)
-# 對特徵MinMax
-X=doScalerdataset
-X=X.values
-# scaler = preprocessing.StandardScaler() #資料標準化
-scaler = MinMaxScaler(feature_range=(0, 1)).fit(X)
-scaler.fit(X)
-X=scaler.transform(X)
+    return df
 
 
-# 開始ch2特征选择，先分离特征和目标变量
-y = mergecompelete_dataset['Label']  # 目标变量
-
-# 使用 SelectKBest 进行特征选择，选择 k=38 个特征，要跟TONIOT的45個特徵對齊，38+7=45，
-# 7是扣掉的'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-# chi2 表示使用卡方检验进行评估
-k_best = SelectKBest(chi2, k=38)
-X_new = k_best.fit_transform(X, y)
-
-# 获取被选中的特征的索引
-selected_feature_indices = k_best.get_support(indices=True)
-
-# 打印被选中的特征列名
-selected_features = doScalerdataset.columns[selected_feature_indices]
-print("Selected Features:")
-print(selected_features)
-
-# 将 X_new 转换为 DataFrame
-X_new_df = pd.DataFrame(X_new, columns=selected_features)
-
-# 将选中的特征和 Label 合并为新的 DataFrame
-selected_data = pd.concat([X_new_df, mergecompelete_dataset['Label']], axis=1)
-
-# 将排除的列名和选中的特征和 Label 合并为新的 DataFrame
-finalDf = pd.concat([undoScalerdataset,selected_data], axis = 1)
-# print(finalDf)
-
-# 保存新的 DataFrame
-selected_data.to_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_Selected_Features.csv", index=False)
-# 保存新的 DataFrame
-finalDf.to_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_AfterProcessed_updated_10000_add_Label_and_Selected_Features.csv", index=False)
-
-encoded_type_values, finalDf = label_encoding("Label", finalDf)
-
-# print("Original Type Values:", original_type_values)
-print("Encoded Type Values:", encoded_type_values)
-
-# 保存新的 DataFrame
-finalDf.to_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_AfterProcessed_updated_10000_add_Label_and_Selected_Features_and_Labelencode_and_minmax.csv", index=False)
-
-# ## 重新合並MinMax後的特徵
-# number_of_components=77 # 原84個的特徵，扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label' | 84-7 =77
-# columns_array=[]
-# for i in range (number_of_components):
-#     columns_array.append("principal_Component"+str(i+1))
+def DoMinMaxAndLabelEncoding(afterprocess_dataset,choose_merge_days,bool_doencode):
     
-# principalComponents = X
-# principalDf = pd.DataFrame(data = principalComponents
-#               , columns = columns_array)
+    ##除了Label外的特徵做encode
+    afterprocess_dataset = label_Encoding('SourceIP',afterprocess_dataset)
+    afterprocess_dataset = label_Encoding('SourcePort',afterprocess_dataset)
+    afterprocess_dataset = label_Encoding('DestinationIP',afterprocess_dataset)
+    afterprocess_dataset = label_Encoding('DestinationPort',afterprocess_dataset)
+    afterprocess_dataset = label_Encoding('Protocol',afterprocess_dataset)
+    afterprocess_dataset = label_Encoding('Timestamp',afterprocess_dataset)
+    
+    ### extracting features
+    #除了Label外的特徵
+    crop_dataset=afterprocess_dataset.iloc[:,:-1]
+    # 列出要排除的列名，這6個以外得特徵做minmax
+    columns_to_exclude = ['SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp']
+    # 使用条件选择不等于这些列名的列
+    doScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col not in columns_to_exclude]]
+    undoScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col  in columns_to_exclude]]
+    # print(doScalerdataset.info)
+    # print(afterprocess_dataset.info)
+    # print(undoScalerdataset.info)
+    # 開始minmax
+    X=doScalerdataset
+    X=X.values
+    # scaler = preprocessing.StandardScaler() #資料標準化
+    scaler = MinMaxScaler(feature_range=(0, 1)).fit(X)
+    scaler.fit(X)
+    X=scaler.transform(X)
+    # 将缩放后的值更新到 doScalerdataset 中
+    doScalerdataset.iloc[:, :] = X
+    # 将排除的列名和选中的特征和 Label 合并为新的 DataFrame
+    afterminmax_dataset = pd.concat([undoScalerdataset,doScalerdataset,afterprocess_dataset['Label']], axis = 1)
+    
+    # 保存Lable未做label_encoding的DataFrame方便後續Noniid實驗
+    if bool_doencode != True:
+        # afterminmax_dataset.to_csv(filepath + 
+                                #    "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_UndoLabelencode_"+choose_merge_days+".csv", index=False)
+        if(CheckFileExists(filepath + 
+                           "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_UndoLabelencode_"+choose_merge_days+".csv")
+                           !=True):
+            # False 只add 所選擇的星期沒有的Label
+            # afterminmax_dataset = DoAddLabel(afterminmax_dataset,choose_merge_days,False)
+            # True add 所選擇的星期沒有的Label和TONIOT的Label
+            afterminmax_dataset = DoAddLabel(afterminmax_dataset,choose_merge_days,True)
 
-# finalDf = pd.concat([undoScalerdataset,principalDf, mergecompelete_dataset[['Label']]], axis = 1)
-# print(finalDf)
-# mergecompelete_dataset=finalDf
-# # 保留MinMaxScaler後的結果
-# # SaveDataToCsvfile(mergecompelete_dataset, "./data/dataset_AfterProcessed","total_encoded_updated_10000_After_minmax")
+            afterminmax_dataset.to_csv(filepath +
+                                       "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_UndoLabelencode_"+choose_merge_days+".csv", index=False)
+                
+            afterminmax_dataset = pd.read_csv(filepath +
+                                              "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_UndoLabelencode_"+choose_merge_days+".csv")
 
-# # 做one hot
-# # mergecompelete_dataset = OneHot_Encoding('Protocol', mergecompelete_dataset)
-# # mergecompelete_dataset = OneHot_Encoding('Label', mergecompelete_dataset)
-# # SaveDataToCsvfile(mergecompelete_dataset, "./data/dataset_AfterProcessed","total_encoded_updated_10000_After_minmax_onehot")
+        else:
+            afterminmax_dataset = pd.read_csv(filepath +
+                                              "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_UndoLabelencode_"+choose_merge_days+".csv")
 
-# split mergecompelete_dataset
-train_dataframes, test_dataframes = train_test_split(finalDf, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+        encoded_type_values, afterminmax_dataset = label_encoding("Label", afterminmax_dataset)
+        print("Encoded Type Values:", encoded_type_values)
+        with open(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/encode_and_count_Noniid.csv", "a+") as file:
+            file.write("Encoded Type Values\n")
+            file.write(str(encoded_type_values) + "\n")
+    #保存Lable做label_encoding的DataFrame方便後續BaseLine實驗
+    else:
+        encoded_type_values, afterminmax_dataset = label_encoding("Label", afterminmax_dataset)
+        # afterminmax_dataset.to_csv(filepath + 
+                                #    "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_DoLabelencode_"+choose_merge_days+".csv", index=False)
+        
+        
+        if(CheckFileExists(filepath + 
+                           "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_DoLabelencode_"+choose_merge_days+".csv")
+                           !=True):
+            afterminmax_dataset.to_csv(filepath +
+                                       "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_DoLabelencode_"+choose_merge_days+".csv", index=False)
+                
+            afterminmax_dataset = pd.read_csv(filepath +
+                                              "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_DoLabelencode_"+choose_merge_days+".csv")
 
-label_counts = test_dataframes['Label'].value_counts()
-print("test_dataframes\n", label_counts)
-label_counts = train_dataframes['Label'].value_counts()
-print("train_dataframes\n", label_counts)
-# # printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes)
+        else:
+            afterminmax_dataset = pd.read_csv(filepath +
+                                              "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_DoLabelencode_"+choose_merge_days+".csv")
+        
+        # print("Original Type Values:", original_type_values)
+        print("Encoded Type Values:", encoded_type_values)
+        with open(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/encode_and_count_baseLine.csv", "a+") as file:
+            file.write("Encoded Type Values\n")
+            file.write(str(encoded_type_values) + "\n")
+
+    return afterminmax_dataset
+
+# do Labelencode and minmax 
+def DoSpiltAllfeatureAfterMinMax(df,choose_merge_days,bool_Noniid):  
+    train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    # printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
+    
+    if bool_Noniid !=True:
+        if choose_merge_days =="Monday_and_Firday":
+            # 篩選test_dataframes中標籤為2、3、5和19的行加回去train
+            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,3,5,19])]
+            # test刪除Label相當於2,3,5,19的行，因為這些是因為noniid要加到train的Label
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,3,5,19])]
+            # 合併Label2,3,5,19回去到train
+            train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
+        
+        elif choose_merge_days =="Tuesday_and_Wednesday_and_Thursday":
+            # Noniid時
+            # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
+            # encode後對照如下
+            # Heartbleed:6、
+            # Infiltration:7、
+            # Web Attack Sql Injection:10
+            # Label encode mode  分別取出Label等於6、7、10的數據 對半分
+            train_label_6, test_label_6 = spiltweakLabelbalance(7,df,0.33)
+            train_label_7, test_label_7 = spiltweakLabelbalance(8,df,0.33)
+            train_label_10, test_label_10 = spiltweakLabelbalance(12,df,0.33)
+
+            # # 刪除Label相當於6、7、10的行
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([7, 8,12])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([7, 8,12])]
+            # 合併Label6、7、10回去
+            test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
+            train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
+
+    else:
+        # BaseLine時
+        # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
+        # encode後對照如下
+        # Heartbleed:6、
+        # Infiltration:7、
+        # Web Attack Sql Injection:10
+        if choose_merge_days =="Tuesday_and_Wednesday_and_Thursday":
+            # Label encode mode  分別取出Label等於6、7、10的數據 對半分
+            train_label_6, test_label_6 = spiltweakLabelbalance(6,df,0.33)
+            train_label_7, test_label_7 = spiltweakLabelbalance(7,df,0.33)
+            train_label_10, test_label_10 = spiltweakLabelbalance(10,df,0.33)
+
+            # # 刪除Label相當於6、7、10的行
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([6, 7,10])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([6, 7,10])]
+            # 合併Label6、7、10回去
+            test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
+            train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
+    
+    # 紀錄資料筆數
+    with open(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/encode_and_count_{bool_Noniid}.csv", "a+") as file:
+        label_counts = test_dataframes['Label'].value_counts()
+        print("test_dataframes\n", label_counts)
+        file.write("test_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+        
+        label_counts = train_dataframes['Label'].value_counts()
+        print("train_dataframes\n", label_counts)
+        file.write("train_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+
+    SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}", f"{choose_merge_days}_train_dataframes_{today}")
+    SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}", f"{choose_merge_days}_test_dataframes_{today}")
+    # SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}", f"{choose_merge_days}_test",today)
+    # SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}", f"{choose_merge_days}_train",today)
+
+def dofeatureSelect(df, slecet_label_counts,choose_merge_days):
+    significance_level=0.05
+    if (slecet_label_counts == None):
+        slecet_label_counts ='all'
+
+    # 開始ch2特征选择，先分离特征和目标变量
+    y = df['Label']  # 目标变量
+    X = df.iloc[:, :-1]  # 特征
+
+    # 创建 SelectKBest 模型，选择 f_classif 统计测试方法
+    k_best = SelectKBest(score_func=chi2, k=slecet_label_counts)
+    X_new = k_best.fit_transform(X, y)
+
+    # 获取被选中的特征的索引
+    selected_feature_indices = k_best.get_support(indices=True)
+
+    # 打印被选中的特征的列名
+    selected_features = X.columns[selected_feature_indices]
+    print("Selected Features:")
+    print(selected_features)
+
+    # 印选择的特征的名称、索引和相应的 F 值、p 值
+    print("\nSelected Feature Statistics:")
+    selected_feature_stats = []
+    for idx, feature_idx in enumerate(selected_feature_indices):
+        feature_name = selected_features[idx]
+        f_value = k_best.scores_[feature_idx]
+        p_value = k_best.pvalues_[feature_idx]
+        print(f"Name = {feature_name}, F-value = {f_value}, p-value = {p_value}")
+        selected_feature_stats.append({
+            'Name': feature_name,
+            'F-value': f_value,
+            'p-value': p_value
+        })
+        # 判斷 p-值 是否小於显著性水準
+        if p_value <= significance_level:
+            print(f"Feature {feature_name} is statistically significant.")
+        else:
+            print(f"Feature {feature_name} is not statistically significant.")
+
+    print("selected特徵數", len(selected_feature_indices))
+
+    # 迴圈遍歷所有特徵，印出相應的統計信息
+    print("\nAll Features Statistics:")
+    all_feature_stats = []
+    for idx, feature_name in enumerate(X.columns):
+        f_value = k_best.scores_[idx]
+        p_value = k_best.pvalues_[idx]
+        print(f"Name = {feature_name}, F-value = {f_value}, p-value = {p_value}")
+        all_feature_stats.append({
+            'Name': feature_name,
+            'F-value': f_value,
+            'p-value': p_value
+        })
+    print("原特徵數", len(X.columns))
+
+    # 將選中特徵的統計信息存儲到 CSV 文件
+    selected_feature_stats_df = pd.DataFrame(selected_feature_stats)
+    all_feature_stats_df = pd.DataFrame(all_feature_stats)
+    SaveDataToCsvfile(selected_feature_stats_df, 
+                      f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doFeatureSelect/{slecet_label_counts}", 
+                      f"{choose_merge_days}_selected_feature_stats_{today}")
+
+    SaveDataToCsvfile(all_feature_stats_df, 
+                      f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doFeatureSelect/{slecet_label_counts}", 
+                      f"{choose_merge_days}_all_feature_stats_{today}")
+
+    # 将未被选中特徵的統計信息存儲到 CSV 文件
+    unselected_feature_indices = list(set(range(len(X.columns))) - set(selected_feature_indices))
+    unselected_features = X.columns[unselected_feature_indices]
+    unselected_feature_stats = []
+    for idx, feature_idx in enumerate(unselected_feature_indices):
+        feature_name = unselected_features[idx]
+        f_value = k_best.scores_[feature_idx]
+        p_value = k_best.pvalues_[feature_idx]
+        print(f"Unselected Feature - Name = {feature_name}, F-value = {f_value}, p-value = {p_value}")
+        unselected_feature_stats.append({
+            'Name': feature_name,
+            'F-value': f_value,
+            'p-value': p_value
+        })
+    
+    # 將未被選中特徵的統計信息存儲到 CSV 文件
+    unselected_feature_stats_df = pd.DataFrame(unselected_feature_stats)
+    SaveDataToCsvfile(unselected_feature_stats_df, 
+                      f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doFeatureSelect/{slecet_label_counts}", 
+                      f"{choose_merge_days}_unselected_feature_stats_{today}")
+    
+
+    # 将 X_new 转换为 DataFrame
+    X_new_df = pd.DataFrame(X_new, columns=selected_features)
+
+    # 将选中的特征和 Label 合并为新的 DataFrame
+    selected_data = pd.concat([X_new_df, df['Label']], axis=1)
+    
+    # SaveDataToCsvfile(selected_data, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doFeatureSelect/{slecet_label_counts}", 
+    #                   f"{choose_merge_days}_AfterSelected_{slecet_label_counts}_feature_data_{today}")
+    return selected_data
+
+# do chi-square and Labelencode and minmax 
+def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noniid):
+    df = dofeatureSelect(df,slecet_label_counts,choose_merge_days)
+    train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+
+    if bool_Noniid !=True:
+        if choose_merge_days =="Monday_and_Firday":
+            # 篩選test_dataframes中標籤為2、3、5和19的行加回去train
+            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,3,5,19])]
+            # test刪除Label相當於2,3,5,19的行，因為這些是因為noniid要加到train的Label
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,3,5,19])]
+            # 合併Label2,3,5,19回去到train
+            train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
+        
+        elif choose_merge_days =="Tuesday_and_Wednesday_and_Thursday":
+            # Noniid時
+            # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
+            # encode後對照如下
+            # Heartbleed:6、
+            # Infiltration:7、
+            # Web Attack Sql Injection:10
+            # Label encode mode  分別取出Label等於6、7、10的數據 對半分
+            train_label_6, test_label_6 = spiltweakLabelbalance(7,df,0.33)
+            train_label_7, test_label_7 = spiltweakLabelbalance(8,df,0.33)
+            train_label_10, test_label_10 = spiltweakLabelbalance(12,df,0.33)
+
+            # # 刪除Label相當於6、7、10的行
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([7, 8,12])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([7, 8,12])]
+            # 合併Label6、7、10回去
+            test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
+            train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
+
+    else:
+        # BaseLine時
+        # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
+        # encode後對照如下
+        # Heartbleed:6、
+        # Infiltration:7、
+        # Web Attack Sql Injection:10
+        if choose_merge_days =="Tuesday_and_Wednesday_and_Thursday":
+            # Label encode mode  分別取出Label等於6、7、10的數據 對半分
+            train_label_6, test_label_6 = spiltweakLabelbalance(6,df,0.33)
+            train_label_7, test_label_7 = spiltweakLabelbalance(7,df,0.33)
+            train_label_10, test_label_10 = spiltweakLabelbalance(10,df,0.33)
+
+            # # 刪除Label相當於6、7、10的行
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([6, 7,10])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([6, 7,10])]
+            # 合併Label6、7、10回去
+            test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
+            train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
+    
+    # 紀錄資料筆數
+    with open(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/encode_and_count_after_chisquare_{bool_Noniid}.csv", "a+") as file:
+        label_counts = test_dataframes['Label'].value_counts()
+        print("test_dataframes\n", label_counts)
+        file.write("test_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+        
+        label_counts = train_dataframes['Label'].value_counts()
+        print("train_dataframes\n", label_counts)
+        file.write("train_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+
+
+    SaveDataToCsvfile(train_dataframes, 
+                      f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doFeatureSelect/{slecet_label_counts}",  
+                      f"{choose_merge_days}_train_dataframes_AfterFeatureSelect")
+    SaveDataToCsvfile(test_dataframes, 
+                      f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doFeatureSelect/{slecet_label_counts}", 
+                      f"{choose_merge_days}_test_dataframes_AfterFeatureSelect")
+    SaveDataframeTonpArray(test_dataframes, 
+                           f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doFeatureSelect/{slecet_label_counts}", 
+                           f"{choose_merge_days}_test_cicids2017_AfterFeatureSelect{slecet_label_counts}",today)
+    SaveDataframeTonpArray(train_dataframes, 
+                           f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doFeatureSelect/{slecet_label_counts}", 
+                           f"{choose_merge_days}_train_cicids2017_AfterFeatureSelect{slecet_label_counts}",today)
+
+# do PCA and Labelencode and minmax 
+def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
+    # number_of_components=20
+    
+    crop_dataset=df.iloc[:,:-1]
+    # 列出要排除的列名
+    columns_to_exclude = ['SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp']
+    # 使用条件选择不等于这些列名的列
+    # number_of_components=77 # 原84個的特徵，扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label' | 84-7 =77
+    doScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col not in columns_to_exclude]]
+    undoScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col  in columns_to_exclude]]
+    # afterminmax_dataset = pd.concat([undoScalerdataset,doScalerdataset,mergecompelete_dataset['Label']], axis = 1)
+
+    print("Original number of features:", len(df.columns) - 1)  # 减去 'Label' 列
+    # X = df.drop(columns=['Label'])  # 提取特征，去除 'Label' 列
+    X = doScalerdataset
+    pca = PCA(n_components=number_of_components)
+    columns_array=[]
+    for i in range (number_of_components):
+        columns_array.append("principal_Component"+str(i+1))
+        
+    principalComponents = pca.fit_transform(X)
+    principalDf = pd.DataFrame(data = principalComponents
+                , columns = columns_array)
+
+    finalDf = pd.concat([undoScalerdataset,principalDf, df[['Label']]], axis = 1)
+    df=finalDf
+
+    SaveDataToCsvfile(df, 
+                      f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doPCA/{number_of_components}", 
+                      f"{choose_merge_days}_cicids2017_AfterProcessed_minmax_PCA")
+
+    train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
+    if bool_Noniid !=True:
+        if choose_merge_days =="Monday_and_Firday":
+            # 篩選test_dataframes中標籤為2、3、5和19的行加回去train
+            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,3,5,19])]
+            # test刪除Label相當於2,3,5,19的行，因為這些是因為noniid要加到train的Label
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,3,5,19])]
+            # 合併Label2,3,5,19回去到train
+            train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
+        
+        elif choose_merge_days =="Tuesday_and_Wednesday_and_Thursday":
+            # Noniid時
+            # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
+            # encode後對照如下
+            # Heartbleed:6、
+            # Infiltration:7、
+            # Web Attack Sql Injection:10
+            # Label encode mode  分別取出Label等於6、7、10的數據 對半分
+            train_label_6, test_label_6 = spiltweakLabelbalance(7,df,0.33)
+            train_label_7, test_label_7 = spiltweakLabelbalance(8,df,0.33)
+            train_label_10, test_label_10 = spiltweakLabelbalance(12,df,0.33)
+
+            # # 刪除Label相當於6、7、10的行
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([7, 8,12])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([7, 8,12])]
+            # 合併Label6、7、10回去
+            test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
+            train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
+
+    else:
+        # BaseLine時
+        # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
+        # encode後對照如下
+        # Heartbleed:6、
+        # Infiltration:7、
+        # Web Attack Sql Injection:10
+        if choose_merge_days =="Tuesday_and_Wednesday_and_Thursday":
+            # Label encode mode  分別取出Label等於6、7、10的數據 對半分
+            train_label_6, test_label_6 = spiltweakLabelbalance(6,df,0.33)
+            train_label_7, test_label_7 = spiltweakLabelbalance(7,df,0.33)
+            train_label_10, test_label_10 = spiltweakLabelbalance(10,df,0.33)
+
+            # # 刪除Label相當於6、7、10的行
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([6, 7,10])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([6, 7,10])]
+            # 合併Label6、7、10回去
+            test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
+            train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
+    # 紀錄資料筆數
+    with open(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/encode_and_count_after_PCA_{bool_Noniid}.csv", "a+") as file:
+        label_counts = test_dataframes['Label'].value_counts()
+        print("test_dataframes\n", label_counts)
+        file.write("test_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+        
+        label_counts = train_dataframes['Label'].value_counts()
+        print("train_dataframes\n", label_counts)
+        file.write("train_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+
+    SaveDataToCsvfile(train_dataframes, 
+                      f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doPCA/{number_of_components}", 
+                      f"{choose_merge_days}_train_dataframes_AfterPCA{number_of_components}_{today}")
+    SaveDataToCsvfile(test_dataframes,
+                      f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doPCA/{number_of_components}", 
+                      f"{choose_merge_days}_test_dataframes_AfterPCA{number_of_components}_{today}")
+    SaveDataframeTonpArray(test_dataframes, 
+                           f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doPCA/{number_of_components}", 
+                           f"{choose_merge_days}_test_AfterPCA{number_of_components}",today)
+    SaveDataframeTonpArray(train_dataframes, 
+                           f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doPCA/{number_of_components}", 
+                           f"{choose_merge_days}_train_AfterPCA{number_of_components}",today)
+
+
+# 開始進行資料劃分主要function
+def SelectfeatureUseChiSquareOrPCA(df,choose_merge_days,bool_doChiSquare,bool_doPCA,bool_Noniid):
+    if bool_doChiSquare!=False:
+        # 選ALL特徵
+        # DoSpiltAfterFeatureSelect(df,None)
+        #ChiSquare選80個特徵
+        # DoSpiltAfterFeatureSelect(df,80,choose_merge_days,bool_Noniid)
+        # #ChiSquare選70個特徵
+        # DoSpiltAfterFeatureSelect(df,70,choose_merge_days,bool_Noniid)
+        # # #ChiSquare選65個特徵
+        # DoSpiltAfterFeatureSelect(df,60,choose_merge_days,bool_Noniid)
+        # # #ChiSquare選60個特徵
+        # DoSpiltAfterFeatureSelect(df,60,choose_merge_days,bool_Noniid)
+        # # #ChiSquare選55個特徵
+        # DoSpiltAfterFeatureSelect(df,55,choose_merge_days,bool_Noniid)
+        # # #ChiSquare選50個特徵
+        # DoSpiltAfterFeatureSelect(df,50,choose_merge_days,bool_Noniid)
+        # # #ChiSquare選45個特徵
+        # DoSpiltAfterFeatureSelect(df,45,choose_merge_days,bool_Noniid)
+        # #ChiSquare選44個特徵
+        DoSpiltAfterFeatureSelect(df,44,choose_merge_days,bool_Noniid)
+        # #ChiSquare選40個特徵
+        # DoSpiltAfterFeatureSelect(df,40,choose_merge_days,bool_Noniid)
+    elif bool_doPCA!=False:
+         #PCA選77個特徵 總84特徵=77+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        DoSpiltAfterDoPCA(df,77,choose_merge_days,bool_Noniid)
+        #PCA選73個特徵 總80特徵=73+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        DoSpiltAfterDoPCA(df,73,choose_merge_days,bool_Noniid)
+        #PCA選63個特徵 總70特徵=73+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        DoSpiltAfterDoPCA(df,63,choose_merge_days,bool_Noniid)
+        #PCA選53個特徵 總60特徵=53+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        DoSpiltAfterDoPCA(df,53,choose_merge_days,bool_Noniid)
+        #PCA選43個特徵 總50特徵=43+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        DoSpiltAfterDoPCA(df,43,choose_merge_days,bool_Noniid)
+        #PCA選38個特徵 總45特徵=38+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        DoSpiltAfterDoPCA(df,38,choose_merge_days,bool_Noniid)
+        #PCA選33個特徵 總40特徵=33+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        DoSpiltAfterDoPCA(df,33,choose_merge_days,bool_Noniid) 
+
+def forBaseLineUseData(choose_merge_days,bool_Noniid):
+    if choose_merge_days == "Monday_and_Firday":
+        # 載入資料集
+        df_Monday_and_Firday=LoadingDatasetAfterMegreComplete(choose_merge_days)
+        # 預處理和正規化
+        # True for BaseLine
+        # False for Noniid
+        df_Monday_and_Firday=DoMinMaxAndLabelEncoding(df_Monday_and_Firday,choose_merge_days,bool_Noniid)
+        # 一般全部特徵
+        # DoSpiltAllfeatureAfterMinMax(df_Monday_and_Firday,choose_merge_days,bool_Noniid)
+        # 做ChiSquare
+        SelectfeatureUseChiSquareOrPCA(df_Monday_and_Firday,choose_merge_days,True,False,bool_Noniid)
+        # 做PCA
+        # SelectfeatureUseChiSquareOrPCA(df_Monday_and_Firday,choose_merge_days,False,True,bool_Noniid)
+    elif choose_merge_days == "Tuesday_and_Wednesday_and_Thursday":
+        df_Tuesday_and_Wednesday_and_Thursday=LoadingDatasetAfterMegreComplete(choose_merge_days)
+        # 預處理和正規化
+        # True for BaseLine
+        # False for Noniid
+        df_Tuesday_and_Wednesday_and_Thursday=DoMinMaxAndLabelEncoding(df_Tuesday_and_Wednesday_and_Thursday,choose_merge_days,bool_Noniid)
+        # DoSpiltAllfeatureAfterMinMax(df_Tuesday_and_Wednesday_and_Thursday,choose_merge_days,bool_Noniid)
+        # # 做ChiSquare
+        SelectfeatureUseChiSquareOrPCA(df_Tuesday_and_Wednesday_and_Thursday,choose_merge_days,True,False,bool_Noniid)
+        # # 做PCA
+        # SelectfeatureUseChiSquareOrPCA(df_Tuesday_and_Wednesday_and_Thursday,choose_merge_days,False,True,bool_Noniid)
+
+    # elif choose_merge_days == "ALLday":
+    #     df_ALLday=LoadingDatasetAfterMegreComplete(choose_merge_days)
+    #     df_ALLday=DoMinMaxAndLabelEncoding(df_ALLday,choose_merge_days,True)
+    #     DoSpiltAllfeatureAfterMinMax(df_ALLday,choose_merge_days)
+    #     # 做ChiSquare
+    #     SelectfeatureUseChiSquareOrPCA(df_ALLday,choose_merge_days,True,False)
+    #     # 做PCA
+    #     SelectfeatureUseChiSquareOrPCA(df_ALLday,choose_merge_days,False,True)
+
+
+
+# True for BaseLine
+# False for Noniid
+forBaseLineUseData("Monday_and_Firday",False)
+# forBaseLineUseData("Monday_and_Firday",True)
+forBaseLineUseData("Tuesday_and_Wednesday_and_Thursday",False)
+# forBaseLineUseData("Tuesday_and_Wednesday_and_Thursday",True)
+# forBaseLineUseData("ALLday")
+
+  
+
+
+# DoAllfeatureOrSelectfeature(afterminmax_dataset,False)
+# DoAllfeatureOrSelectfeature(afterminmax_dataset,True)
+
+
+
+
+
 
 # ###########################################################Don't do one hot mode################################################################################################
 # # 要做這邊的話上面OneHot_Encoding Protocol和Label要註解掉
@@ -374,13 +864,13 @@ print("train_dataframes\n", label_counts)
 # # train_df_half1和train_df_half2 detail information
 # printFeatureCountAndLabelCountInfo(train_half1, train_df_half2)
 
-SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{today}", f"train_CICIDS2017_dataframes_{today}")
-SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/CICIDS2017/{today}", f"test_CICIDS2017_dataframes_{today}")
+# SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{today}", f"train_CICIDS2017_dataframes_{today}")
+# SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/CICIDS2017/{today}", f"test_CICIDS2017_dataframes_{today}")
 # SaveDataToCsvfile(train_half1, f"./data/dataset_AfterProcessed/{today}", f"train_half1_{today}")
 # SaveDataToCsvfile(train_half2,  f"./data/dataset_AfterProcessed/{today}", f"train_half2_{today}") 
 
-SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{today}", "test_CICIDS2017",today)
-SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{today}", "train_CICIDS2017",today)
+# SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{today}", "test_CICIDS2017",today)
+# SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{today}", "train_CICIDS2017",today)
 # SaveDataframeTonpArray(train_half1, f"./data/dataset_AfterProcessed/{today}", "train_half1", today)
 # SaveDataframeTonpArray(train_half2, f"./data/dataset_AfterProcessed/{today}", "train_half2", today)
 
