@@ -81,7 +81,7 @@ def main() -> None:
     )
 
     # Start Flower server for ten rounds of federated learning
-    fl.server.start_server(server_address="127.0.0.1:53388", config=fl.server.ServerConfig(num_rounds=50), strategy=strategy) #windows
+    fl.server.start_server(server_address="127.0.0.1:53388", config=fl.server.ServerConfig(num_rounds=5), strategy=strategy) #windows
 
 '''
 [Model Hyperparameter](Client-side, train strategy)
@@ -118,11 +118,17 @@ def get_eval_fn(model, x_test, y_test, csv_filename):
         model.load_state_dict(fl.common.parameters_to_ndarrays(weights))
         model.eval()
 
+        # Predict on the test set
+        y_pred = model.predict(x_test)
         with torch.no_grad():
             outputs = model(x_test)
             loss = criterion(outputs, y_test)
             _, predicted = torch.max(outputs, 1)
             accuracy = (predicted == y_test).sum().item() / len(y_test)
+            y_test_class = np.argmax(y_test, axis=1)
+            y_test_pred_class = np.argmax(y_pred, axis=1)
+            true_labels = y_test_class
+            predicted_labels = y_test_pred_class
             recall = recall_score(y_test.numpy(), predicted.numpy(), average='weighted')
             recall1 = recall_score(y_test.numpy(), predicted.numpy(), average='macro')
             class_names = {
@@ -134,15 +140,40 @@ def get_eval_fn(model, x_test, y_test, csv_filename):
             }
 
             
-            f1_scores = f1_score(y_test.numpy(), predicted.numpy(), average=None)
-            precision_scores = precision_score(y_test.numpy(), predicted.numpy(), average=None)
-            recall_scores = recall_score(y_test.numpy(), predicted.numpy(), average=None)
+            # f1_scores = f1_score(y_test.numpy(), predicted.numpy(), average=None)
+            # precision_scores = precision_score(y_test.numpy(), predicted.numpy(), average=None)
+            # recall_scores = recall_score(y_test.numpy(), predicted.numpy(), average=None)
+
+            # results_table = pd.DataFrame({
+            #     'Precision': precision_scores,
+            #     'Recall': recall_scores,
+            #     'F1-Score': f1_scores
+            # })
+            f1_scores = []
+            precision_scores = []
+            recall_scores = []
+            label_counts = {label: (y_test_class == label).sum() for label in range(25)}
+
+            for class_idx in range(25):  # Assuming 25 classes
+                true_labels = (y_test_class == class_idx)
+                predicted_labels = (y_test_pred_class == class_idx)
+                f1 = f1_score(true_labels, predicted_labels, zero_division=1)
+                precision = precision_score(true_labels, predicted_labels, zero_division=1)
+                recall = recall_score(true_labels, predicted_labels, zero_division=1)
+        
+                f1_scores.append(f1)
+                precision_scores.append(precision)
+                recall_scores.append(recall)
+
 
             results_table = pd.DataFrame({
+                'Class': [class_names[i] for i in range(25)],
                 'Precision': precision_scores,
                 'Recall': recall_scores,
-                'F1-Score': f1_scores
-            })
+                'F1-Score': f1_scores,
+                'Label Count': [label_counts[i] for i in range(25)]
+        
+                })
 
             print("Results Table:")
             print(results_table)
