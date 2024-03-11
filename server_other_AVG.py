@@ -9,7 +9,6 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 import csv
 from sklearn.metrics import f1_score, recall_score, precision_score
 
@@ -37,6 +36,13 @@ class MLP_Model(nn.Module):
 '''
 Step 2. Start server and run the strategy (套用所設定的策略，啟動Server)
 '''
+csv_filename = 'D:/flower_test/server_accuracy/evaluation_results.csv'
+os.makedirs(os.path.dirname(csv_filename), exist_ok=True)
+dftest = pd.read_csv("D:/develop_Federated_Learning_Non_IID_Lab/data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/20240310/TONIOT_test_and_CICIDS2017_test_merged.csv")    
+x_columns = dftest.columns.drop(dftest.filter(like='Label').columns)
+x_test = torch.tensor(dftest[x_columns].values.astype('float32'))
+y_test = torch.tensor(dftest.filter(like='Label').values.squeeze(), dtype=torch.int64)
+print(y_test)
 
 def main() -> None:
     # Load and compile model for
@@ -48,25 +54,6 @@ def main() -> None:
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.CrossEntropyLoss()
 
-    dftest = pd.read_csv("D:/develop_Federated_Learning_Non_IID_Lab/data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/20240310/TONIOT_test_and_CICIDS2017_test_merged.csv")
-    # Check if DataFrame is empty
-    if dftest.empty:
-        print("Error: DataFrame is empty.")
-        return
-
-    label_columns = dftest.filter(like='Label')
-    # Check if label columns exist
-    if label_columns.empty:
-        print("Error: Label columns not found in DataFrame.")
-        return
-    
-    x_columns = dftest.columns.drop(dftest.filter(like='Label').columns)
-    x_test = torch.tensor(dftest[x_columns].values.astype('float32'))
-    y_test = torch.tensor(dftest.filter(like='Label').values.argmax(axis=1))
-
-    csv_filename = 'D:/flower_test/server_accuracy/evaluation_results.csv'
-    os.makedirs(os.path.dirname(csv_filename), exist_ok=True)
-
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.5,
@@ -76,7 +63,7 @@ def main() -> None:
         min_available_clients=3,
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=evaluate_config,
-        evaluate_fn=get_eval_fn(model, x_test, y_test, csv_filename),
+        evaluate_fn=get_eval_fn(model),
         # initial_parameters=fl.common.weights_to_parameters(model.state_dict()),
     )
 
@@ -104,7 +91,7 @@ def evaluate_config(rnd: int):
 [Model Hyperparameter](Server-side, evaluate strategy) 
 '''
 
-def get_eval_fn(model, x_test, y_test, csv_filename):
+def get_eval_fn(model):
     round_counter = 0
 
     with open(csv_filename, 'a', newline='') as csvfile:
@@ -113,20 +100,20 @@ def get_eval_fn(model, x_test, y_test, csv_filename):
         if csvfile.tell() == 0:
             csv_writer.writeheader()
 
-    def evaluate(weights: fl.common.NDArrays) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
+    def evaluate(self, parameters, config) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         nonlocal round_counter
-        model.load_state_dict(fl.common.parameters_to_ndarrays(weights))
+        # model.load_state_dict(parameters)
         model.eval()
 
         # Predict on the test set
-        y_pred = model.predict(x_test)
+        criterion = nn.CrossEntropyLoss()
         with torch.no_grad():
             outputs = model(x_test)
             loss = criterion(outputs, y_test)
             _, predicted = torch.max(outputs, 1)
             accuracy = (predicted == y_test).sum().item() / len(y_test)
-            y_test_class = np.argmax(y_test, axis=1)
-            y_test_pred_class = np.argmax(y_pred, axis=1)
+            y_test_class = np.argmax(y_test)
+            y_test_pred_class = np.argmax(outputs)
             true_labels = y_test_class
             predicted_labels = y_test_pred_class
             recall = recall_score(y_test.numpy(), predicted.numpy(), average='weighted')
@@ -139,22 +126,12 @@ def get_eval_fn(model, x_test, y_test, csv_filename):
                 21: 'scanning'
             }
 
-            
-            # f1_scores = f1_score(y_test.numpy(), predicted.numpy(), average=None)
-            # precision_scores = precision_score(y_test.numpy(), predicted.numpy(), average=None)
-            # recall_scores = recall_score(y_test.numpy(), predicted.numpy(), average=None)
-
-            # results_table = pd.DataFrame({
-            #     'Precision': precision_scores,
-            #     'Recall': recall_scores,
-            #     'F1-Score': f1_scores
-            # })
             f1_scores = []
             precision_scores = []
             recall_scores = []
-            label_counts = {label: (y_test_class == label).sum() for label in range(25)}
+            label_counts = {label: (y_test_class == label).sum() for label in range(22)}
 
-            for class_idx in range(25):  # Assuming 25 classes
+            for class_idx in range(22):  # Assuming 22 classes
                 true_labels = (y_test_class == class_idx)
                 predicted_labels = (y_test_pred_class == class_idx)
                 f1 = f1_score(true_labels, predicted_labels, zero_division=1)
@@ -167,11 +144,11 @@ def get_eval_fn(model, x_test, y_test, csv_filename):
 
 
             results_table = pd.DataFrame({
-                'Class': [class_names[i] for i in range(25)],
+                'Class': [class_names[i] for i in range(22)],
                 'Precision': precision_scores,
                 'Recall': recall_scores,
                 'F1-Score': f1_scores,
-                'Label Count': [label_counts[i] for i in range(25)]
+                'Label Count': [label_counts[i] for i in range(22)]
         
                 })
 
