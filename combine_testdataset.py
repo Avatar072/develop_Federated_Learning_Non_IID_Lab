@@ -77,12 +77,12 @@ def ReplaceMorethanTenthousandQuantity(df):
 
 # 加载 .npy 文件
 # 载入Monday_and_Firday test
-cicids2017_Monday_and_Firday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/x_Monday_and_Firday_test_cicids2017_AfterFeatureSelect44_20240304.npy")
-cicids2017_Monday_and_Firday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/y_Monday_and_Firday_test_cicids2017_AfterFeatureSelect44_20240304.npy")
+cicids2017_Monday_and_Firday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/x_Monday_and_Firday_test_cicids2017_AfterFeatureSelect44_20240310.npy")
+cicids2017_Monday_and_Firday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/y_Monday_and_Firday_test_cicids2017_AfterFeatureSelect44_20240310.npy")
 
 # 载入Tuesday_and_Wednesday_and_Thursday test
-cicids2017_Tuesday_and_Wednesday_and_Thursday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/x_Tuesday_and_Wednesday_and_Thursday_test_cicids2017_AfterFeatureSelect44_20240304.npy")
-cicids2017_Tuesday_and_Wednesday_and_Thursday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/y_Tuesday_and_Wednesday_and_Thursday_test_cicids2017_AfterFeatureSelect44_20240304.npy")
+cicids2017_Tuesday_and_Wednesday_and_Thursday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/x_Tuesday_and_Wednesday_and_Thursday_test_cicids2017_AfterFeatureSelect44_20240310.npy")
+cicids2017_Tuesday_and_Wednesday_and_Thursday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/y_Tuesday_and_Wednesday_and_Thursday_test_cicids2017_AfterFeatureSelect44_20240310.npy")
 
 # 载入TONIOT test
 TONIOT_x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_test_ToN-IoT_20240304.npy")

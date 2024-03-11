@@ -223,9 +223,9 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\y_train_CICIDS2017_20240110.npy", allow_pickle=True)
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\x_train_CICIDS2017_addlossvalue_20240110.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\y_train_CICIDS2017_addlossvalue_20240110.npy", allow_pickle=True)
-            # # 20240304 non iid client1 use cicids2017 Monday_and_Firday after chi-square
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\x_Monday_and_Firday_train_cicids2017_AfterFeatureSelect44_20240304.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\y_Monday_and_Firday_train_cicids2017_AfterFeatureSelect44_20240304.npy", allow_pickle=True)
+            # # 20240310 non iid client1 use cicids2017 Monday_and_Firday after chi-square
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\x_Monday_and_Firday_train_cicids2017_AfterFeatureSelect44_20240310.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\y_Monday_and_Firday_train_cicids2017_AfterFeatureSelect44_20240310.npy", allow_pickle=True)
 
         elif (Choose_method == 'SMOTE'):
             # # # 20231226 borderLineSMOTE2 Lable1  Label 3 Label 4 Label6 Label9 k=5  M = 10 
@@ -248,9 +248,9 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240110.npy", allow_pickle=True)
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
-            # # 20240304 non iid client1 use cicids2017 Tuesday_and_Wednesday_and_Thursday after chi-square
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_cicids2017_AfterFeatureSelect44_20240304.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_cicids2017_AfterFeatureSelect44_20240304.npy", allow_pickle=True)
+            # # 20240310 non iid client1 use cicids2017 Tuesday_and_Wednesday_and_Thursday after chi-square
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_cicids2017_AfterFeatureSelect44_20240310.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_cicids2017_AfterFeatureSelect44_20240310.npy", allow_pickle=True)
 
         elif (Choose_method == 'SMOTE'):
             # # # 20231226 borderLineSMOTE2 Lable1  Label 3 Label 4 Label6 Label9 k=5  M = 10 
@@ -273,7 +273,7 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240110.npy", allow_pickle=True)
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
-            # # 20240110 non iid client3 use TONIOT
+            # # 20240304 non iid client3 use TONIOT
             x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240304.npy", allow_pickle=True)
             y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240304.npy", allow_pickle=True)
         elif (Choose_method == 'SMOTE'):

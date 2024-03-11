@@ -33,12 +33,18 @@ generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\", toda
 #############################################################################  funcion宣告與實作  ###########
 
 # 加载CICIDS 2017数据集
-def writeData(file_path):
+def writeData(file_path, bool_Rmove_Benign):
     # 读取CSV文件并返回DataFrame
     df = pd.read_csv(file_path,encoding='cp1252',low_memory=False)
     # df = pd.read_csv(file_path)
     # 找到不包含NaN、Infinity和"inf"值的行
     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
+    if bool_Rmove_Benign != False:
+        # 找到不包含"BENIGN"值的Label 這邊Label帶進來前面要空格 
+        # 下面兩者寫法都行
+        # df = df[~(df[' Label']=='BENIGN')]
+        # 只留Monday的BENIGN，其他天移掉
+        df = df[~df[" Label"].isin(["BENIGN"])]
     return df
 
 ### merge多個DataFrame
@@ -48,24 +54,24 @@ def mergeData(folder_path, choose_merge_days):
 
     # 添加每个CSV文件的DataFrame到列表
     if choose_merge_days == "Monday_and_Firday":
-        dataframes_to_merge.append(writeData(folder_path + "\\Monday-WorkingHours.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Morning.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Monday-WorkingHours.pcap_ISCX.csv",False))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Morning.pcap_ISCX.csv",True))
     elif choose_merge_days == "Tuesday_and_Wednesday_and_Thursday":
-        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Tuesday-WorkingHours.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Wednesday-workingHours.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Tuesday-WorkingHours.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Wednesday-workingHours.pcap_ISCX.csv",True))
     elif choose_merge_days == "ALLday":
-        dataframes_to_merge.append(writeData(folder_path + "\\Monday-WorkingHours.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Morning.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Tuesday-WorkingHours.pcap_ISCX.csv"))
-        dataframes_to_merge.append(writeData(folder_path + "\\Wednesday-workingHours.pcap_ISCX.csv"))
+        dataframes_to_merge.append(writeData(folder_path + "\\Monday-WorkingHours.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Friday-WorkingHours-Morning.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Tuesday-WorkingHours.pcap_ISCX.csv",True))
+        dataframes_to_merge.append(writeData(folder_path + "\\Wednesday-workingHours.pcap_ISCX.csv",True))
 
     # 检查特征名是否一致
     if check_column_names(dataframes_to_merge):
@@ -254,7 +260,7 @@ def AddLabelToCICIDS2017(df,add_mergedays_label_or_dataset_label):
                                  'FTPPatator', 'Heartbleed', 'Infiltration', 'SSHPatator', 
                                  'WebAttackBruteForce','WebAttackSqlInjection','WebAttackXSS']
     elif add_mergedays_label_or_dataset_label == "Tuesday_and_Wednesday_and_Thursday":
-            values_to_insert = ['Bot', 'DDoS', 'PortScan']
+            values_to_insert = ['BENIGN', 'Bot', 'DDoS', 'PortScan']
      # 获取 'Label' 列前的所有列的列名
     columns_before_type = df.columns.tolist()[:df.columns.get_loc('Label')]
 
@@ -393,20 +399,26 @@ def DoSpiltAllfeatureAfterMinMax(df,choose_merge_days,bool_Noniid):
             # Noniid時
             # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
             # encode後對照如下
-            # Heartbleed:6、
-            # Infiltration:7、
-            # Web Attack Sql Injection:10
+            # Heartbleed:7、
+            # Infiltration:8、
+            # Web Attack Sql Injection:12
             # Label encode mode  分別取出Label等於6、7、10的數據 對半分
-            train_label_6, test_label_6 = spiltweakLabelbalance(7,df,0.33)
-            train_label_7, test_label_7 = spiltweakLabelbalance(8,df,0.33)
-            train_label_10, test_label_10 = spiltweakLabelbalance(12,df,0.33)
-
+            train_label_7, test_label_7 = spiltweakLabelbalance(7,df,0.33)
+            train_label_8, test_label_8 = spiltweakLabelbalance(8,df,0.33)
+            train_label_12, test_label_12 = spiltweakLabelbalance(12,df,0.33)
             # # 刪除Label相當於6、7、10的行
             test_dataframes = test_dataframes[~test_dataframes['Label'].isin([7, 8,12])]
             train_dataframes = train_dataframes[~train_dataframes['Label'].isin([7, 8,12])]
             # 合併Label6、7、10回去
-            test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
-            train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
+            test_dataframes = pd.concat([test_dataframes, test_label_7, test_label_8, test_label_12])
+            train_dataframes = pd.concat([train_dataframes,train_label_7, train_label_8,train_label_12])
+            
+            # 篩選test_dataframes中標籤為1和17的行加回去train
+            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([1,17])]
+            # test刪除Label相當於1和17的行，因為這些是因為noniid要加到train的Label
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([1,17])]
+            # 合併Label1和17回去到train
+            train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
 
     else:
         # BaseLine時
@@ -562,20 +574,26 @@ def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noni
             # Noniid時
             # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
             # encode後對照如下
-            # Heartbleed:6、
-            # Infiltration:7、
-            # Web Attack Sql Injection:10
+            # Heartbleed:7、
+            # Infiltration:8、
+            # Web Attack Sql Injection:12
             # Label encode mode  分別取出Label等於6、7、10的數據 對半分
-            train_label_6, test_label_6 = spiltweakLabelbalance(7,df,0.33)
-            train_label_7, test_label_7 = spiltweakLabelbalance(8,df,0.33)
-            train_label_10, test_label_10 = spiltweakLabelbalance(12,df,0.33)
-
+            train_label_7, test_label_7 = spiltweakLabelbalance(7,df,0.33)
+            train_label_8, test_label_8 = spiltweakLabelbalance(8,df,0.33)
+            train_label_12, test_label_12 = spiltweakLabelbalance(12,df,0.33)
             # # 刪除Label相當於6、7、10的行
             test_dataframes = test_dataframes[~test_dataframes['Label'].isin([7, 8,12])]
             train_dataframes = train_dataframes[~train_dataframes['Label'].isin([7, 8,12])]
             # 合併Label6、7、10回去
-            test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
-            train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
+            test_dataframes = pd.concat([test_dataframes, test_label_7, test_label_8, test_label_12])
+            train_dataframes = pd.concat([train_dataframes,train_label_7, train_label_8,train_label_12])
+
+            # 篩選test_dataframes中標籤為1和17的行加回去train
+            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([1,17])]
+            # test刪除Label相當於1和17的行，因為這些是因為noniid要加到train的Label
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([1,17])]
+            # 合併Label1和17回去到train
+            train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
 
     else:
         # BaseLine時
