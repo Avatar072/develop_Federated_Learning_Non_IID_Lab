@@ -275,7 +275,7 @@ def AddLabelToCICIDS2017(df,add_mergedays_label_or_dataset_label):
         # 添加新数据到 DataFrame
         df = df.append(new_data, ignore_index=True)
     
-    df['Label'] = df['Label'].replace({'BENIGN': 'normal'})
+    # df['Label'] = df['Label'].replace({'BENIGN': 'normal'})
     return df
 
 ### train dataframe做就好
@@ -334,9 +334,9 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,choose_merge_days,bool_doencod
                            "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_UndoLabelencode_"+choose_merge_days+".csv")
                            !=True):
             # False 只add 所選擇的星期沒有的Label
-            # afterminmax_dataset = DoAddLabel(afterminmax_dataset,choose_merge_days,False)
+            afterminmax_dataset = DoAddLabel(afterminmax_dataset,choose_merge_days,False)
             # True add 所選擇的星期沒有的Label和TONIOT的Label
-            afterminmax_dataset = DoAddLabel(afterminmax_dataset,choose_merge_days,True)
+            # afterminmax_dataset = DoAddLabel(afterminmax_dataset,choose_merge_days,True)
 
             afterminmax_dataset.to_csv(filepath +
                                        "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_UndoLabelencode_"+choose_merge_days+".csv", index=False)
@@ -561,12 +561,13 @@ def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noni
     df = dofeatureSelect(df,slecet_label_counts,choose_merge_days)
     train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
 
+    #加toniot的情況
     if bool_Noniid !=True:
         if choose_merge_days =="Monday_and_Firday":
             # 篩選test_dataframes中標籤為2、3、5和19的行加回去train
-            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,3,5,19])]
+            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([12])]
             # test刪除Label相當於2,3,5,19的行，因為這些是因為noniid要加到train的Label
-            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,3,5,19])]
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([12])]
             # 合併Label2,3,5,19回去到train
             train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
         
@@ -574,46 +575,46 @@ def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noni
             # Noniid時
             # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
             # encode後對照如下
-            # Heartbleed:7、
-            # Infiltration:8、
-            # Web Attack Sql Injection:12
+            # Heartbleed:8、
+            # Infiltration:9、
+            # Web Attack Sql Injection:13
             # Label encode mode  分別取出Label等於6、7、10的數據 對半分
-            train_label_7, test_label_7 = spiltweakLabelbalance(7,df,0.33)
-            train_label_8, test_label_8 = spiltweakLabelbalance(8,df,0.33)
-            train_label_12, test_label_12 = spiltweakLabelbalance(12,df,0.33)
+            train_label_7, test_label_7 = spiltweakLabelbalance(8,df,0.33)
+            train_label_8, test_label_8 = spiltweakLabelbalance(9,df,0.33)
+            train_label_12, test_label_12 = spiltweakLabelbalance(13,df,0.33)
             # # 刪除Label相當於6、7、10的行
-            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([7, 8,12])]
-            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([7, 8,12])]
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([8, 9,13])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([8, 9,13])]
             # 合併Label6、7、10回去
             test_dataframes = pd.concat([test_dataframes, test_label_7, test_label_8, test_label_12])
             train_dataframes = pd.concat([train_dataframes,train_label_7, train_label_8,train_label_12])
 
             # 篩選test_dataframes中標籤為1和17的行加回去train
-            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([1,17])]
-            # test刪除Label相當於1和17的行，因為這些是因為noniid要加到train的Label
-            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([1,17])]
-            # 合併Label1和17回去到train
-            train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
+            # train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([1,17])]
+            # # test刪除Label相當於1和17的行，因為這些是因為noniid要加到train的Label
+            # test_dataframes = test_dataframes[~test_dataframes['Label'].isin([1,17])]
+            # # 合併Label1和17回去到train
+            # train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
 
-    else:
-        # BaseLine時
-        # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
-        # encode後對照如下
-        # Heartbleed:6、
-        # Infiltration:7、
-        # Web Attack Sql Injection:10
-        if choose_merge_days =="Tuesday_and_Wednesday_and_Thursday":
-            # Label encode mode  分別取出Label等於6、7、10的數據 對半分
-            train_label_6, test_label_6 = spiltweakLabelbalance(6,df,0.33)
-            train_label_7, test_label_7 = spiltweakLabelbalance(7,df,0.33)
-            train_label_10, test_label_10 = spiltweakLabelbalance(10,df,0.33)
+    # else:
+    #     # BaseLine時
+    #     # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
+    #     # encode後對照如下
+    #     # Heartbleed:6、
+    #     # Infiltration:7、
+    #     # Web Attack Sql Injection:10
+    #     if choose_merge_days =="Tuesday_and_Wednesday_and_Thursday":
+    #         # Label encode mode  分別取出Label等於6、7、10的數據 對半分
+    #         train_label_6, test_label_6 = spiltweakLabelbalance(6,df,0.33)
+    #         train_label_7, test_label_7 = spiltweakLabelbalance(7,df,0.33)
+    #         train_label_10, test_label_10 = spiltweakLabelbalance(10,df,0.33)
 
-            # # 刪除Label相當於6、7、10的行
-            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([6, 7,10])]
-            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([6, 7,10])]
-            # 合併Label6、7、10回去
-            test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
-            train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
+    #         # # 刪除Label相當於6、7、10的行
+    #         test_dataframes = test_dataframes[~test_dataframes['Label'].isin([6, 7,10])]
+    #         train_dataframes = train_dataframes[~train_dataframes['Label'].isin([6, 7,10])]
+    #         # 合併Label6、7、10回去
+    #         test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
+    #         train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
     
     # 紀錄資料筆數
     with open(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/encode_and_count_after_chisquare_{bool_Noniid}.csv", "a+") as file:
@@ -674,13 +675,13 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
                       f"{choose_merge_days}_cicids2017_AfterProcessed_minmax_PCA")
 
     train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
-    printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
+    # printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
     if bool_Noniid !=True:
         if choose_merge_days =="Monday_and_Firday":
             # 篩選test_dataframes中標籤為2、3、5和19的行加回去train
-            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,3,5,19])]
+            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([12])]
             # test刪除Label相當於2,3,5,19的行，因為這些是因為noniid要加到train的Label
-            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,3,5,19])]
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([12])]
             # 合併Label2,3,5,19回去到train
             train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
         
@@ -688,17 +689,17 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
             # Noniid時
             # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
             # encode後對照如下
-            # Heartbleed:6、
-            # Infiltration:7、
-            # Web Attack Sql Injection:10
+            # Heartbleed:8、
+            # Infiltration:9、
+            # Web Attack Sql Injection:13
             # Label encode mode  分別取出Label等於6、7、10的數據 對半分
-            train_label_6, test_label_6 = spiltweakLabelbalance(7,df,0.33)
-            train_label_7, test_label_7 = spiltweakLabelbalance(8,df,0.33)
-            train_label_10, test_label_10 = spiltweakLabelbalance(12,df,0.33)
+            train_label_6, test_label_6 = spiltweakLabelbalance(8,df,0.33)
+            train_label_7, test_label_7 = spiltweakLabelbalance(9,df,0.33)
+            train_label_10, test_label_10 = spiltweakLabelbalance(13,df,0.33)
 
             # # 刪除Label相當於6、7、10的行
-            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([7, 8,12])]
-            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([7, 8,12])]
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([8, 9,13])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([8, 9,13])]
             # 合併Label6、7、10回去
             test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
             train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
@@ -772,20 +773,20 @@ def SelectfeatureUseChiSquareOrPCA(df,choose_merge_days,bool_doChiSquare,bool_do
         # #ChiSquare選40個特徵
         # DoSpiltAfterFeatureSelect(df,40,choose_merge_days,bool_Noniid)
     elif bool_doPCA!=False:
-         #PCA選77個特徵 總84特徵=77+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        #  #PCA選77個特徵 總84特徵=77+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
         DoSpiltAfterDoPCA(df,77,choose_merge_days,bool_Noniid)
-        #PCA選73個特徵 總80特徵=73+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        DoSpiltAfterDoPCA(df,73,choose_merge_days,bool_Noniid)
-        #PCA選63個特徵 總70特徵=73+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        DoSpiltAfterDoPCA(df,63,choose_merge_days,bool_Noniid)
-        #PCA選53個特徵 總60特徵=53+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        DoSpiltAfterDoPCA(df,53,choose_merge_days,bool_Noniid)
+        # #PCA選73個特徵 總80特徵=73+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        # DoSpiltAfterDoPCA(df,73,choose_merge_days,bool_Noniid)
+        # #PCA選63個特徵 總70特徵=73+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        # DoSpiltAfterDoPCA(df,63,choose_merge_days,bool_Noniid)
+        # #PCA選53個特徵 總60特徵=53+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        # DoSpiltAfterDoPCA(df,53,choose_merge_days,bool_Noniid)
         #PCA選43個特徵 總50特徵=43+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        DoSpiltAfterDoPCA(df,43,choose_merge_days,bool_Noniid)
-        #PCA選38個特徵 總45特徵=38+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        # DoSpiltAfterDoPCA(df,43,choose_merge_days,bool_Noniid)
+        # #PCA選38個特徵 總45特徵=38+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
         DoSpiltAfterDoPCA(df,38,choose_merge_days,bool_Noniid)
-        #PCA選33個特徵 總40特徵=33+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        DoSpiltAfterDoPCA(df,33,choose_merge_days,bool_Noniid) 
+        # #PCA選33個特徵 總40特徵=33+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
+        # DoSpiltAfterDoPCA(df,33,choose_merge_days,bool_Noniid) 
 
 def forBaseLineUseData(choose_merge_days,bool_Noniid):
     if choose_merge_days == "Monday_and_Firday":
@@ -798,9 +799,9 @@ def forBaseLineUseData(choose_merge_days,bool_Noniid):
         # 一般全部特徵
         # DoSpiltAllfeatureAfterMinMax(df_Monday_and_Firday,choose_merge_days,bool_Noniid)
         # 做ChiSquare
-        SelectfeatureUseChiSquareOrPCA(df_Monday_and_Firday,choose_merge_days,True,False,bool_Noniid)
+        # SelectfeatureUseChiSquareOrPCA(df_Monday_and_Firday,choose_merge_days,True,False,bool_Noniid)
         # 做PCA
-        # SelectfeatureUseChiSquareOrPCA(df_Monday_and_Firday,choose_merge_days,False,True,bool_Noniid)
+        SelectfeatureUseChiSquareOrPCA(df_Monday_and_Firday,choose_merge_days,False,True,bool_Noniid)
     elif choose_merge_days == "Tuesday_and_Wednesday_and_Thursday":
         df_Tuesday_and_Wednesday_and_Thursday=LoadingDatasetAfterMegreComplete(choose_merge_days)
         # 預處理和正規化
@@ -809,9 +810,9 @@ def forBaseLineUseData(choose_merge_days,bool_Noniid):
         df_Tuesday_and_Wednesday_and_Thursday=DoMinMaxAndLabelEncoding(df_Tuesday_and_Wednesday_and_Thursday,choose_merge_days,bool_Noniid)
         # DoSpiltAllfeatureAfterMinMax(df_Tuesday_and_Wednesday_and_Thursday,choose_merge_days,bool_Noniid)
         # # 做ChiSquare
-        SelectfeatureUseChiSquareOrPCA(df_Tuesday_and_Wednesday_and_Thursday,choose_merge_days,True,False,bool_Noniid)
+        # SelectfeatureUseChiSquareOrPCA(df_Tuesday_and_Wednesday_and_Thursday,choose_merge_days,True,False,bool_Noniid)
         # # 做PCA
-        # SelectfeatureUseChiSquareOrPCA(df_Tuesday_and_Wednesday_and_Thursday,choose_merge_days,False,True,bool_Noniid)
+        SelectfeatureUseChiSquareOrPCA(df_Tuesday_and_Wednesday_and_Thursday,choose_merge_days,False,True,bool_Noniid)
 
     # elif choose_merge_days == "ALLday":
     #     df_ALLday=LoadingDatasetAfterMegreComplete(choose_merge_days)
