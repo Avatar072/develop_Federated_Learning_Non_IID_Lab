@@ -33,6 +33,7 @@ start_IDS = time.time()
 # #############################################################################
 
 warnings.filterwarnings("ignore", category=UserWarning)
+# DEVICE = torch.device("cpu")
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 #python client.py --dataset train_half1 --epochs 500 --method normal
@@ -54,9 +55,22 @@ generatefolder(f"./FL_AnalyseReportfolder/", today)
 generatefolder(f"./FL_AnalyseReportfolder/{today}/", client_str)
 generatefolder(f"./FL_AnalyseReportfolder/{today}/{client_str}/", Choose_method)
 
-# 20231220 after do labelencode and minmax
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y.npy", allow_pickle=True)
+# # 20240316 after do labelencode and minmax
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y.npy", allow_pickle=True)
+# # 20240317 after do labelencode and minmax add toniot
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_add_toniot.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_add_toniot.npy", allow_pickle=True)
+# 20240317 after do labelencode and minmax add toniot remove all ip port
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_remove_ip_port.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_remove_ip_port.npy", allow_pickle=True)
+# 20240317 after do labelencode and minmax tonniot add cicids2017 39 feature then PCA 
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_PCA.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_PCA.npy", allow_pickle=True)
+# 20240317 after do labelencode and minmax cicids2017 PCA 38 
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_PCA_38.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_PCA_38.npy", allow_pickle=True)
+
 
 counter = Counter(y_test)
 print("test",counter)
@@ -105,7 +119,7 @@ class MLP(nn.Module):
         self.fc2 = nn.Linear(512, 512)
         self.fc3 = nn.Linear(512, 512)
         self.fc4 = nn.Linear(512, 512)
-        self.layer5 = nn.Linear(512, 22)
+        self.layer5 = nn.Linear(512, 15)
 
     def forward(self, x):
         x = F.relu(self.layer1(x))
@@ -121,6 +135,8 @@ def train(net, trainloader, epochs):
     criterion = nn.CrossEntropyLoss()
     # optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001)
+    # 學長的參數
+    # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.001)
 
     for epoch in range(epochs):
         print("epoch",epoch)
@@ -132,10 +148,10 @@ def train(net, trainloader, epochs):
             loss.backward()
             optimizer.step()
             ###訓練的過程    
-        test_accuracy = test(net, testloader, start_IDS, client_str,False)
+        test_accuracy = test(net, testloader, start_IDS, client_str, "local_test",False)
         print(f"訓練週期 [{epoch+1}/{epochs}] - 測試準確度: {test_accuracy:.4f}")
 
-def test(net, testloader, start_time, client_str,plot_confusion_matrix):
+def test(net, testloader, start_time, client_str, str_globalOrlocal,bool_plot_confusion_matrix):
     print("test")
     correct = 0
     total = 0
@@ -185,7 +201,7 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
             #RecordRecall = []
             RecordRecall = ()
             RecordAccuracy = ()
-            labelCount = 22
+            labelCount = 15
             # labelCount = len(np.unique(y_train))# label數量要記得改
             # print("labelCount:\n",labelCount)
 
@@ -199,7 +215,7 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
 
             # 标志来跟踪是否已经添加了标题行
             header_written = False
-            with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
+            with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/recall-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
                 # file.write(str(RecordRecall))
                 # file.writelines("\n")
                 # 添加标题行
@@ -209,7 +225,7 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
                 file.write(str(RecordRecall) + "\n")
         
             # 将总体准确率和其他信息写入 "accuracy-baseline.csv" 文件
-            with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}.csv", "a+") as file:
+            with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
                 # file.write(str(RecordAccuracy))
                 # file.writelines("\n")
                 # 添加标题行
@@ -222,38 +238,65 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
             # 将字典转换为 DataFrame 并转置
             report_df = pd.DataFrame(GenrateReport).transpose()
             # 保存为 baseline_report 文件
-            report_df.to_csv(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/baseline_report_{client_str}.csv",header=True)
-    draw_confusion_matrix(y_true, y_pred,plot_confusion_matrix)
+            report_df.to_csv(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/baseline_report_{client_str}_{str_globalOrlocal}.csv",header=True)
+    draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion_matrix)
     accuracy = correct / total
     print(f"測試準確度: {accuracy:.4f}")
     return accuracy
 
 # 畫混淆矩陣
-def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
+def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion_matrix = False):
     #混淆矩陣
-    if plot_confusion_matrix:
+    if bool_plot_confusion_matrix:
         # df_cm的PD.DataFrame 接受三個參數：
         # arr：混淆矩陣的數據，這是一個二維陣列，其中包含了模型的預測和實際標籤之間的關係，以及它們在混淆矩陣中的計數。
         # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，以標識混淆矩陣中每個類別的位置。
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
-        labelCount = 22# label數量要記得改
-        class_names = [str(i) for i in range(labelCount)]
+        labelCount = 15# label數量要記得改
+        # class_names = [str(i) for i in range(labelCount)]
+        class_names = {
+                        0: '0_BENIGN', 
+                        1: '1_Bot', 
+                        2: '2_DDoS', 
+                        3: '3_DoS GoldenEye', 
+                        4: '4_DoS Hulk', 
+                        5: '5_DoS Slowhttptest', 
+                        6: '6_DoS slowloris', 
+                        7: '7_FTP-Patator', 
+                        8: '8_Heartbleed', 
+                        9: '9_Infiltration', 
+                        10: '10_PortScan', 
+                        11: '11_SSH-Patator', 
+                        12: '12_Web Attack Brute Force', 
+                        13: '13_Web Attack Sql Injection', 
+                        14: '14_Web Attack XSS'
+                        # 15: '15_backdoor',
+                        # 16: '16_dos',
+                        # 17: '17_injection',
+                        # 18: '18_mitm',
+                        # 19: '19_password',
+                        # 20: '20_ransomware',
+                        # 21: '21_scanning',
+                        # 22: '22_xss'
+                        }      
         # class_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11','12','13','14','15','16','17','18','20','21']
         # class_names = ['0', '1', '2', '3']
-        df_cm = pd.DataFrame(arr, class_names, class_names)
-        plt.figure(figsize = (9,6))
-        sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn')
+        df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
+        plt.figure(figsize = (20,10))
+        sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn', annot_kws={"size": 15})
         plt.title(client_str +"_"+ Choose_method)
-        plt.xlabel("prediction")
-        plt.ylabel("label (ground truth)")
-        plt.savefig(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
+        plt.xlabel("prediction",fontsize=15)
+        plt.ylabel("label (ground truth)",fontsize=15,labelpad=-25, va='center')
+        plt.xticks(rotation=0, fontsize=15)
+        plt.yticks(fontsize=11)
+        plt.savefig(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_{str_globalOrlocal}_confusion_matrix.png")
         # plt.show()
 
 # 创建用于训练和测试的 DataLoader
 train_data = TensorDataset(x_train, y_train)
 test_data = TensorDataset(x_test, y_test)
-trainloader = DataLoader(train_data, batch_size=500, shuffle=True)  # 设置 shuffle 为 True
+trainloader = DataLoader(train_data, batch_size=512, shuffle=True)  # 设置 shuffle 为 True
 # test_data 的batch_size要設跟test_data(y_test)的筆數一樣 重要!!!
 testloader = DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 # #############################################################################
@@ -271,13 +314,31 @@ class FlowerClient(fl.client.NumPyClient):
         net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
-        self.set_parameters(parameters)
+        self.set_parameters(parameters)# 剛聚合完的權重
+        #global test 對每global round剛聚合完的gobal model進行測試 要在Local_train之前測試
+        # 通常第1 round測出來會是0
+        # 在训练或测试结束后，保存模型
+        torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Before_local_train_model.pth")
+        accuracy = test(net, testloader, start_IDS, client_str,f"global_test",True)
+        print("accuracy",accuracy)
+                    # 将总体准确率和其他信息写入 "accuracy-baseline.csv" 文件
+        with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-gobal_model_{client_str}.csv", "a+") as file:
+            # file.write(str(RecordAccuracy))
+            # file.writelines("\n")
+            # 添加标题行
+            file.write(f"{client_str}_gobal_model_Accuracy\n")
+            # 写入Accuracy数据
+            file.write(str(accuracy) + "\n")
+
         train(net, trainloader, epochs=num_epochs)
         return self.get_parameters(config={}), len(trainloader.dataset), {}#step1上傳給權重，#step2在server做聚合，step3往下傳給server
 
     def evaluate(self, parameters, config):
-        
-        accuracy = test(net, testloader, start_IDS, client_str,True)
+        # local test
+        # 這邊的測試結果會受到local train的影響
+        # 在训练或测试结束后，保存模型
+        torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/After_local_train_model.pth")
+        accuracy = test(net, testloader, start_IDS, client_str,f"local_test",True)
         self.set_parameters(parameters)#更新現有的知識#step4 更新model
         return accuracy, len(testloader.dataset), {"accuracy": accuracy}
 

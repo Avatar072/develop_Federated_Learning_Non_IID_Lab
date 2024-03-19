@@ -75,34 +75,59 @@ def ReplaceMorethanTenthousandQuantity(df):
 # TONIOT_testdataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\test_ToN-IoT_dataframes_20240110.csv")
 
 
-# 加载 .npy 文件
-# 载入Monday_and_Firday test
-cicids2017_Monday_and_Firday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/x_Monday_and_Firday_test_cicids2017_AfterFeatureSelect44_20240310.npy")
-cicids2017_Monday_and_Firday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/y_Monday_and_Firday_test_cicids2017_AfterFeatureSelect44_20240310.npy")
+# # 加载 .npy 文件
+# # 载入Monday_and_Firday test chi-square
+# cicids2017_Monday_and_Firday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/x_Monday_and_Firday_test_AfterPCA77_20240317.npy")
+# cicids2017_Monday_and_Firday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/y_Monday_and_Firday_test_AfterPCA77_20240317.npy")
 
-# 载入Tuesday_and_Wednesday_and_Thursday test
-cicids2017_Tuesday_and_Wednesday_and_Thursday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/x_Tuesday_and_Wednesday_and_Thursday_test_cicids2017_AfterFeatureSelect44_20240310.npy")
-cicids2017_Tuesday_and_Wednesday_and_Thursday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/y_Tuesday_and_Wednesday_and_Thursday_test_cicids2017_AfterFeatureSelect44_20240310.npy")
+# # 载入Tuesday_and_Wednesday_and_Thursday test chi-square
+# cicids2017_Tuesday_and_Wednesday_and_Thursday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/x_Tuesday_and_Wednesday_and_Thursday_test_AfterPCA77_20240317.npy")
+# cicids2017_Tuesday_and_Wednesday_and_Thursday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/y_Tuesday_and_Wednesday_and_Thursday_test_AfterPCA77_20240317.npy")
+
+
+# 加载 .npy 文件
+# 载入Monday_and_Firday test PCA
+cicids2017_Monday_and_Firday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/x_Monday_and_Firday_test_AfterPCA38_20240318.npy")
+cicids2017_Monday_and_Firday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/y_Monday_and_Firday_test_AfterPCA38_20240318.npy")
+
+# # 载入Tuesday_and_Wednesday_and_Thursday test PCA
+cicids2017_Tuesday_and_Wednesday_and_Thursday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/x_Tuesday_and_Wednesday_and_Thursday_test_AfterPCA38_20240318.npy")
+cicids2017_Tuesday_and_Wednesday_and_Thursday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Tuesday_and_Wednesday_and_Thursday/y_Tuesday_and_Wednesday_and_Thursday_test_AfterPCA38_20240318.npy")
+
 
 # 载入TONIOT test
-TONIOT_x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_test_ToN-IoT_20240304.npy")
-TONIOT_y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_test_ToN-IoT_20240304.npy")
+# TONIOT_x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_test_ToN-IoT_test_AfterPCA77_20240317.npy")
+# TONIOT_y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_test_ToN-IoT_test_AfterPCA77_20240317.npy")
+
 
 # 合并 x_test 和 x1_test
 merged_x = np.concatenate((cicids2017_Monday_and_Firday_x_test,
-                           cicids2017_Tuesday_and_Wednesday_and_Thursday_x_test,
-                           TONIOT_x_test), axis=0)
+                           cicids2017_Tuesday_and_Wednesday_and_Thursday_x_test
+                           ), axis=0)
 
 # 合并 y_test 和 y1_test
 merged_y = np.concatenate((cicids2017_Monday_and_Firday_y_test,
-                           cicids2017_Tuesday_and_Wednesday_and_Thursday_y_test,
-                           TONIOT_y_test), axis=0)
+                           cicids2017_Tuesday_and_Wednesday_and_Thursday_y_test
+                           ), axis=0)
+
+# # 合并 x_test 和 x1_test
+# merged_x = np.concatenate((cicids2017_Monday_and_Firday_x_test,
+#                            cicids2017_Tuesday_and_Wednesday_and_Thursday_x_test,
+#                            TONIOT_x_test), axis=0)
+
+# # 合并 y_test 和 y1_test
+# merged_y = np.concatenate((cicids2017_Monday_and_Firday_y_test,
+#                            cicids2017_Tuesday_and_Wednesday_and_Thursday_y_test,
+#                            TONIOT_y_test), axis=0)
 
 # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\TONIOT_test_and_CICIDS2017_test_combine\20240110
 # 保存合并后的数组
-np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_x.npy", merged_x)
-np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_y.npy", merged_y)
-
+# np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_x_add_toniot.npy", merged_x)
+# np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_y_add_toniot.npy", merged_y)
+# np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_x_cicids2017_toniot_remove_ip_port.npy", merged_x)
+# np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_y_cicids2017_toniot_remove_ip_port.npy", merged_y)
+np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_x_cicids2017_toniot_PCA_38.npy", merged_x)
+np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_y_cicids2017_toniot_PCA_38.npy", merged_y)
 print("按行合并 x 的结果：")
 print(merged_x)
 

@@ -34,11 +34,7 @@ def clearDirtyData(df):
     df = df[~df.isin([np.nan, np.inf, -np.inf]).any(1)]
     return df
 
-### label encoding
-def label_Encoding(label):
-    label_encoder = preprocessing.LabelEncoder()
-    afterprocess_dataset[label] = label_encoder.fit_transform(afterprocess_dataset[label])
-    afterprocess_dataset[label].unique()
+
 
 ### show original label name and after labelenocode
 def label_encoding(label, dataset):
@@ -93,9 +89,7 @@ def ReplaceMorethanTenthousandQuantity(df):
     print(extracted_df['type'].value_counts())
     return extracted_df
 
-# Loading datasets
-dataset = pd.read_csv(filepath + "\\TONTOT_Original\\Train_Test_Network.csv")
-dataset = clearDirtyData(dataset)
+
 
 # 将每列中的 "-" 替换为最常见值
 def RealpaceSymboltoTheMostCommonValue(dataset):
@@ -115,33 +109,64 @@ def RealpaceSymboltoTheMostCommonValue(dataset):
     print(most_common_values)
     return dataset
 
+def LabelMapping(df):
+    # 定义您想要的固定编码值的字典映射
+    encoding_map = {
+        'BENIGN': 0,
+        'Bot': 1,
+        'DDoS': 2,
+        'DoSGoldenEye': 3,
+        'DoSHulk': 4,
+        'DoSSlowhttptest': 5,
+        'DoSslowloris': 6,
+        'FTPPatator': 7,
+        'Heartbleed': 8,
+        'Infiltration': 9,
+        'PortScan': 10,
+        'SSHPatator': 11,
+        'WebAttackBruteForce': 12,
+        'WebAttackSqlInjection': 13,
+        'WebAttackXSS': 14,
+        'backdoor': 15,
+        'dos': 16,
+        'injection': 17,
+        'mitm': 18,
+        'password': 19,
+        'ransomware': 20,
+        'scanning': 21,
+        'xss': 22
+    }
+    # 將固定編碼值映射應用到DataFrame中的Label列，直接更新原始的Label列
+    df['type'] = df['type'].map(encoding_map)
+    return df, encoding_map
 
-dataset = RealpaceSymboltoTheMostCommonValue(dataset)
-if(CheckFileExists(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed.csv")!=True):
-    #存将每列中的 "-" 替换为最常见值後的csv
-    dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed.csv", index=False)
-else:
-    dataset= pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed.csv")
+
+def LoadingDatasetAfterMegreComplete(dataset):
+
+    dataset = clearDirtyData(dataset)
+    dataset = RealpaceSymboltoTheMostCommonValue(dataset)
+    if(CheckFileExists(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed.csv")!=True):
+        #存将每列中的 "-" 替换为最常见值後的csv
+        dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed.csv", index=False)
+    else:
+        dataset= pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed.csv")
 
 
-dataset = ReplaceMorethanTenthousandQuantity(dataset)
+        dataset = ReplaceMorethanTenthousandQuantity(dataset)
 
-# dataset.to_csv(filepath + "\\dataset_AfterProcessed\\Train_Test_Network_AfterProcessed_updated_10000.csv", index=False)
-# afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\Train_Test_Network_AfterProcessed_updated_10000.csv")
+    if(CheckFileExists(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv")!=True):
+        dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv", index=False)
+        afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv")
 
+    else:
+        afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv")
 
-if(CheckFileExists(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv")!=True):
-    dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv", index=False)
-    afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv")
-
-else:
-    afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv")
-
+    return afterprocess_dataset
 ### add 沒有的Label到TONIOT
-def AddLabelToTONIOT(df):
+def DoAddcicids2017LabelToTONIOT(df):
     values_to_insert = ['Bot', 'DoSGoldenEye', 'DoSHulk', 'DoSSlowhttptest', 'DoSslowloris', 
                         'FTPPatator', 'Heartbleed', 'Infiltration', 'PortScan', 'SSHPatator', 
-                        'WebAttackBruteForce','WebAttackSqlInjection']
+                        'WebAttackBruteForce','WebAttackSqlInjection','WebAttackXSS']
      # 获取 'type' 列前的所有列的列名
     columns_before_type = df.columns.tolist()[:df.columns.get_loc('type')]
 
@@ -159,128 +184,290 @@ def AddLabelToTONIOT(df):
         # 添加新数据到 DataFrame
         df = df.append(new_data, ignore_index=True)
     
-    df['type'] = df['type'].replace({'ddos': 'DDos'})
-    df['type'] = df['type'].replace({'xss': 'WebAttackXSS'})
+    df['type'] = df['type'].replace({'normal': 'BENIGN'})
+    df['type'] = df['type'].replace({'ddos': 'DDoS'})
+
     return df
 
-afterprocess_dataset = AddLabelToTONIOT(afterprocess_dataset)
-# afterprocess_dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label.csv", index=False)
-if(CheckFileExists(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label.csv")!=True):
-    # dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000.csv", index=False)
-    afterprocess_dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label.csv", index=False)
 
-    afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label.csv")
+def DoMinMaxAndLabelEncoding(afterprocess_dataset,bool_doencode):
+    ### label encoding
+    def label_Encoding(label):
+        label_encoder = preprocessing.LabelEncoder()
+        afterprocess_dataset[label] = label_encoder.fit_transform(afterprocess_dataset[label])
+        afterprocess_dataset[label].unique()
 
-else:
-    afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label.csv")
+    ##除了Label外的特徵做encode
+   # 等標籤對其後 在對特徵做處理
+    label_Encoding('src_ip')
+    label_Encoding('src_port')
+    label_Encoding('dst_ip')
+    label_Encoding('dst_port')
+    label_Encoding('proto')
+    label_Encoding('ts')
+    label_Encoding('service')
+    label_Encoding('conn_state')
+    # 需要做label_Encoding的欄位
+    label_Encoding('dns_query')
+    label_Encoding('dns_AA')
+    label_Encoding('dns_RD')
+    label_Encoding('dns_RA')
+    label_Encoding('dns_rejected')
+    label_Encoding('ssl_version')
+    label_Encoding('ssl_cipher')
+    label_Encoding('ssl_resumed')
+    label_Encoding('ssl_established')
+    label_Encoding('ssl_subject')
+    label_Encoding('ssl_issuer')
+    # label_Encoding('http_trans_depth')
+    label_Encoding('http_method')
+    label_Encoding('http_uri')
+    # label_Encoding('http_version')
+    label_Encoding('http_user_agent')
+    label_Encoding('http_orig_mime_types')
+    label_Encoding('http_resp_mime_types')
+    label_Encoding('weird_name')
+    # label_Encoding('weird_addl')
+    label_Encoding('weird_notice')
+    
+    ## extracting features
+    # 除了type外的特徵
+    crop_dataset=afterprocess_dataset.iloc[:,:-1]
+    # 列出要排除的列名，這6個以外得特徵做minmax
+    columns_to_exclude = ['src_ip', 'src_port', 'dst_ip', 'dst_port', 'proto', 'ts']
+    # 使用条件选择不等于这些列名的列
+    doScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col not in columns_to_exclude]]
+    undoScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col  in columns_to_exclude]]
+    # print(doScalerdataset.info)
+    # print(afterprocess_dataset.info)
+    # print(undoScalerdataset.info)
+    # 開始minmax
+    X=doScalerdataset
+    X=X.values
+    # scaler = preprocessing.StandardScaler() #資料標準化
+    scaler = MinMaxScaler(feature_range=(0, 1)).fit(X)
+    scaler.fit(X)
+    X=scaler.transform(X)
+    # 将缩放后的值更新到 doScalerdataset 中
+    doScalerdataset.iloc[:, :] = X
+    # 将排除的列名和选中的特征和 Label 合并为新的 DataFrame
+    afterminmax_dataset = pd.concat([undoScalerdataset,doScalerdataset,afterprocess_dataset['type']], axis = 1)
+    
+    # 保存Lable未做label_encoding的DataFrame方便後續Noniid實驗
+    if bool_doencode != True:
+        if(CheckFileExists(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_UnDoLabelencode_and_minmax.csv")
+                           !=True):
 
-# 等標籤對其後 在對特徵做處理
-label_Encoding('src_ip')
-label_Encoding('src_port')
-label_Encoding('dst_ip')
-label_Encoding('dst_port')
-label_Encoding('proto')
-label_Encoding('ts')
-label_Encoding('service')
-label_Encoding('conn_state')
-# 需要做label_Encoding的欄位
-label_Encoding('dns_query')
-label_Encoding('dns_AA')
-label_Encoding('dns_RD')
-label_Encoding('dns_RA')
-label_Encoding('dns_rejected')
-label_Encoding('ssl_version')
-label_Encoding('ssl_cipher')
-label_Encoding('ssl_resumed')
-label_Encoding('ssl_established')
-label_Encoding('ssl_subject')
-label_Encoding('ssl_issuer')
-# label_Encoding('http_trans_depth')
-label_Encoding('http_method')
-label_Encoding('http_uri')
-# label_Encoding('http_version')
-label_Encoding('http_user_agent')
-label_Encoding('http_orig_mime_types')
-label_Encoding('http_resp_mime_types')
-label_Encoding('weird_name')
-# label_Encoding('weird_addl')
-label_Encoding('weird_notice')
-# 需要做label_Encoding的欄位
-# label_Encoding('type')
+            afterminmax_dataset = DoAddcicids2017LabelToTONIOT(afterminmax_dataset)
+            afterminmax_dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_UnDoLabelencode_and_minmax.csv", index=False)
+                
+            afterminmax_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_UnDoLabelencode_and_minmax.csv")
 
-encoded_type_values, afterprocess_dataset = label_encoding("type", afterprocess_dataset)
+        else:
+            afterminmax_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_UnDoLabelencode_and_minmax.csv")
 
-# print("Original Type Values:", original_type_values)
-print("Encoded Type Values:", encoded_type_values)
+         # encoded_type_values, afterminmax_dataset = label_encoding("type", afterminmax_dataset)
+        # # print("Original Type Values:", original_type_values)
+        # print("Encoded Type Values:", encoded_type_values)
+        afterminmax_dataset,encoded_type_values = LabelMapping(afterminmax_dataset)
 
-afterprocess_dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_Labelencode.csv", index=False)
+        print("Encoded Type Values:", encoded_type_values)
+        with open(f"./data/dataset_AfterProcessed/TONIOT/encode_and_count_Noniid.csv", "a+") as file:
+            file.write("Encoded Type Values\n")
+            file.write(str(encoded_type_values) + "\n")
+    #保存Lable做label_encoding的DataFrame方便後續BaseLine實驗
+    else:
+        encoded_type_values, afterminmax_dataset = label_encoding("type", afterminmax_dataset)
+        # afterminmax_dataset.to_csv(filepath + 
+                                #    "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_DoLabelencode_"+choose_merge_days+".csv", index=False)
+        
+        
+        if(CheckFileExists(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_DoLabelencode_and_minmax.csv")
+                           !=True):
+            afterminmax_dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_DoLabelencode_and_minmax.csv", index=False)
+                
+            afterminmax_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_DoLabelencode_and_minmax.csv")
 
-## extracting features
-# 除了type外的特徵
-crop_dataset=afterprocess_dataset.iloc[:,:-1]
-# 列出要排除的列名
-columns_to_exclude = ['src_ip', 'src_port', 'dst_ip', 'dst_port', 'proto', 'ts']
-# 使用条件选择不等于这些列名的列
-doScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col not in columns_to_exclude]]
-undoScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col  in columns_to_exclude]]
-# print(doScalerdataset.info)
-# print(afterprocess_dataset.info)
-# print(undoScalerdataset.info)
-# 開始MinMax
-X=doScalerdataset
-X=X.values
-# scaler = preprocessing.StandardScaler() #資料標準化
-scaler = MinMaxScaler(feature_range=(0, 1)).fit(X)
-scaler.fit(X)
-X=scaler.transform(X)
+        else:
+            afterminmax_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_DoLabelencode_and_minmax.csv")
 
-finalDf = pd.concat([undoScalerdataset, doScalerdataset, afterprocess_dataset[['type']]], axis = 1)
+        # print("Original Type Values:", original_type_values)
+        print("Encoded Type Values:", encoded_type_values)
+        with open(f"./data/dataset_AfterProcessed/TONIOT/encode_and_count_baseLine.csv", "a+") as file:
+            file.write("Encoded Type Values\n")
+            file.write(str(encoded_type_values) + "\n")
 
-afterprocess_dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_Labelencode_and_minmax.csv", index=False)
+    return afterminmax_dataset
 
+# do Labelencode and minmax 
+def DoSpiltAllfeatureAfterMinMax(df,bool_Noniid):  
+    # train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    train_dataframes, test_dataframes = manualspiltdataset(df)#test_size=0.2表示将数据集分成测试集的比例为20%
 
-train_dataframes, test_dataframes = train_test_split(afterprocess_dataset, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    if bool_Noniid !=True:
 
+            label_counts = test_dataframes['type'].value_counts()
+            print("test_dataframes\n", label_counts)
+            label_counts = train_dataframes['type'].value_counts()
+            print("train_dataframes\n", label_counts)
+    else:
+        # BaseLine時
+            label_counts = test_dataframes['type'].value_counts()
+            print("test_dataframes\n", label_counts)
+            label_counts = train_dataframes['type'].value_counts()
+            print("train_dataframes\n", label_counts)
+    
+    # 紀錄資料筆數
+    with open(f"./data/dataset_AfterProcessed/TONIOT/encode_and_count_{bool_Noniid}.csv", "a+") as file:
+        label_counts = test_dataframes['type'].value_counts()
+        print("test_dataframes\n", label_counts)
+        file.write("test_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+        
+        label_counts = train_dataframes['type'].value_counts()
+        print("train_dataframes\n", label_counts)
+        file.write("train_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
 
-
-# 篩選test_dataframes中標籤為2、3、5和19的行加回去train
-train_dataframes_add = test_dataframes[test_dataframes['type'].isin([4,12])]
-# test刪除Label相當於2,3,5,19的行，因為這些是因為noniid要加到train的Label
-test_dataframes = test_dataframes[~test_dataframes['type'].isin([4,12])]
-# 合併Label2,3,5,19回去到train
-train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
-
-
-# train_dataframes = clearDirtyData(train_dataframes)
-# test_dataframes = clearDirtyData(test_dataframes)
-label_counts = test_dataframes['type'].value_counts()
-print("test_dataframes\n", label_counts)
-label_counts = train_dataframes['type'].value_counts()
-print("train_dataframes\n", label_counts)
-
-# # split train_dataframes各一半
-# train_half1,train_half2 = splitdatasetbalancehalf(train_dataframes,'type')
-
-# # 找到train_df_half1和train_df_half2中重复的行
-# duplicates = train_half2[train_half2.duplicated(keep=False)]
-
-# # 删除train_df_half2中与train_df_half1重复的行
-# train_df_half2 = train_half2[~train_half2.duplicated(keep=False)]
-
-# # train_df_half1和train_df_half2 detail information
-# printFeatureCountAndLabelCountInfo(train_half1, train_df_half2,'type')
+    SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}", f"train_ToN-IoT_dataframes_{today}")
+    SaveDataToCsvfile(test_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}", f"test_ToN-IoT_dataframes_{today}")
+    SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}", "test_ToN-IoT",today)
+    SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}", "train_ToN-IoT",today)
 
 
+def DoSpiltAfterDoPCA(df,number_of_components,bool_Noniid,bool_add_cicids2017feature):
+    
+    # add cicids2017 chisquare select 45出來除IP外的的39個特徵
+    if(bool_add_cicids2017feature):
+        columns = [
+                'FlowDuration', 'FwdPacketLengthMin', 'BwdPacketLengthMax', 'BwdPacketLengthMin', 'BwdPacketLengthMean', 'BwdPacketLengthStd',
+                'FlowPackets/s', 'FlowIATMean', 'FlowIATStd', 'FlowIATMax', 'FwdIATTotal', 'FwdIATMean', 'FwdIATStd', 'FwdIATMax', 'FwdIATMin',
+                'BwdIATTotal', 'BwdIATMean', 'BwdIATMax', 'FwdPSHFlags', 'BwdPackets/s', 'MinPacketLength', 'MaxPacketLength', 'PacketLengthMean',
+                'PacketLengthStd', 'PacketLengthVariance', 'FINFlagCount', 'SYNFlagCount', 'PSHFlagCount', 'ACKFlagCount', 'URGFlagCount', 
+                'Down/UpRatio', 'AveragePacketSize', 'AvgBwdSegmentSize', 'Init_Win_bytes_forward', 'Init_Win_bytes_backward', 'ActiveMin',
+                'IdleMean', 'IdleStd', 'IdleMax', 'IdleMin'
+            ]
 
-SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}", f"train_ToN-IoT_dataframes_{today}")
-SaveDataToCsvfile(test_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}", f"test_ToN-IoT_dataframes_{today}")
-# SaveDataToCsvfile(train_half1, f"./TON_IoT Datasets/UNSW-ToN-IoT/dataset_AfterProcessed/{today}", f"train_half1_{today}")
-# SaveDataToCsvfile(train_half2,  f"./TON_IoT Datasets/UNSW-ToN-IoT/dataset_AfterProcessed/{today}", f"train_half2_{today}") 
+        
+        # 创建新列的DataFrame，所有值都是0
+        df_cicids2017feature = pd.DataFrame(0, index=df.index, columns=columns)
+        df = pd.concat([df.iloc[:,:-1],df_cicids2017feature,df[['type']]], axis = 1)
+        
+    crop_dataset=df.iloc[:,:-1]
+    # 列出要排除的列名
+    columns_to_exclude = ['src_ip', 'src_port', 'dst_ip', 'dst_port', 'proto', 'ts']
+    # 使用条件选择不等于这些列名的列
+    # number_of_components=77 # 原84個的特徵，扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label' | 84-7 =77
+    doScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col not in columns_to_exclude]]
+    undoScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col  in columns_to_exclude]]
+    # afterminmax_dataset = pd.concat([undoScalerdataset,doScalerdataset,mergecompelete_dataset['Label']], axis = 1)
 
-## train_dataframes.to_csv(filepath + "\\dataset_AfterProcessed\\Train_Test_Network_AfterProcessed_updated_train_dataframes.csv", index=False)
-## test_dataframes.to_csv(filepath + "\\dataset_AfterProcessed\\Train_Test_Network_AfterProcessed_updated_test_dataframes.csv", index=False)
+    print("Original number of features:", len(df.columns) - 1)  # 减去 'Label' 列
+    # X = df.drop(columns=['Label'])  # 提取特征，去除 'Label' 列
+    X = doScalerdataset
+    pca = PCA(n_components=number_of_components)
+    columns_array=[]
+    for i in range (number_of_components):
+        columns_array.append("principal_Component"+str(i+1))
+        
+    principalComponents = pca.fit_transform(X)
+    principalDf = pd.DataFrame(data = principalComponents
+                , columns = columns_array)
 
-SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}", "test_ToN-IoT",today)
-SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}", "train_ToN-IoT",today)
-# SaveDataframeTonpArray(train_half1, f"./TON_IoT Datasets/UNSW-ToN-IoT/dataset_AfterProcessed/{today}", "train_half1_ToN-IoT", today)
-# SaveDataframeTonpArray(train_half2, f"./TON_IoT Datasets/UNSW-ToN-IoT/dataset_AfterProcessed/{today}", "train_half2_ToN-IoT", today)
+    finalDf = pd.concat([undoScalerdataset,principalDf, df[['type']]], axis = 1)
+    df=finalDf
+
+    SaveDataToCsvfile(df, 
+                      f"./data/dataset_AfterProcessed/TONIOT/{today}/doPCA/{number_of_components}", 
+                      f"TONIOT_AfterProcessed_minmax_PCA")
+
+    # train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    # 手動劃分資料集
+    train_dataframes, test_dataframes = manualspiltdataset(df)
+    # printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
+    if bool_Noniid !=True:
+
+            label_counts = test_dataframes['type'].value_counts()
+            print("test_dataframes\n", label_counts)
+            label_counts = train_dataframes['type'].value_counts()
+            print("train_dataframes\n", label_counts)
+    else:
+        # BaseLine時
+            label_counts = test_dataframes['type'].value_counts()
+            print("test_dataframes\n", label_counts)
+            label_counts = train_dataframes['type'].value_counts()
+            print("train_dataframes\n", label_counts)
+
+
+    SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}/doPCA/{number_of_components}", 
+                      f"train_ToN-IoT_dataframes_AfterPCA{number_of_components}_{today}")
+    SaveDataToCsvfile(test_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}/doPCA/{number_of_components}", 
+                      f"test_ToN-IoT_dataframes_AfterPCA{number_of_components}_{today}")
+    
+    SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}/doPCA/{number_of_components}", 
+                           f"test_ToN-IoT_test_AfterPCA{number_of_components}",today)
+    SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}/doPCA/{number_of_components}", 
+                           f"train_ToN-IoT_train_AfterPCA{number_of_components}",today)
+
+
+
+#手動劃分
+def manualspiltdataset(df):
+        train_dataframes = pd.concat([
+                                            df[df['type'] == 0].iloc[:8000],
+                                            df[df['type'] == 1].iloc[:1],
+                                            df[df['type'] == 2].iloc[:8000],
+                                            df[df['type'] == 3].iloc[:1],
+                                            df[df['type'] == 4].iloc[:1],
+                                            df[df['type'] == 5].iloc[:1],
+                                            df[df['type'] == 6].iloc[:1],
+                                            df[df['type'] == 7].iloc[:1],
+                                            df[df['type'] == 8].iloc[:1],
+                                            df[df['type'] == 9].iloc[:1],
+                                            df[df['type'] == 10].iloc[:1],
+                                            df[df['type'] == 11].iloc[:1],
+                                            df[df['type'] == 12].iloc[:1],
+                                            df[df['type'] == 13].iloc[:1],
+                                            df[df['type'] == 14].iloc[:1],
+                                            df[df['type'] == 15].iloc[:8000],
+                                            df[df['type'] == 16].iloc[:8000],
+                                            df[df['type'] == 17].iloc[:8000],
+                                            df[df['type'] == 18].iloc[:827],
+                                            df[df['type'] == 19].iloc[:8000],
+                                            df[df['type'] == 20].iloc[:8000],
+                                            df[df['type'] == 21].iloc[:8000],
+                                            df[df['type'] == 22].iloc[:8000],
+                                        ], ignore_index=True)
+
+        test_dataframes = pd.concat([
+                                            df[df['type'] == 0].iloc[8000:],
+                                            df[df['type'] == 2].iloc[8000:],
+                                            df[df['type'] == 15].iloc[8000:],
+                                            df[df['type'] == 16].iloc[8000:],
+                                            df[df['type'] == 17].iloc[8000:],
+                                            df[df['type'] == 18].iloc[827:],
+                                            df[df['type'] == 19].iloc[8000:],
+                                            df[df['type'] == 20].iloc[8000:],
+                                            df[df['type'] == 21].iloc[8000:],
+                                            df[df['type'] == 22].iloc[8000:],
+                                        ], ignore_index=True)
+        
+        return train_dataframes,test_dataframes
+
+def forBaseLineUseData(bool_Noniid):
+        # Loading datasets
+        df = pd.read_csv(filepath + "\\TONTOT_Original\\Train_Test_Network.csv")
+        # 載入資料集預處理和正規化
+        df=LoadingDatasetAfterMegreComplete(df)
+        # True for BaseLine
+        # False for Noniid
+        df=DoMinMaxAndLabelEncoding(df,bool_Noniid)
+        # 一般全部特徵
+        # DoSpiltAllfeatureAfterMinMax(df,bool_Noniid)
+        # PCA
+        DoSpiltAfterDoPCA(df,77,bool_Noniid,True)
+
+
+# True for BaseLine
+# False for Noniid
+forBaseLineUseData(False)
