@@ -254,7 +254,7 @@ def AddLabelToCICIDS2017(df,add_mergedays_label_or_dataset_label):
     
     if add_mergedays_label_or_dataset_label == "TONIOT":
             values_to_insert = ['backdoor', 'dos', 'injection', 'mitm', 'password', 
-                                'ransomware', 'scanning']
+                                'ransomware', 'scanning','xss']
     elif add_mergedays_label_or_dataset_label == "Monday_and_Firday":
             values_to_insert = ['DoSGoldenEye', 'DoSHulk', 'DoSSlowhttptest', 'DoSslowloris', 
                                  'FTPPatator', 'Heartbleed', 'Infiltration', 'SSHPatator', 
@@ -287,11 +287,44 @@ def DoAddLabel(df,choose_mergedays_or_dataset,bool_Add_TONIOT_Label):
         #Tuesday_and_Wednesday_and_Thursday 要add TONIOT和載入Monday_and_Firday的Label
         df = AddLabelToCICIDS2017(df,choose_mergedays_or_dataset)
 
-    if(bool_Add_TONIOT_Label!=False):
+    if(bool_Add_TONIOT_Label):
+        print(choose_mergedays_or_dataset)
+        df = AddLabelToCICIDS2017(df,choose_mergedays_or_dataset)
         df = AddLabelToCICIDS2017(df,"TONIOT")
+        
 
     return df
 
+def LabelMapping(df):
+    # 定义您想要的固定编码值的字典映射
+    encoding_map = {
+        'BENIGN': 0,
+        'Bot': 1,
+        'DDoS': 2,
+        'DoSGoldenEye': 3,
+        'DoSHulk': 4,
+        'DoSSlowhttptest': 5,
+        'DoSslowloris': 6,
+        'FTPPatator': 7,
+        'Heartbleed': 8,
+        'Infiltration': 9,
+        'PortScan': 10,
+        'SSHPatator': 11,
+        'WebAttackBruteForce': 12,
+        'WebAttackSqlInjection': 13,
+        'WebAttackXSS': 14,
+        'backdoor': 15,
+        'dos': 16,
+        'injection': 17,
+        'mitm': 18,
+        'password': 19,
+        'ransomware': 20,
+        'scanning': 21,
+        'xss': 22
+    }
+    # 將固定編碼值映射應用到DataFrame中的Label列，直接更新原始的Label列
+    df['Label'] = df['Label'].map(encoding_map)
+    return df, encoding_map
 
 def DoMinMaxAndLabelEncoding(afterprocess_dataset,choose_merge_days,bool_doencode):
     
@@ -334,9 +367,9 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,choose_merge_days,bool_doencod
                            "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_UndoLabelencode_"+choose_merge_days+".csv")
                            !=True):
             # False 只add 所選擇的星期沒有的Label
-            afterminmax_dataset = DoAddLabel(afterminmax_dataset,choose_merge_days,False)
+            # afterminmax_dataset = DoAddLabel(afterminmax_dataset,choose_merge_days,False)
             # True add 所選擇的星期沒有的Label和TONIOT的Label
-            # afterminmax_dataset = DoAddLabel(afterminmax_dataset,choose_merge_days,True)
+            afterminmax_dataset = DoAddLabel(afterminmax_dataset,choose_merge_days,True)
 
             afterminmax_dataset.to_csv(filepath +
                                        "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_UndoLabelencode_"+choose_merge_days+".csv", index=False)
@@ -348,7 +381,9 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,choose_merge_days,bool_doencod
             afterminmax_dataset = pd.read_csv(filepath +
                                               "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_UndoLabelencode_"+choose_merge_days+".csv")
 
-        encoded_type_values, afterminmax_dataset = label_encoding("Label", afterminmax_dataset)
+        # encoded_type_values, afterminmax_dataset = label_encoding("Label", afterminmax_dataset)
+        # 固定Label encode值方便後續Noniid實驗
+        afterminmax_dataset,encoded_type_values = LabelMapping(afterminmax_dataset)
         print("Encoded Type Values:", encoded_type_values)
         with open(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/encode_and_count_Noniid.csv", "a+") as file:
             file.write("Encoded Type Values\n")
@@ -380,11 +415,92 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,choose_merge_days,bool_doencod
             file.write(str(encoded_type_values) + "\n")
 
     return afterminmax_dataset
+# 手動或自動劃分
+def DoSpiltdatasetAutoOrManual(df, bool_Auto,choose_merge_days):
+    if bool_Auto:
+        train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)
+    else:
+        train_dataframes,test_dataframes = manualspiltdataset(df,choose_merge_days)
+
+    return train_dataframes,test_dataframes
+
+#手動劃分
+def manualspiltdataset(df,choose_merge_days):
+    if choose_merge_days =="Monday_and_Firday":
+            train_dataframes = pd.concat([
+                                            df[df['Label'] == 0].iloc[:8000],
+                                            df[df['Label'] == 1].iloc[:1565],
+                                            df[df['Label'] == 2].iloc[:8000],
+                                            df[df['Label'] == 3].iloc[:1],
+                                            df[df['Label'] == 4].iloc[:1],
+                                            df[df['Label'] == 5].iloc[:1],
+                                            df[df['Label'] == 6].iloc[:1],
+                                            df[df['Label'] == 7].iloc[:1],
+                                            df[df['Label'] == 8].iloc[:1],
+                                            df[df['Label'] == 9].iloc[:1],
+                                            df[df['Label'] == 10].iloc[:8000],
+                                            df[df['Label'] == 11].iloc[:1],
+                                            df[df['Label'] == 12].iloc[:1],
+                                            df[df['Label'] == 13].iloc[:1],
+                                            df[df['Label'] == 14].iloc[:1],
+                                            df[df['Label'] == 15].iloc[:1],
+                                            df[df['Label'] == 16].iloc[:1],
+                                            df[df['Label'] == 17].iloc[:1],
+                                            df[df['Label'] == 18].iloc[:1],
+                                            df[df['Label'] == 19].iloc[:1],
+                                            df[df['Label'] == 20].iloc[:1],
+                                            df[df['Label'] == 21].iloc[:1],
+                                            df[df['Label'] == 22].iloc[:1]
+                                        ], ignore_index=True)
+
+            test_dataframes = pd.concat([
+                                            df[df['Label'] == 0].iloc[8000:],
+                                            df[df['Label'] == 1].iloc[1565:],
+                                            df[df['Label'] == 2].iloc[8000:],
+                                            df[df['Label'] == 10].iloc[8000:]
+                                        ], ignore_index=True)
+    elif choose_merge_days =="Tuesday_and_Wednesday_and_Thursday":
+            train_dataframes = pd.concat([
+                                            df[df['Label'] == 0].iloc[:1],
+                                            df[df['Label'] == 1].iloc[:1],
+                                            df[df['Label'] == 2].iloc[:1],
+                                            df[df['Label'] == 3].iloc[:8000],
+                                            df[df['Label'] == 4].iloc[:8000],
+                                            df[df['Label'] == 5].iloc[:4399],
+                                            df[df['Label'] == 6].iloc[:4637],
+                                            df[df['Label'] == 7].iloc[:6348],
+                                            df[df['Label'] == 10].iloc[:1],
+                                            df[df['Label'] == 11].iloc[:4718],
+                                            df[df['Label'] == 12].iloc[:1206],
+                                            df[df['Label'] == 14].iloc[:522],
+                                            df[df['Label'] == 15].iloc[:1],
+                                            df[df['Label'] == 16].iloc[:1],
+                                            df[df['Label'] == 17].iloc[:1],
+                                            df[df['Label'] == 18].iloc[:1],
+                                            df[df['Label'] == 19].iloc[:1],
+                                            df[df['Label'] == 20].iloc[:1],
+                                            df[df['Label'] == 21].iloc[:1],
+                                            df[df['Label'] == 22].iloc[:1]                                        
+                                        ], ignore_index=True)
+
+            test_dataframes = pd.concat([
+                                            df[df['Label'] == 3].iloc[8000:],
+                                            df[df['Label'] == 4].iloc[8000:],
+                                            df[df['Label'] == 5].iloc[4399:],
+                                            df[df['Label'] == 6].iloc[4637:],
+                                            df[df['Label'] == 7].iloc[6348:],
+                                            df[df['Label'] == 11].iloc[4718:],
+                                            df[df['Label'] == 12].iloc[1206:],
+                                            df[df['Label'] == 14].iloc[522:]                                        
+                                        ], ignore_index=True)  
+    
+    return train_dataframes,test_dataframes
 
 # do Labelencode and minmax 
 def DoSpiltAllfeatureAfterMinMax(df,choose_merge_days,bool_Noniid):  
     train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
     # printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
+    
     
     if bool_Noniid !=True:
         if choose_merge_days =="Monday_and_Firday":
@@ -559,8 +675,10 @@ def dofeatureSelect(df, slecet_label_counts,choose_merge_days):
 # do chi-square and Labelencode and minmax 
 def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noniid):
     df = dofeatureSelect(df,slecet_label_counts,choose_merge_days)
-    train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
-
+    # train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    # 手動劃分資料集
+    train_dataframes, test_dataframes = DoSpiltdatasetAutoOrManual(df, False,choose_merge_days)    
+    
     #加toniot的情況
     if bool_Noniid !=True:
         if choose_merge_days =="Monday_and_Firday":
@@ -642,6 +760,9 @@ def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noni
                            f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doFeatureSelect/{slecet_label_counts}", 
                            f"{choose_merge_days}_train_cicids2017_AfterFeatureSelect{slecet_label_counts}",today)
 
+
+
+
 # do PCA and Labelencode and minmax 
 def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
     # number_of_components=20
@@ -674,7 +795,9 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
                       f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/{today}/doPCA/{number_of_components}", 
                       f"{choose_merge_days}_cicids2017_AfterProcessed_minmax_PCA")
 
-    train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    # train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    # 手動劃分資料集
+    train_dataframes, test_dataframes = DoSpiltdatasetAutoOrManual(df, False,choose_merge_days)
     # printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
     if bool_Noniid !=True:
         if choose_merge_days =="Monday_and_Firday":
@@ -684,7 +807,7 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
             test_dataframes = test_dataframes[~test_dataframes['Label'].isin([12])]
             # 合併Label2,3,5,19回去到train
             train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
-        
+
         elif choose_merge_days =="Tuesday_and_Wednesday_and_Thursday":
             # Noniid時
             # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
@@ -697,10 +820,10 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
             train_label_7, test_label_7 = spiltweakLabelbalance(9,df,0.33)
             train_label_10, test_label_10 = spiltweakLabelbalance(13,df,0.33)
 
-            # # 刪除Label相當於6、7、10的行
+            # # # 刪除Label相當於6、7、10的行
             test_dataframes = test_dataframes[~test_dataframes['Label'].isin([8, 9,13])]
             train_dataframes = train_dataframes[~train_dataframes['Label'].isin([8, 9,13])]
-            # 合併Label6、7、10回去
+            # # 合併Label6、7、10回去
             test_dataframes = pd.concat([test_dataframes, test_label_6, test_label_7, test_label_10])
             train_dataframes = pd.concat([train_dataframes,train_label_6, train_label_7,train_label_10])
 
@@ -766,15 +889,19 @@ def SelectfeatureUseChiSquareOrPCA(df,choose_merge_days,bool_doChiSquare,bool_do
         # DoSpiltAfterFeatureSelect(df,55,choose_merge_days,bool_Noniid)
         # # #ChiSquare選50個特徵
         # DoSpiltAfterFeatureSelect(df,50,choose_merge_days,bool_Noniid)
+        # # #ChiSquare選46個特徵
+        # DoSpiltAfterFeatureSelect(df,46,choose_merge_days,bool_Noniid)
         # # #ChiSquare選45個特徵
-        # DoSpiltAfterFeatureSelect(df,45,choose_merge_days,bool_Noniid)
+        DoSpiltAfterFeatureSelect(df,45,choose_merge_days,bool_Noniid)
         # #ChiSquare選44個特徵
-        DoSpiltAfterFeatureSelect(df,44,choose_merge_days,bool_Noniid)
+        # DoSpiltAfterFeatureSelect(df,44,choose_merge_days,bool_Noniid)
         # #ChiSquare選40個特徵
         # DoSpiltAfterFeatureSelect(df,40,choose_merge_days,bool_Noniid)
+        # #ChiSquare選38個特徵
+        # DoSpiltAfterFeatureSelect(df,38,choose_merge_days,bool_Noniid)
     elif bool_doPCA!=False:
         #  #PCA選77個特徵 總84特徵=77+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        DoSpiltAfterDoPCA(df,77,choose_merge_days,bool_Noniid)
+        # DoSpiltAfterDoPCA(df,77,choose_merge_days,bool_Noniid)
         # #PCA選73個特徵 總80特徵=73+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
         # DoSpiltAfterDoPCA(df,73,choose_merge_days,bool_Noniid)
         # #PCA選63個特徵 總70特徵=73+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
@@ -967,3 +1094,4 @@ forBaseLineUseData("Tuesday_and_Wednesday_and_Thursday",False)
 # SaveDataframeTonpArray(train_half2, f"./data/dataset_AfterProcessed/{today}", "train_half2", today)
 
 
+    
