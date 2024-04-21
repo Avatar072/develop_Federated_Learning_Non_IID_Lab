@@ -137,16 +137,17 @@ def DoALLWeakLabel(x_train,y_train, ChooseLabel, bool_choose_default_k_neighbors
 
      # Start Do SMOTE
     if(bool_choose_default_k_neighbors):# k_neighbors  use default 5
-        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_BENIGN,5, x_train, y_train, 0)
-        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_DDoS, 5, X_res, y_res, 2)
-        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_backdoor, 5, X_res, y_res, 15)
-        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_dos, 5, X_res, y_res, 16)
-        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_injection, 5, X_res, y_res, 17)
-        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_mitm, 5, X_res, y_res, 18)
-        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_password, 5, X_res, y_res, 19)
-        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_ransomware, 5, X_res, y_res, 20)
-        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_scanning, 5, X_res, y_res, 21)
-        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_xss, 5, X_res, y_res, 22)
+        # X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_BENIGN,5, x_train, y_train, 0)
+        X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_DDoS, 5, x_train, y_train, 2)
+        # X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_DDoS, 5, X_res, y_res, 2)
+        # X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_backdoor, 5, X_res, y_res, 15)
+        # X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_dos, 5, X_res, y_res, 16)
+        # X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_injection, 5, X_res, y_res, 17)
+        # X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_mitm, 5, X_res, y_res, 18)
+        # X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_password, 5, X_res, y_res, 19)
+        # X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_ransomware, 5, X_res, y_res, 20)
+        # X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_scanning, 5, X_res, y_res, 21)
+        # X_res, y_res = SMOTEParameterSet(sampling_strategy_Label_xss, 5, X_res, y_res, 22)
         # y_res = y_res.astype(int) 
         # spilttrainhalfAfterSMOTE(X_res,y_res)
     else: 
@@ -259,16 +260,17 @@ def DoBorederlineSMOTE(x_train, y_train,choosekind,ChooseLable):
 
     # y_res = y_res.astype(int)
     y_train = y_train.astype(int)
-    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_BENIGN,  5, 10, x_train, y_train, 0)
-    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_DDoS,  5, 10, X_res, y_res, 2)
-    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_backdoor, 5, 10, X_res, y_res, 15)
-    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_dos,  5, 10, X_res, y_res, 16)
-    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_injection,  5, 10, X_res, y_res, 17)
-    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_mitm,  5, 10, X_res, y_res, 18)
-    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_password, 5, 10, X_res, y_res, 19)
-    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_ransomware,  5, 10, X_res, y_res, 20)
-    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_scanning, 5, 10, X_res, y_res, 21)
-    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_xss, 5, 10, X_res, y_res, 22)
+    # X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_BENIGN, choosekind,  5, 10, x_train, y_train, 0)
+    X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_DDoS, choosekind, 5, 10, x_train, y_train, 2)
+    # X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_DDoS, choosekind,  5, 10, X_res, y_res, 2)
+    # X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_backdoor, choosekind, 5, 10, X_res, y_res, 15)
+    # X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_dos, choosekind,  5, 10, X_res, y_res, 16)
+    # X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_injection, choosekind,  5, 10, X_res, y_res, 17)
+    # X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_mitm, choosekind,  5, 10, X_res, y_res, 18)
+    # X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_password, choosekind, 5, 10, X_res, y_res, 19)
+    # X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_ransomware, choosekind,  5, 10, X_res, y_res, 20)
+    # X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_scanning, choosekind, 5, 10, X_res, y_res, 21)
+    # X_res, y_res = BorderLineParameterSet(sampling_strategy_Label_xss, choosekind, 5, 10, X_res, y_res, 22)
     print('Afterr BorderLine SMOTE dataset shape %s' % Counter(y_res))
 #    D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\TONIOT\TONIOT\ALL_Label\BorderlineSMOTE\borderline-1\20240317\client2\TONIOT_ALL_Label
     np.save(f'{filepath}\\dataset_AfterProcessed\\TONIOT\\ALL_Label\\BorderlineSMOTE\\{choosekind}\\{today}\\{client_str}\\TONIOT_ALL_Label\\x_{choosekind}_{today}.npy', X_res)
@@ -340,10 +342,10 @@ def ShowTSNEPicture():
 
 # ShowTSNEPicture()
 
-DoALLWeakLabel(x_train,y_train,"TONIOT_ALL_Label", True)
+# DoALLWeakLabel(x_train,y_train,"TONIOT_ALL_Label", True)
 # DoALL_Label(x_train,y_train)
-# DoBorederlineSMOTE(x_train, y_train,"borderline-1","TONIOT_ALL_Label","TONIOT")
-# DoBorederlineSMOTE(x_train, y_train,"borderline-2","TONIOT_ALL_Label","TONIOT")
+DoBorederlineSMOTE(x_train, y_train,"borderline-1","TONIOT_ALL_Label")
+DoBorederlineSMOTE(x_train, y_train,"borderline-2","TONIOT_ALL_Label")
 
 ############################################################n參數說明#################################################################################
 # #一次SMOTE只SMOTE一個weaklabel

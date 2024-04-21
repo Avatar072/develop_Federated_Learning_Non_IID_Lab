@@ -19,8 +19,7 @@ from mytoolfunction import generatefolder, ChooseLoadNpArray,ChooseTrainDatastes
 from collections import Counter
 ####################################################################################################
 
-filepath = "D:\\ToN-IoT-Network\\TON_IoT Datasets\\UNSW-ToN-IoT\\"
-# filepath = "D:\\ToN-IoT-Network\\TON_IoT Datasets\\CIC-ToN-IoT\\"
+filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(torch.cuda.is_available())
@@ -49,22 +48,23 @@ generatefolder(f"./single_AnalyseReportFolder/", today)
 generatefolder(f"./single_AnalyseReportFolder/{today}/", client_str)
 generatefolder(f"./single_AnalyseReportFolder/{today}/{client_str}/", Choose_method)
 
-# 20231220 after do labelencode and minmax
-x_test = np.load(filepath + "x_test_ToN-IoT_20231220.npy", allow_pickle=True)
-y_test = np.load(filepath + "y_test_ToN-IoT_20231220.npy", allow_pickle=True)
+# 20240324 after do chi-square
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_cicids2017_AfterFeatureSelect44_BaseLine_SpiltIP_20240323.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_cicids2017_AfterFeatureSelect44_BaseLine_SpiltIP_20240323.npy", allow_pickle=True)
 
-# 20231220 UNSW-ToN-IoT after PCA do labelencode and minmax
-# x_test = np.load(filepath + "x_test_ToN-IoT_afterPCA_20231220.npy", allow_pickle=True)
-# y_test = np.load(filepath + "y_test_ToN-IoT_afterPCA_20231220.npy", allow_pickle=True)
+# 20240325 after do PCA
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_AfterPCA38_20240325.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_AfterPCA38_20240325.npy", allow_pickle=True)
 
-# 20231220 CIC-ToN-IoT after do labelencode and minmax
-# x_test = np.load(filepath + "x_test_CIC_ToN-IoT_20231220.npy", allow_pickle=True)
-# y_test = np.load(filepath + "y_test_CIC_ToN-IoT_20231220.npy", allow_pickle=True)
+# 20240422 CICIDS2019 after PCA do labelencode and minmax
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
 
-# 20231225 CIC-ToN-IoT after do labelencode and minmax 上限取5000
-# x_test = np.load(filepath + "x_test_CIC_ToN-IoT_20231225.npy", allow_pickle=True)
-# y_test = np.load(filepath + "y_test_CIC_ToN-IoT_20231225.npy", allow_pickle=True)
-# x_test, y_test = ChooseTestDataSet(filepath)
+# 20240422 CICIDS2019 after PCA do labelencode and minmax chi-square 45
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
+
+
 counter = Counter(y_test)
 print("test筆數",counter)
 
@@ -102,7 +102,7 @@ class MLP(nn.Module):
         self.fc2 = nn.Linear(512, 512)
         self.fc3 = nn.Linear(512, 512)
         self.fc4 = nn.Linear(512, 512)
-        self.layer5 = nn.Linear(512, 10)
+        self.layer5 = nn.Linear(512, 13)
 
     def forward(self, x):
         x = F.relu(self.layer1(x))
@@ -205,7 +205,8 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
             # 將每個類別的召回率寫入 "recall-baseline.csv" 檔案
             RecordRecall = ()
             RecordAccuracy = ()
-            labelCount = 10
+            # labelCount = 15
+            labelCount = 13
             # labelCount = 4
            
             for i in range(labelCount):
@@ -249,8 +250,58 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，以標識混淆矩陣中每個類別的位置。
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
-        class_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-        df_cm = pd.DataFrame(arr, class_names, class_names)
+        # class_names = {
+        #                 0: '0_BENIGN', 
+        #                 1: '1_Bot', 
+        #                 2: '2_DDoS', 
+        #                 3: '3_DoS GoldenEye', 
+        #                 4: '4_DoS Hulk', 
+        #                 5: '5_DoS Slowhttptest', 
+        #                 6: '6_DoS slowloris', 
+        #                 7: '7_FTP-Patator', 
+        #                 8: '8_Heartbleed', 
+        #                 9: '9_Infiltration', 
+        #                 10: '10_PortScan', 
+        #                 11: '11_SSH-Patator', 
+        #                 12: '12_Web Attack Brute Force', 
+        #                 13: '13_Web Attack Sql Injection', 
+        #                 14: '14_Web Attack XSS'
+        #                 # 15: '15_backdoor',
+        #                 # 16: '16_dos',
+        #                 # 17: '17_injection',
+        #                 # 18: '18_mitm',
+        #                 # 19: '19_password',
+        #                 # 20: '20_ransomware',
+        #                 # 21: '21_scanning',
+        #                 # 22: '22_xss'
+        #                 } 
+        #CICIDS2019
+        class_names = {
+                        0: '0_BENIGN', 
+                        1: '1_DrDoS_DNS', 
+                        2: '2_DrDoS_LDAP', 
+                        3: '3_DrDoS_MSSQL',
+                        4: '4_DrDoS_NTP', 
+                        5: '5_DrDoS_NetBIOS', 
+                        6: '6_DrDoS_SNMP', 
+                        7: '7_DrDoS_SSDP', 
+                        8: '8_DrDoS_UDP', 
+                        9: '9_Syn', 
+                        10: '10_TFTP', 
+                        11: '11_UDPlag', 
+                        12: '12_WebDDoS'
+                        # 13: '13_Web Attack Sql Injection', 
+                        # 14: '14_Web Attack XSS'
+                        # 15: '15_backdoor',
+                        # 16: '16_dos',
+                        # 17: '17_injection',
+                        # 18: '18_mitm',
+                        # 19: '19_password',
+                        # 20: '20_ransomware',
+                        # 21: '21_scanning',
+                        # 22: '22_xss'
+                        } 
+        df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
         plt.figure(figsize = (9,6))
         sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn')
         plt.title(client_str +"_"+ Choose_method)

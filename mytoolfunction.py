@@ -153,21 +153,26 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "x_train_20231113.npy", allow_pickle=True)
             # y_train = np.load(filepath + "y_train_20231113.npy", allow_pickle=True)
 
-            # # 20231220 after do labelencode and minmax
-            x_train = np.load(filepath + "x_train_ToN-IoT_20231220.npy", allow_pickle=True)
-            y_train = np.load(filepath + "y_train_ToN-IoT_20231220.npy", allow_pickle=True)
+            # 20240323 after Chi-square45
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_cicids2017_AfterFeatureSelect44_BaseLine_SpiltIP_20240323.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_cicids2017_AfterFeatureSelect44_BaseLine_SpiltIP_20240323.npy", allow_pickle=True)
+
+            # 20240325 after PCA45
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_AfterPCA38_20240325.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_AfterPCA38_20240325.npy", allow_pickle=True)
+
 
             # # 20231220 after PCA do labelencode and minmax
             # x_train = np.load(filepath + "x_train_ToN-IoT_afterPCA_20231220.npy", allow_pickle=True)
             # y_train = np.load(filepath + "y_train_ToN-IoT_afterPCA_20231220.npy", allow_pickle=True)
-
-            # # 20231220 CIC-ToN-IoT after do labelencode and minmax
-            # x_train = np.load(filepath + "x_train_CIC_ToN-IoT_20231220.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "y_train_CIC_ToN-IoT_20231220.npy", allow_pickle=True)
-
-            # # # 20231225 CIC-ToN-IoT after do labelencode and minmax 上限取5000
-            # x_train = np.load(filepath + "x_train_CIC_ToN-IoT_20231225.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "y_train_CIC_ToN-IoT_20231225.npy", allow_pickle=True)
+            
+            # 20240422 CIC-IDS2019 after do labelencode and minmax 
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
+            # 20240422 CIC-IDS2019 after do labelencode and minmax chi-square 45
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
+        
         elif (Choose_method == 'SMOTE'):
             # x_train = np.load(filepath + "x_total_train_SMOTE_ALL_Label.npy", allow_pickle=True)
             # y_train = np.load(filepath + "y_total_train_SMOTE_ALL_Label.npy", allow_pickle=True)
@@ -242,9 +247,18 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\x_Monday_and_Firday_train_AfterPCA77_20240317.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\y_Monday_and_Firday_train_AfterPCA77_20240317.npy", allow_pickle=True)
             # # 20240317 non iid client1 use cicids2017 Monday_and_Firday PCA 38
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\x_Monday_and_Firday_train_AfterPCA38_20240318.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\y_Monday_and_Firday_train_AfterPCA38_20240318.npy", allow_pickle=True)
-            
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\x_Monday_and_Firday_train_AfterPCA38_20240318.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\y_Monday_and_Firday_train_AfterPCA38_20240318.npy", allow_pickle=True)
+             # # 20240319 non iid client1 use cicids2017 ALLday  chi-square_45
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_cicids2017_AfterFeatureSelect44_20240319.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_cicids2017_AfterFeatureSelect44_20240319.npy", allow_pickle=True)
+            # 20240323 non iid client1 use cicids2017 ALLday  chi-square_45 change ip encode
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy", allow_pickle=True)
+            # 20240323 non iid client1 use cicids2017 ALLday  chi-square_45
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_cicids2017_AfterFeatureSelect44_20240323.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_cicids2017_AfterFeatureSelect44_20240323.npy", allow_pickle=True)
+
 
         elif (Choose_method == 'SMOTE'):
             # # # # 20240317 Chi-square 45 SMOTE  K=5         
@@ -263,9 +277,20 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\x_borderline-1_20240318.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\y_borderline-1_20240318.npy", allow_pickle=True)
             # # # 20240318 PCA 38 BL-SMOTE2  K=5  M = 10         
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\x_borderline-2_20240318.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\y_borderline-2_20240318.npy", allow_pickle=True)
-        
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\x_borderline-2_20240318.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Monday_and_Firday\\y_borderline-2_20240318.npy", allow_pickle=True)
+            # # # # 20240319 Chi-square 45 SMOTE  K=5         
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_train_half1_SMOTE_ALLday_ALL_Label_20240319.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_train_half1_SMOTE_ALLday_ALL_Label_20240319.npy", allow_pickle=True)
+            # # # # 20240324 Chi-square 45 SMOTE  K=5     
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_train_half1_SMOTE_ALLday_ALL_Label_20240324.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_train_half1_SMOTE_ALLday_ALL_Label_20240324.npy", allow_pickle=True)
+            # # # 20240324 Chi-square 45 BL-SMOTE1  K=5  M = 10         
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_borderline-1_20240324.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_borderline-1_20240324.npy", allow_pickle=True)
+            # # # 20240324 Chi-square 45 BL-SMOTE2  K=5  M = 10         
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_borderline-2_20240324.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_borderline-2_20240324.npy", allow_pickle=True)
 
             print("train_half1 SMOTE")
 
@@ -323,8 +348,8 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_borderline-1_20240318.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_borderline-1_20240318.npy", allow_pickle=True)
             # # 20240318 PCA 38 BL-SMOTE2 K=5 M = 10      
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_borderline-2_20240318.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_borderline-2_20240318.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_borderline-2_20240318.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_borderline-2_20240318.npy", allow_pickle=True)
           
             print("train_half2 SMOTE")
         elif (Choose_method == 'GAN'):
@@ -341,18 +366,31 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # # 20240317 non iid client3 use TONIOT
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240317.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240317.npy", allow_pickle=True)
+            # # 20240323 non iid client3 use TONIOT change ts change ip encode
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
+            # # 20240323 non iid client3 use TONIOT change ts
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_change_ts_20240317.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_change_ts_20240317.npy", allow_pickle=True)
+            
             # # 20240317 non iid client3 use TONIOT remove all IP port
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_rmove_ip_port_20240317.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_rmove_ip_port_20240317.npy", allow_pickle=True)
             # # 20240317 non iid client3 use TONIOT  add cicids2017 39 feature then PCA
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_train_AfterPCA77_20240317.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_train_AfterPCA77_20240317.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_train_AfterPCA77_20240317.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_train_AfterPCA77_20240317.npy", allow_pickle=True)
    
         elif (Choose_method == 'SMOTE'):
-            # # # 20231226 borderLineSMOTE2 Lable1  Label 3 Label 4 Label6 Label9 k=5  M = 10 
-            x_train = np.load(filepath + "x_train_half2_BorederlineSMOTE_borderline-2_Label1_and_Label3_Label4_Label6_Label9_20231226.npy", allow_pickle=True)
-            y_train = np.load(filepath + "y_train_half2_BorederlineSMOTE_borderline-2_Label1_and_Label3_Label4_Label6_Label9_20231226.npy", allow_pickle=True)
-            print("train_half2 SMOTE")
+            # # 20240324 Chi-square 45 SMOTE  K=5          
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_half3_SMOTE_TONIOT_ALL_Label_20240324.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_half3_SMOTE_TONIOT_ALL_Label_20240324.npy", allow_pickle=True)
+            # # # 20240324 Chi-square 45 BL-SMOTE1 K=5 M = 10      
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_borderline-1_20240324.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_borderline-1_20240324.npy", allow_pickle=True)
+            #  # # # 20240324 Chi-square 45 BL-SMOTE2 K=5 M = 10      
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_borderline-2_20240324.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_borderline-2_20240324.npy", allow_pickle=True)
+            print("train_half3 SMOTE")
         elif (Choose_method == 'GAN'):
             # 20231114 after 百分百PCAonly do labelencode and minmax
             x_train = np.load(filepath + "x_train_half2_20231114.npy", allow_pickle=True)

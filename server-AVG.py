@@ -24,7 +24,7 @@ class MLP(nn.Module):
         self.fc2 = nn.Linear(512, 512)
         self.fc3 = nn.Linear(512, 512)
         self.fc4 = nn.Linear(512, 512)
-        self.layer5 = nn.Linear(512, 15)
+        self.layer5 = nn.Linear(512, 23)
 
     def forward(self, x):
         x = F.relu(self.layer1(x))
@@ -97,6 +97,6 @@ strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, ev
 fl.server.start_server(
     server_address="127.0.0.1:53388",
     # server_address="127.0.0.1:8080",
-    config=fl.server.ServerConfig(num_rounds=1),
+    config=fl.server.ServerConfig(num_rounds=50),
     strategy=strategy,
 )

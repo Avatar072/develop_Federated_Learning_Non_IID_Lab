@@ -36,9 +36,9 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # DEVICE = torch.device("cpu")
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-#python client.py --dataset train_half1 --epochs 500 --method normal
-#python client.py --dataset train_half2 --epochs 500 --method normal
-#python client.py --dataset train_half3 --epochs 500 --method normal
+#python client.py --dataset train_half1 --epochs 50 --method normal
+#python client.py --dataset train_half2 --epochs 50 --method normal
+#python client.py --dataset train_half3 --epochs 50 --method normal
 file, num_epochs,Choose_method = ParseCommandLineArgs(["dataset", "epochs", "method"])
 print(f"Dataset: {file}")
 print(f"Number of epochs: {num_epochs}")
@@ -67,9 +67,18 @@ generatefolder(f"./FL_AnalyseReportfolder/{today}/{client_str}/", Choose_method)
 # 20240317 after do labelencode and minmax tonniot add cicids2017 39 feature then PCA 
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_PCA.npy", allow_pickle=True)
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_PCA.npy", allow_pickle=True)
-# 20240317 after do labelencode and minmax cicids2017 PCA 38 
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_PCA_38.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_PCA_38.npy", allow_pickle=True)
+# # 20240317 after do labelencode and minmax cicids2017 PCA 38 
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_PCA_38.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_PCA_38.npy", allow_pickle=True)
+# 20240323 after do labelencode and minmax cicids2017 ALLDay and toniot  Chi_square_45
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_Chi_square_45.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_Chi_square_45.npy", allow_pickle=True)
+# 20240319 after do labelencode and minmax cicids2017 ALLDay and toniot  Chi_square_45
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_Chi_square_45_change_ip_encode.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_Chi_square_45_change_ip_encode.npy", allow_pickle=True)
+# 20240323 after do labelencode and minmax cicids2017 ALLDay and toniot  Chi_square_45 change ts change ip
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_Chi_square_45_change_ip.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_Chi_square_45_change_ip.npy", allow_pickle=True)
 
 
 counter = Counter(y_test)
@@ -119,7 +128,7 @@ class MLP(nn.Module):
         self.fc2 = nn.Linear(512, 512)
         self.fc3 = nn.Linear(512, 512)
         self.fc4 = nn.Linear(512, 512)
-        self.layer5 = nn.Linear(512, 15)
+        self.layer5 = nn.Linear(512, 23)
 
     def forward(self, x):
         x = F.relu(self.layer1(x))
@@ -201,9 +210,9 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal,bool_plot_co
             #RecordRecall = []
             RecordRecall = ()
             RecordAccuracy = ()
-            labelCount = 15
+            labelCount = 23
             # labelCount = len(np.unique(y_train))# label數量要記得改
-            # print("labelCount:\n",labelCount)
+            print("labelCount:\n",labelCount)
 
             for i in range(labelCount):
                 RecordRecall = RecordRecall + (acc[str(i)]['recall'],)
@@ -253,7 +262,7 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，以標識混淆矩陣中每個類別的位置。
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
-        labelCount = 15# label數量要記得改
+        labelCount = 23# label數量要記得改
         # class_names = [str(i) for i in range(labelCount)]
         class_names = {
                         0: '0_BENIGN', 
@@ -270,15 +279,15 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
                         11: '11_SSH-Patator', 
                         12: '12_Web Attack Brute Force', 
                         13: '13_Web Attack Sql Injection', 
-                        14: '14_Web Attack XSS'
-                        # 15: '15_backdoor',
-                        # 16: '16_dos',
-                        # 17: '17_injection',
-                        # 18: '18_mitm',
-                        # 19: '19_password',
-                        # 20: '20_ransomware',
-                        # 21: '21_scanning',
-                        # 22: '22_xss'
+                        14: '14_Web Attack XSS',
+                        15: '15_backdoor',
+                        16: '16_dos',
+                        17: '17_injection',
+                        18: '18_mitm',
+                        19: '19_password',
+                        20: '20_ransomware',
+                        21: '21_scanning',
+                        22: '22_xss'
                         }      
         # class_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11','12','13','14','15','16','17','18','20','21']
         # class_names = ['0', '1', '2', '3']
@@ -287,7 +296,7 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn', annot_kws={"size": 15})
         plt.title(client_str +"_"+ Choose_method)
         plt.xlabel("prediction",fontsize=15)
-        plt.ylabel("label (ground truth)",fontsize=15,labelpad=-25, va='center')
+        # plt.ylabel("label (ground truth)",fontsize=5,labelpad=0, va='top')
         plt.xticks(rotation=0, fontsize=15)
         plt.yticks(fontsize=11)
         plt.savefig(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_{str_globalOrlocal}_confusion_matrix.png")

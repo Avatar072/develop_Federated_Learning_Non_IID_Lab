@@ -465,7 +465,7 @@ def forBaseLineUseData(bool_Noniid):
         # 一般全部特徵
         # DoSpiltAllfeatureAfterMinMax(df,bool_Noniid)
         # PCA
-        DoSpiltAfterDoPCA(df,77,bool_Noniid,True)
+        # DoSpiltAfterDoPCA(df,77,bool_Noniid,True)
 
 
 # True for BaseLine
