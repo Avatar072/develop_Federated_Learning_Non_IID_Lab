@@ -14,3 +14,7 @@
 *.npy
 # 忽略"data" 資料夾下所有csv文件
 /data/*.csv
+# 忽略所有.pth文件
+*.pth
+# 忽略所有.xlsx文件
+*.xlsx
