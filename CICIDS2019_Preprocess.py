@@ -244,7 +244,7 @@ def AddLabelToCICIDS2019(df,add_mergedays_label_or_dataset_label):
             values_to_insert = ['backdoor', 'dos', 'injection', 'mitm', 'password', 
                                 'ransomware', 'scanning','xss']
     elif add_mergedays_label_or_dataset_label == "CICIDS2017":
-            values_to_insert = ['Bot', 'DoSGoldenEye', 'DoSHulk', 'DoSSlowhttptest', 'DoSslowloris', 
+            values_to_insert = ['Bot', 'DDoS', 'DoSGoldenEye', 'DoSHulk', 'DoSSlowhttptest', 'DoSslowloris', 
                         'FTPPatator', 'Heartbleed', 'Infiltration', 'PortScan', 'SSHPatator', 
                         'WebAttackBruteForce','WebAttackSqlInjection','WebAttackXSS']
     # 获取 'Label' 列前的所有列的列名
@@ -298,7 +298,19 @@ def LabelMapping(df):
         'password': 19,
         'ransomware': 20,
         'scanning': 21,
-        'xss': 22
+        'xss': 22,
+        'DrDoS_DNS': 23,
+        'DrDoS_LDAP': 24,
+        'DrDoS_MSSQL': 25,
+        'DrDoS_NTP': 26,
+        'DrDoS_NetBIOS': 27,
+        'DrDoS_SNMP': 28,
+        'DrDoS_SSDP': 29,
+        'DrDoS_UDP': 30,
+        'Syn': 31,
+		'TFTP': 32,
+        'UDPlag': 33,
+        'WebDDoS': 34
     }
     # 將固定編碼值映射應用到DataFrame中的Label列，直接更新原始的Label列
     df['Label'] = df['Label'].map(encoding_map)
@@ -527,17 +539,41 @@ def DoSpiltAllfeatureAfterMinMax(df,choose_merge_days,bool_Noniid):
     
     if bool_Noniid !=True:
         if choose_merge_days =="01_12":
-            # 篩選test_dataframes中標籤為2、3、5和19的行加回去train
-            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,3,5,19])]
-            # test刪除Label相當於2,3,5,19的行，因為這些是因為noniid要加到train的Label
-            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,3,5,19])]
-            # 合併Label2,3,5,19回去到train
+            # Noniid時
+            # encode後對照如下
+            # WebDDoS:34
+            train_label_WebDDoS, test_label_WebDDoS = spiltweakLabelbalance(34,df,0.33)
+            # # 刪除Label相當於34的行
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([34])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([34])]
+            # 合併Label 34回去
+            test_dataframes = pd.concat([test_dataframes, test_label_WebDDoS])
+            train_dataframes = pd.concat([train_dataframes,train_label_WebDDoS])   
+
+            # 篩選test_dataframes中標籤為2,14,20,22的行加回去train
+            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,14,20,22])]
+            # test刪除Label相當於2,14,20,22的行，因為這些是因為noniid要加到train的Label
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,14,20,22])]
+            # # 合併Label2,14,20,22回去到train
             train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
     else:
         # BaseLine時
         if choose_merge_days =="01_12":
+            # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+            List_train_Label = []
+            List_test_Label = []
+            for i in range(13):
+                if i == 12:
+                    continue
+                train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+                List_train_Label.append(train_label_split)
+                List_test_Label.append(test_label_split)         
+            
+            train_dataframes = pd.concat(List_train_Label)
+            test_dataframes = pd.concat(List_test_Label)
             # encode後對照如下
             # WebDDoS:12
+            # Label encode mode  分別取出Label等於12的數據 對6633分
             train_label_WebDDoS, test_label_WebDDoS = spiltweakLabelbalance(12,df,0.33)
             # # 刪除Label相當於12的行
             test_dataframes = test_dataframes[~test_dataframes['Label'].isin([12])]
@@ -671,12 +707,22 @@ def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noni
     
     #加toniot的情況
     if bool_Noniid !=True:
-        if choose_merge_days =="01_12":
-            # 篩選test_dataframes中標籤為2、3、5和19的行加回去train
-            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,3,5,19])]
-            # test刪除Label相當於2,3,5,19的行，因為這些是因為noniid要加到train的Label
-            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,3,5,19])]
-            # 合併Label2,3,5,19回去到train
+            # Noniid時
+            # encode後對照如下
+            # WebDDoS:34
+            train_label_WebDDoS, test_label_WebDDoS = spiltweakLabelbalance(34,df,0.33)
+            # # 刪除Label相當於34的行
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([34])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([34])]
+            # 合併Label 34回去
+            test_dataframes = pd.concat([test_dataframes, test_label_WebDDoS])
+            train_dataframes = pd.concat([train_dataframes,train_label_WebDDoS])   
+
+            # 篩選test_dataframes中標籤為2,14,20,22的行加回去train
+            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,14,20,22])]
+            # test刪除Label相當於2,14,20,22的行，因為這些是因為noniid要加到train的Label
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,14,20,22])]
+            # # 合併Label2,14,20,22回去到train
             train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
     else:
         # BaseLine時
@@ -758,11 +804,22 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
     # printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
     if bool_Noniid !=True:
         if choose_merge_days =="01_12":
-            # 篩選test_dataframes中標籤為2、3、5和19的行加回去train
-            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,3,5,19])]
-            # test刪除Label相當於2,3,5,19的行，因為這些是因為noniid要加到train的Label
-            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,3,5,19])]
-            # 合併Label2,3,5,19回去到train
+            # Noniid時
+            # encode後對照如下
+            # WebDDoS:34
+            train_label_WebDDoS, test_label_WebDDoS = spiltweakLabelbalance(34,df,0.33)
+            # # 刪除Label相當於34的行
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([34])]
+            train_dataframes = train_dataframes[~train_dataframes['Label'].isin([34])]
+            # 合併Label 34回去
+            test_dataframes = pd.concat([test_dataframes, test_label_WebDDoS])
+            train_dataframes = pd.concat([train_dataframes,train_label_WebDDoS])   
+
+            # 篩選test_dataframes中標籤為2,14,20,22的行加回去train
+            train_dataframes_add = test_dataframes[test_dataframes['Label'].isin([2,14,20,22])]
+            # test刪除Label相當於2,14,20,22的行，因為這些是因為noniid要加到train的Label
+            test_dataframes = test_dataframes[~test_dataframes['Label'].isin([2,14,20,22])]
+            # # 合併Label2,14,20,22回去到train
             train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
     else:
         # BaseLine時
@@ -802,6 +859,38 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
                            f"./data/dataset_AfterProcessed/CICIDS2019/{choose_merge_days}/{today}/doPCA/{number_of_components}", 
                            f"{choose_merge_days}_train_AfterPCA{number_of_components}",today)
 
+# do split train to half for iid and Labelencode and minmax 
+def DoSpilthalfForiid(choose_merge_days):
+    if choose_merge_days == "01_12":
+        df_ALLtrain = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\20240502\\01_12_train_dataframes_20240502.csv")
+                    # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+        List_train_half1_Label = []
+        List_train_half2_Label = []
+        for i in range(13):
+            train_half1_label_split, train_half2_label_split = spiltweakLabelbalance(i,df_ALLtrain,0.5)
+            List_train_half1_Label.append(train_half1_label_split)
+            List_train_half2_Label.append(train_half2_label_split)         
+            
+        df_train_half1 = pd.concat(List_train_half1_Label)
+        df_train_half2 = pd.concat(List_train_half2_Label)
+            
+
+        # 紀錄資料筆數
+        with open(f"./data/dataset_AfterProcessed/CICIDS2019/{choose_merge_days}/encode_and_count_iid.csv", "a+") as file:
+            label_counts = df_train_half1['Label'].value_counts()
+            print("df_train_half1\n", label_counts)
+            file.write("df_train_half1_label_counts\n")
+            file.write(str(label_counts) + "\n")
+            
+            label_counts = df_train_half2['Label'].value_counts()
+            print("df_train_half2\n", label_counts)
+            file.write("df_train_half2_label_counts\n")
+            file.write(str(label_counts) + "\n")
+
+        SaveDataToCsvfile(df_train_half1, f"./data/dataset_AfterProcessed/CICIDS2019/{choose_merge_days}/{today}", f"{choose_merge_days}_train_half1_{today}")
+        SaveDataToCsvfile(df_train_half2,  f"./data/dataset_AfterProcessed/CICIDS2019/{choose_merge_days}/{today}", f"{choose_merge_days}_train_half2_{today}")
+        SaveDataframeTonpArray(df_train_half1, f"./data/dataset_AfterProcessed/CICIDS2019/{choose_merge_days}/{today}", f"{choose_merge_days}_train_half1",today)
+        SaveDataframeTonpArray(df_train_half2, f"./data/dataset_AfterProcessed/CICIDS2019/{choose_merge_days}/{today}", f"{choose_merge_days}_train_half2",today)
 
 # 開始進行資料劃分主要function
 def SelectfeatureUseChiSquareOrPCA(df,choose_merge_days,bool_doChiSquare,bool_doPCA,bool_Noniid):
@@ -854,10 +943,12 @@ def forBaseLineUseData(choose_merge_days,bool_Noniid):
         # True for BaseLine
         # False for Noniid
         df_01_12=DoMinMaxAndLabelEncoding(df_01_12,choose_merge_days,bool_Noniid)
+        # for iid 實驗將ALL train分一半
+        DoSpilthalfForiid(choose_merge_days)
         # 一般全部特徵
         # DoSpiltAllfeatureAfterMinMax(df_01_12,choose_merge_days,bool_Noniid)
         # 做ChiSquare
-        SelectfeatureUseChiSquareOrPCA(df_01_12,choose_merge_days,True,False,bool_Noniid)
+        # SelectfeatureUseChiSquareOrPCA(df_01_12,choose_merge_days,True,False,bool_Noniid)
         # 做PCA
         # SelectfeatureUseChiSquareOrPCA(df_01_12,choose_merge_days,False,True,bool_Noniid)
     

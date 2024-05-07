@@ -16,9 +16,14 @@ from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
 from sklearn.metrics import confusion_matrix
 from mytoolfunction import generatefolder, ChooseLoadNpArray,ChooseTrainDatastes, ParseCommandLineArgs,ChooseTestDataSet
+from mytoolfunction import ChooseUseModel, getStartorEndtime
 from collections import Counter
 ####################################################################################################
 
+#CICIIDS2017
+# labelCount = 15
+#CICIIDS2019
+labelCount = 13
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -47,6 +52,7 @@ today = today.strftime("%Y%m%d")
 generatefolder(f"./single_AnalyseReportFolder/", today)
 generatefolder(f"./single_AnalyseReportFolder/{today}/", client_str)
 generatefolder(f"./single_AnalyseReportFolder/{today}/{client_str}/", Choose_method)
+getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}")
 
 # 20240324 after do chi-square
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_cicids2017_AfterFeatureSelect44_BaseLine_SpiltIP_20240323.npy", allow_pickle=True)
@@ -56,14 +62,21 @@ generatefolder(f"./single_AnalyseReportFolder/{today}/{client_str}/", Choose_met
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_AfterPCA38_20240325.npy", allow_pickle=True)
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_AfterPCA38_20240325.npy", allow_pickle=True)
 
+# 20240502 CIC-IDS2017 after do labelencode and minmax  75 25分
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_20240502.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_20240502.npy", allow_pickle=True)   
+
 # 20240422 CICIDS2019 after PCA do labelencode and minmax
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
 
 # 20240422 CICIDS2019 after PCA do labelencode and minmax chi-square 45
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
 
+# 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_20240502.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
 
 counter = Counter(y_test)
 print("test筆數",counter)
@@ -81,20 +94,6 @@ x_test = x_test.to(DEVICE)
 y_test = y_test.to(DEVICE)
 
 # 定義你的神經網絡模型
-# class Net(nn.Module):
-#     def __init__(self) -> None:
-#         super(Net, self).__init__()
-#         self.fc1 = nn.Linear(x_train.shape[1], 512)
-#         self.fc2 = nn.Linear(512, 512)
-#         self.fc3 = nn.Linear(512, 512)
-#         self.fc4 = nn.Linear(512, 15)
-
-#     def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
-#         x = F.relu(self.fc1(x))
-#         x = F.relu(self.fc2(x))
-#         x = F.relu(self.fc3(x))
-#         x = self.fc4(x)
-#         return x
 class MLP(nn.Module):
     def __init__(self):
         super(MLP, self).__init__()
@@ -111,46 +110,6 @@ class MLP(nn.Module):
         x = F.relu(self.fc4(x))
         x = self.layer5(x)
         return x
-# class MLP(nn.Module):
-#     def __init__(self):
-#         super(MLP, self).__init__()
-#         self.layer1 = nn.Linear(x_train.shape[1], 512)
-#         self.fc2 = nn.Linear(512, 512)
-#         self.fc3 = nn.Linear(512, 512)
-#         self.fc4 = nn.Linear(512, 512)
-#         self.fc5 = nn.Linear(512, 512)
-#         self.fc6 = nn.Linear(512, 512)
-#         self.fc7 = nn.Linear(512, 512)
-#         self.layer8 = nn.Linear(512, 15)
-
-#     def forward(self, x):
-#         x = F.relu(self.layer1(x))
-#         x = F.relu(self.fc2(x))
-#         x = F.relu(self.fc3(x))
-#         x = F.relu(self.fc4(x))
-#         x = F.relu(self.fc5(x))
-#         x = F.relu(self.fc6(x))
-#         x = F.relu(self.fc7(x))
-#         x = self.layer8(x)
-#         return x
-
-class Multiclass(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.hidden1 = nn.Linear(44, 50)
-        self.hidden2 = nn.Linear(50, 50)
-        self.hidden3 = nn.Linear(50, 50)
-        self.hidden4 = nn.Linear(50, 50)
-        self.output = nn.Linear(50, 10)
-    
-    def forward(self, x):
-        x = F.relu(self.hidden1(x))
-        x = F.relu(self.hidden2(x))
-        x = F.relu(self.hidden3(x))
-        x = F.relu(self.hidden4(x))
-        x = self.output(x)
-        return x
-
 
 # 定義訓練函數
 def train(net, trainloader, epochs):
@@ -205,9 +164,6 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
             # 將每個類別的召回率寫入 "recall-baseline.csv" 檔案
             RecordRecall = ()
             RecordAccuracy = ()
-            # labelCount = 15
-            labelCount = 13
-            # labelCount = 4
            
             for i in range(labelCount):
                 RecordRecall = RecordRecall + (acc[str(i)]['recall'],)
@@ -250,6 +206,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，以標識混淆矩陣中每個類別的位置。
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
+        #CICIDS2017
         # class_names = {
         #                 0: '0_BENIGN', 
         #                 1: '1_Bot', 
@@ -275,7 +232,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         #                 # 21: '21_scanning',
         #                 # 22: '22_xss'
         #                 } 
-        #CICIDS2019
+        # CICIDS2019
         class_names = {
                         0: '0_BENIGN', 
                         1: '1_DrDoS_DNS', 
@@ -317,14 +274,21 @@ trainloader = DataLoader(train_data, batch_size=500, shuffle=True)
 testloader = DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 
 # 初始化神經網絡模型
-# net = Net().to(DEVICE)
-net = MLP().to(DEVICE)
-
+# net = MLP().to(DEVICE)
+#CICIDS2019
+net = ChooseUseModel("ANN", x_train.shape[1], labelCount).to(DEVICE)
 # 訓練模型
 train(net, trainloader, epochs=num_epochs)
 
+#紀錄結束時間
+end_IDS = time.time()
+getStartorEndtime("endtime",end_IDS,f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}")
+
 # 評估模型
 test_accuracy = test(net, testloader, start_IDS, client_str,True)
+# 在训练或测试结束后，保存模型
+torch.save(net.state_dict(), f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/BaseLine_After_local_train_model.pth")
+
 print("測試數據量:\n", len(test_data))
 print("訓練數據量:\n", len(train_data))
 print(f"最終測試準確度: {test_accuracy:.4f}")

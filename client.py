@@ -24,7 +24,16 @@ from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from sklearn.metrics import confusion_matrix
 from mytoolfunction import generatefolder, ChooseLoadNpArray,ParseCommandLineArgs,ChooseTrainDatastes
+from mytoolfunction import ChooseUseModel, getStartorEndtime
 from collections import Counter
+
+
+#CICIIDS2017
+# labelCount = 15
+#CICIIDS2019
+# labelCount = 13
+#CICIIDS2017、TONIOT、CICIIDS2019 聯集
+labelCount = 35
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
@@ -35,7 +44,13 @@ start_IDS = time.time()
 warnings.filterwarnings("ignore", category=UserWarning)
 # DEVICE = torch.device("cpu")
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+# 返回gpu数量；
+torch.cuda.device_count()
+# 返回gpu名字，设备索引默认从0开始；
+torch.cuda.get_device_name(0)
+# 返回当前设备索引；
+torch.cuda.current_device()
+print(f"DEVICE: {DEVICE}")
 #python client.py --dataset train_half1 --epochs 50 --method normal
 #python client.py --dataset train_half2 --epochs 50 --method normal
 #python client.py --dataset train_half3 --epochs 50 --method normal
@@ -54,6 +69,8 @@ today = today.strftime("%Y%m%d")
 generatefolder(f"./FL_AnalyseReportfolder/", today)
 generatefolder(f"./FL_AnalyseReportfolder/{today}/", client_str)
 generatefolder(f"./FL_AnalyseReportfolder/{today}/{client_str}/", Choose_method)
+getStartorEndtime("starttime",start_IDS,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}")
+
 
 # # 20240316 after do labelencode and minmax
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x.npy", allow_pickle=True)
@@ -77,9 +94,25 @@ generatefolder(f"./FL_AnalyseReportfolder/{today}/{client_str}/", Choose_method)
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_Chi_square_45_change_ip_encode.npy", allow_pickle=True)
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_Chi_square_45_change_ip_encode.npy", allow_pickle=True)
 # 20240323 after do labelencode and minmax cicids2017 ALLDay and toniot  Chi_square_45 change ts change ip
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_Chi_square_45_change_ip.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_Chi_square_45_change_ip.npy", allow_pickle=True)
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_Chi_square_45_change_ip.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_Chi_square_45_change_ip.npy", allow_pickle=True)
 
+# 20240428 after do labelencode and minmax cicids2017 ALLDay and toniot  Chi_square_45
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_cicids2019_Chi_square_45.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_cicids2019_Chi_square_45.npy", allow_pickle=True)
+
+
+# 20240502 after do labelencode and minmax cicids2017 ALLDay  iid
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\x_ALLDay_test_20240502.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\y_ALLDay_test_20240502.npy", allow_pickle=True)
+
+# 20240502 CIC-IDS2019 after do labelencode and minmax iid
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_20240502.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
+
+# 20240506 after do labelencode and minmax cicids2017 ALLDay and toniot  cicids2019 Chi_square_45
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_cicids2019_Chi_square_45_change_ip.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_cicids2019_Chi_square_45_change_ip.npy", allow_pickle=True)
 
 counter = Counter(y_test)
 print("test",counter)
@@ -99,45 +132,6 @@ y_test = y_test.to(DEVICE)
 print("Minimum label value:", min(y_train))
 print("Maximum label value:", max(y_train))
 
-
-
-
-# def model using nn model ，和神經元使用512
-# class Net(nn.Module):
-#     def __init__(self) -> None:
-#         super(Net, self).__init__()
-#         self.fc1 = nn.Linear(x_train.shape[1], 512)
-#         self.fc2 = nn.Linear(512, 512)
-#         self.fc3 = nn.Linear(512, 512)
-#         self.fc4 = nn.Linear(512, 15)
-#         #self.fc3 = nn.Linear(64, len(np.unique(y_train)))
-
-#     def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
-#         #實際矩陣相乘部分
-#         # x = x.to(torch.float32)
-#         x = F.relu(self.fc1(x))
-#         x = F.relu(self.fc2(x))
-#         x = F.relu(self.fc3(x))
-#         x = self.fc4(x)
-#         return x
-
-class MLP(nn.Module):
-    def __init__(self):
-        super(MLP, self).__init__()
-        self.layer1 = nn.Linear(x_train.shape[1], 512)
-        self.fc2 = nn.Linear(512, 512)
-        self.fc3 = nn.Linear(512, 512)
-        self.fc4 = nn.Linear(512, 512)
-        self.layer5 = nn.Linear(512, 23)
-
-    def forward(self, x):
-        x = F.relu(self.layer1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-        x = self.layer5(x)
-        return x
-    
 # 定义训练和评估函数
 def train(net, trainloader, epochs):
     print("train")
@@ -210,7 +204,6 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal,bool_plot_co
             #RecordRecall = []
             RecordRecall = ()
             RecordAccuracy = ()
-            labelCount = 23
             # labelCount = len(np.unique(y_train))# label數量要記得改
             print("labelCount:\n",labelCount)
 
@@ -262,7 +255,6 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，以標識混淆矩陣中每個類別的位置。
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
-        labelCount = 23# label數量要記得改
         # class_names = [str(i) for i in range(labelCount)]
         class_names = {
                         0: '0_BENIGN', 
@@ -287,17 +279,29 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
                         19: '19_password',
                         20: '20_ransomware',
                         21: '21_scanning',
-                        22: '22_xss'
+                        22: '22_xss',
+                        23: '23_DrDoS_DNS',
+                        24: '24_DrDoS_LDAP',
+                        25: '25_DrDoS_MSSQL',
+                        26: '26_DrDoS_NTP', 
+                        27: '27_DrDoS_NetBIOS',
+                        28: '28_DrDoS_SNMP' ,
+                        29: '29_DrDoS_SSDP',
+                        30: '30_DrDoS_UDP',
+                        31: '31_Syn',
+                        32: '32_TFTP',
+                        33: '33_UDPlag',
+                        34: '34_WebDDoS' 
                         }      
         # class_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11','12','13','14','15','16','17','18','20','21']
         # class_names = ['0', '1', '2', '3']
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
         plt.figure(figsize = (20,10))
-        sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn', annot_kws={"size": 15})
+        sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn', annot_kws={"size": 10})
         plt.title(client_str +"_"+ Choose_method)
-        plt.xlabel("prediction",fontsize=15)
+        plt.xlabel("prediction",fontsize=12)
         # plt.ylabel("label (ground truth)",fontsize=5,labelpad=0, va='top')
-        plt.xticks(rotation=0, fontsize=15)
+        plt.xticks(rotation=0, fontsize=12)
         plt.yticks(fontsize=11)
         plt.savefig(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_{str_globalOrlocal}_confusion_matrix.png")
         # plt.show()
@@ -352,12 +356,17 @@ class FlowerClient(fl.client.NumPyClient):
         return accuracy, len(testloader.dataset), {"accuracy": accuracy}
 
 # 初始化神经网络模型
-# net = Net().to(DEVICE)
-net = MLP().to(DEVICE)
+net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 
 # 启动Flower客户端
 fl.client.start_numpy_client(
-    server_address="127.0.0.1:53388",
+    # server_address="127.0.0.1:53388",
+    server_address="192.168.1.137:53388",
     client=FlowerClient(),
     
 )
+
+#紀錄結束時間
+end_IDS = time.time()
+getStartorEndtime("endtime",end_IDS,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}")
+        

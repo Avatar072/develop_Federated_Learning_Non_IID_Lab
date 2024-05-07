@@ -16,15 +16,19 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from mytoolfunction import ChooseUseModel
 
 class MLP(nn.Module):
     def __init__(self):
         super(MLP, self).__init__()
-        self.layer1 = nn.Linear(44, 512)
+        # self.layer1 = nn.Linear(44, 512)
+        self.layer1 = nn.Linear(83, 512)
         self.fc2 = nn.Linear(512, 512)
         self.fc3 = nn.Linear(512, 512)
         self.fc4 = nn.Linear(512, 512)
-        self.layer5 = nn.Linear(512, 23)
+        # self.layer5 = nn.Linear(512, 35)
+        self.layer5 = nn.Linear(512, 15)
+
 
     def forward(self, x):
         x = F.relu(self.layer1(x))
@@ -35,7 +39,9 @@ class MLP(nn.Module):
         return x
 
 # 初始化模型和優化器
-model = MLP()
+# model = MLP()
+model = ChooseUseModel("MLP", 44, 35)
+
 optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001)
 
 ############# 凍結 #####################
@@ -91,12 +97,18 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 # Define strategy
 strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, evaluate_metrics_aggregation_fn=weighted_average, 
-    min_fit_clients = 2, min_evaluate_clients = 2, min_available_clients = 2)
+    min_fit_clients = 3, min_evaluate_clients = 3, min_available_clients = 3)
+    # min_fit_clients = 2, min_evaluate_clients = 2, min_available_clients = 2)
+
 
 # Start Flower server
 fl.server.start_server(
-    server_address="127.0.0.1:53388",
+    # server_address="127.0.0.1:53388",
     # server_address="127.0.0.1:8080",
+    server_address="192.168.1.137:53388",
+
     config=fl.server.ServerConfig(num_rounds=50),
+    # config=fl.server.ServerConfig(num_rounds=20),
+
     strategy=strategy,
 )
