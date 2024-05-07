@@ -134,7 +134,19 @@ def LabelMapping(df):
         'password': 19,
         'ransomware': 20,
         'scanning': 21,
-        'xss': 22
+        'xss': 22,
+        'DrDoS_DNS': 23,
+        'DrDoS_LDAP': 24,
+        'DrDoS_MSSQL': 25,
+        'DrDoS_NTP': 26,
+        'DrDoS_NetBIOS': 27,
+        'DrDoS_SNMP': 28,
+        'DrDoS_SSDP': 29,
+        'DrDoS_UDP': 30,
+        'Syn': 31,
+		'TFTP': 32,
+        'UDPlag': 33,
+        'WebDDoS': 34
     }
     # 將固定編碼值映射應用到DataFrame中的Label列，直接更新原始的Label列
     df['type'] = df['type'].map(encoding_map)
@@ -163,10 +175,16 @@ def LoadingDatasetAfterMegreComplete(dataset):
 
     return afterprocess_dataset
 ### add 沒有的Label到TONIOT
-def DoAddcicids2017LabelToTONIOT(df):
-    values_to_insert = ['Bot', 'DoSGoldenEye', 'DoSHulk', 'DoSSlowhttptest', 'DoSslowloris', 
-                        'FTPPatator', 'Heartbleed', 'Infiltration', 'PortScan', 'SSHPatator', 
-                        'WebAttackBruteForce','WebAttackSqlInjection','WebAttackXSS']
+def DoAddLabelToTONIOT(df,add_mergedays_label_or_dataset_label):
+    if add_mergedays_label_or_dataset_label == "CICIDS2017":
+            values_to_insert = ['Bot', 'DoSGoldenEye', 'DoSHulk', 'DoSSlowhttptest', 'DoSslowloris', 
+                                'FTPPatator', 'Heartbleed', 'Infiltration', 'PortScan', 'SSHPatator', 
+                                'WebAttackBruteForce','WebAttackSqlInjection','WebAttackXSS']
+    
+    elif add_mergedays_label_or_dataset_label == "CICIDS2019":
+            values_to_insert = ['DrDoS_DNS', 'DrDoS_LDAP', 'DrDoS_MSSQL', 'DrDoS_NTP', 
+                                'DrDoS_NetBIOS', 'DrDoS_SNMP', 'DrDoS_SSDP', 'DrDoS_UDP', 
+                                'Syn', 'TFTP', 'UDPlag', 'WebDDoS']
      # 获取 'type' 列前的所有列的列名
     columns_before_type = df.columns.tolist()[:df.columns.get_loc('type')]
 
@@ -258,7 +276,8 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,bool_doencode):
         if(CheckFileExists(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_UnDoLabelencode_and_minmax.csv")
                            !=True):
 
-            afterminmax_dataset = DoAddcicids2017LabelToTONIOT(afterminmax_dataset)
+            afterminmax_dataset = DoAddLabelToTONIOT(afterminmax_dataset,"CICIDS2017")
+            afterminmax_dataset = DoAddLabelToTONIOT(afterminmax_dataset,"CICIDS2019")
             afterminmax_dataset.to_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_UnDoLabelencode_and_minmax.csv", index=False)
                 
             afterminmax_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\Train_Test_Network_AfterProcessed_updated_10000_add_Label_and_UnDoLabelencode_and_minmax.csv")
@@ -301,15 +320,18 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,bool_doencode):
 
 # do Labelencode and minmax 
 def DoSpiltAllfeatureAfterMinMax(df,bool_Noniid):  
-    # train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
-    train_dataframes, test_dataframes = manualspiltdataset(df)#test_size=0.2表示将数据集分成测试集的比例为20%
+    train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    #不能用手動劃分 因問其劃分時不是random沒有將資料打亂會造成資料誤判
+    # train_dataframes, test_dataframes = manualspiltdataset(df)#test_size=0.2表示将数据集分成测试集的比例为20%
 
     if bool_Noniid !=True:
 
-            label_counts = test_dataframes['type'].value_counts()
-            print("test_dataframes\n", label_counts)
-            label_counts = train_dataframes['type'].value_counts()
-            print("train_dataframes\n", label_counts)
+            # 篩選test_dataframes中標籤為5,10,14,26,34的行加回去train
+            train_dataframes_add = test_dataframes[test_dataframes['type'].isin([5,10,14,26,34])]
+            # test刪除Label相當於5,10,14,26,34的行，因為這些是因為noniid要加到train的Label
+            test_dataframes = test_dataframes[~test_dataframes['type'].isin([5,10,14,26,34])]
+            # # 合併Label5,10,14,26,34回去到train
+            train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
     else:
         # BaseLine時
             label_counts = test_dataframes['type'].value_counts()
@@ -463,7 +485,7 @@ def forBaseLineUseData(bool_Noniid):
         # False for Noniid
         df=DoMinMaxAndLabelEncoding(df,bool_Noniid)
         # 一般全部特徵
-        # DoSpiltAllfeatureAfterMinMax(df,bool_Noniid)
+        DoSpiltAllfeatureAfterMinMax(df,bool_Noniid)
         # PCA
         # DoSpiltAfterDoPCA(df,77,bool_Noniid,True)
 
