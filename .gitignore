@@ -14,3 +14,6 @@
 *.npy
 # 忽略"data" 資料夾下所有csv文件
 /data/*.csv
+# 忽略"data" 資料夾下所有csv文件
+# 聯集對照表.xlsx
+# 期中報告資料筆數.xlsx
