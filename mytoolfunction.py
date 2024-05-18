@@ -3,25 +3,34 @@ import pandas as pd
 import numpy as np
 import argparse
 import time
-from datetime import datetime
+import datetime
 from sklearn import preprocessing
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import train_test_split
+import torch.nn as nn
+import torch.nn.functional as F
+
+today = datetime.date.today()
+today = today.strftime("%Y%m%d")
 
 ### 生成列名列表
 column_names = ["principal_Component" + str(i) for i in range(1, 79)] + ["Label"]
 
 ### 獲取開始or結束時間
-def getStartorEndtime(Start_or_End):
+def getStartorEndtime(Start_or_End_Str,Start_or_End,fliepath):
     timestamp = time.time()# 用於獲取當前時間的時間戳，返回一個浮點數
 
     # 將時間戳轉換為日期時間物件
-    dt_object = datetime.fromtimestamp(timestamp)
+    dt_object = datetime.datetime.fromtimestamp(timestamp)
     
     # 格式化日期时间為 "yyyy-mm-dd hh:mm:ss"
     formatted_time = dt_object.strftime("%Y-%m-%d %H:%M:%S")
 
     print(f"{Start_or_End}_time: {formatted_time}")
+    # 開啟檔案並寫入開始時間
+    with open(f"{fliepath}/StartTime_and_Endtime.csv", "a+") as file:
+        file.write(f"{Start_or_End_Str}:{str(formatted_time)}\n")
+
     return timestamp, formatted_time
 ### 計算花費時間
 def CalculateTime(end_IDS, start_IDS):
@@ -166,12 +175,16 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "x_train_ToN-IoT_afterPCA_20231220.npy", allow_pickle=True)
             # y_train = np.load(filepath + "y_train_ToN-IoT_afterPCA_20231220.npy", allow_pickle=True)
             
+            # 20240502 CIC-IDS2017 after do labelencode and minmax  75 25分
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_20240502.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_20240502.npy", allow_pickle=True)    
+            
             # 20240422 CIC-IDS2019 after do labelencode and minmax 
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
             # 20240422 CIC-IDS2019 after do labelencode and minmax chi-square 45
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
         
         elif (Choose_method == 'SMOTE'):
             # x_train = np.load(filepath + "x_total_train_SMOTE_ALL_Label.npy", allow_pickle=True)
@@ -253,12 +266,35 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_cicids2017_AfterFeatureSelect44_20240319.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_cicids2017_AfterFeatureSelect44_20240319.npy", allow_pickle=True)
             # 20240323 non iid client1 use cicids2017 ALLday  chi-square_45 change ip encode
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy", allow_pickle=True)
-            # 20240323 non iid client1 use cicids2017 ALLday  chi-square_45
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_cicids2017_AfterFeatureSelect44_20240323.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_cicids2017_AfterFeatureSelect44_20240323.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy", allow_pickle=True)
+            # 20240428 non iid client1 use cicids2017 ALLday  chi-square_45
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_cicids2017_AfterFeatureSelect44_20240428.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_cicids2017_AfterFeatureSelect44_20240428.npy", allow_pickle=True)
 
+            # 20240502 after do labelencode and minmax cicids2017 ALLDay  iid
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\x_ALLDay_train_half1_20240502.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\y_ALLDay_train_half1_20240502.npy", allow_pickle=True)
+
+            # 20240503 after do labelencode and minmax cicids2019 01_12  iid
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2019\\01_12\\x_01_12_train_half1_20240503.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2019\\01_12\\y_01_12_train_half1_20240503.npy", allow_pickle=True)
+            
+            # 20240505 non iid after do labelencode and minmax chi-square_45 cicids2017 ALLday
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\CICIDS2017_AddedLabel_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\CICIDS2017_AddedLabel_y.npy", allow_pickle=True)
+
+            # 20240507 after do labelencode and minmax Edge iid
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\x_Edge_train_half1_20240507.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\y_Edge_train_half1_20240507.npy", allow_pickle=True)
+
+            # 20240507 after do labelencode and minmax Kub iid
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\x_Kub_train_half1_20240507.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\y_Kub_train_half1_20240507.npy", allow_pickle=True)
+
+            # 20240507 after do labelencode and minmax Wustl iid
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\x_Wustl_train_half1_20240507.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Wustl_train_half1_20240507.npy", allow_pickle=True)
 
         elif (Choose_method == 'SMOTE'):
             # # # # 20240317 Chi-square 45 SMOTE  K=5         
@@ -304,33 +340,41 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
         print("使用 train_half1 進行訓練")
     elif file == 'train_half2':
         if (Choose_method == 'normal'):
-            # # 20240110 non iid client2 use TONIOT
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240110.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240110.npy", allow_pickle=True)
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
-            # # 20240316 non iid client1 use cicids2017 Tuesday_and_Wednesday_and_Thursday after chi-square
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_cicids2017_AfterFeatureSelect44_20240316.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_cicids2017_AfterFeatureSelect44_20240316.npy", allow_pickle=True)
-            # # 20240314 non iid client1 use cicids2017 Tuesday_and_Wednesday_and_Thursday after PCA
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA38_20240314.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA38_20240314.npy", allow_pickle=True)       
-            # # 20240315 non iid client1 use cicids2017 Tuesday_and_Wednesday_and_Thursday after PCA
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA77_20240315.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA77_20240315.npy", allow_pickle=True)       
-            # # 20240317 non iid client2 use cicids2017 Tuesday_and_Wednesday_and_Thursday after chi-square 45 add tonniot
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_dataframes_AfterFeatureSelect44_ADD_TONIOT_20240316.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_dataframes_AfterFeatureSelect44_ADD_TONIOT_20240316.npy", allow_pickle=True)
-            # # 20240317 non iid client2 use cicids2017 Tuesday_and_Wednesday_and_Thursday after chi-square 45 add tonniot remove all IP port
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_dataframes_AfterFeatureSelect44_ADD_TONIOT_rmove_ip_port_20240316.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_dataframes_AfterFeatureSelect44_ADD_TONIOT_rmove_ip_port_20240316.npy", allow_pickle=True)
-            # # 20240317 non iid client2 use cicids2017 Tuesday_and_Wednesday_and_Thursday tonniot add cicids2017 39 feature then PCA 
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA77_20240317.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA77_20240317.npy", allow_pickle=True)
-            # # 20240318 non iid client2 use cicids2017 Tuesday_and_Wednesday_and_Thursday PCA 38
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA38_20240318.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA38_20240318.npy", allow_pickle=True)
-            
+            # # 20240317 non iid client3 use TONIOT
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240317.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240317.npy", allow_pickle=True)
+            # # 20240323 non iid client3 use TONIOT change ts change ip encode
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
+            # # 20240428 non iid client3 use TONIOT 
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240428.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240428.npy", allow_pickle=True)
+
+            # 20240502 after do labelencode and minmax cicids2017 ALLDay  iid
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\x_ALLDay_train_half2_20240502.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\y_ALLDay_train_half2_20240502.npy", allow_pickle=True)
+
+            # 20240503 after do labelencode and minmax cicids2019 01_12  iid
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2019\\01_12\\x_01_12_train_half2_20240503.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2019\\01_12\\y_01_12_train_half2_20240503.npy", allow_pickle=True)
+
+            # 20240505 non iid after do labelencode and minmax TONIOT
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\TONIIOT_AddedLabel_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\\TONIOT\\TONIIOT_AddedLabel_y.npy", allow_pickle=True)
+
+            # 20240507 after do labelencode and minmax Edge iid
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\x_Edge_train_half2_20240507.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\y_Edge_train_half2_20240507.npy", allow_pickle=True)
+
+            # 20240507 after do labelencode and minmax Kub iid
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\x_Kub_train_half2_20240507.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\y_Kub_train_half2_20240507.npy", allow_pickle=True)
+
+            # 20240507 after do labelencode and minmax Wustl iid
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\x_Wustl_train_half2_20240507.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Wustl_train_half2_20240507.npy", allow_pickle=True)
+
+
         elif (Choose_method == 'SMOTE'):
             # # # 20240317 Chi-square 45 SMOTE  K=5          
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_train_half2_SMOTE_Tuesday_and_Wednesday_and_Thursday_ALL_Label_20240317.npy", allow_pickle=True)
@@ -363,23 +407,43 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
 
     elif file == 'train_half3':
         if (Choose_method == 'normal'):
-            # # 20240317 non iid client3 use TONIOT
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240317.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240317.npy", allow_pickle=True)
-            # # 20240323 non iid client3 use TONIOT change ts change ip encode
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
-            # # 20240323 non iid client3 use TONIOT change ts
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_change_ts_20240317.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_change_ts_20240317.npy", allow_pickle=True)
+            # # 20240110 non iid client2 use TONIOT
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240110.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240110.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_addlossvalue_20240110.npy", allow_pickle=True)
+            # # 20240316 non iid client1 use cicids2017 Tuesday_and_Wednesday_and_Thursday after chi-square
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_cicids2017_AfterFeatureSelect44_20240316.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_cicids2017_AfterFeatureSelect44_20240316.npy", allow_pickle=True)
+            # # 20240314 non iid client1 use cicids2017 Tuesday_and_Wednesday_and_Thursday after PCA
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA38_20240314.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA38_20240314.npy", allow_pickle=True)       
+            # # 20240315 non iid client1 use cicids2017 Tuesday_and_Wednesday_and_Thursday after PCA
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA77_20240315.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA77_20240315.npy", allow_pickle=True)       
+            # # 20240317 non iid client2 use cicids2017 Tuesday_and_Wednesday_and_Thursday after chi-square 45 add tonniot
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_dataframes_AfterFeatureSelect44_ADD_TONIOT_20240316.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_dataframes_AfterFeatureSelect44_ADD_TONIOT_20240316.npy", allow_pickle=True)
+            # # 20240317 non iid client2 use cicids2017 Tuesday_and_Wednesday_and_Thursday after chi-square 45 add tonniot remove all IP port
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_dataframes_AfterFeatureSelect44_ADD_TONIOT_rmove_ip_port_20240316.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_dataframes_AfterFeatureSelect44_ADD_TONIOT_rmove_ip_port_20240316.npy", allow_pickle=True)
+            # # 20240317 non iid client2 use cicids2017 Tuesday_and_Wednesday_and_Thursday tonniot add cicids2017 39 feature then PCA 
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA77_20240317.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA77_20240317.npy", allow_pickle=True)
+            # # 20240318 non iid client2 use cicids2017 Tuesday_and_Wednesday_and_Thursday PCA 38
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA38_20240318.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\y_Tuesday_and_Wednesday_and_Thursday_train_AfterPCA38_20240318.npy", allow_pickle=True)
             
-            # # 20240317 non iid client3 use TONIOT remove all IP port
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_rmove_ip_port_20240317.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_rmove_ip_port_20240317.npy", allow_pickle=True)
-            # # 20240317 non iid client3 use TONIOT  add cicids2017 39 feature then PCA
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_train_AfterPCA77_20240317.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_train_AfterPCA77_20240317.npy", allow_pickle=True)
-   
+            # # 20240428 non iid client3 use cicids2019 chi45
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterFeatureSelect44_20240428.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240428.npy", allow_pickle=True)
+            
+            # # 20240506 non iid client3 use cicids2019 chi45
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\CICIDS2019_AddedLabel_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\CICIDS2019_AddedLabel_y.npy", allow_pickle=True)
+            
+
+
         elif (Choose_method == 'SMOTE'):
             # # 20240324 Chi-square 45 SMOTE  K=5          
             x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_half3_SMOTE_TONIOT_ALL_Label_20240324.npy", allow_pickle=True)
@@ -398,7 +462,7 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
         print("train_half3 x_train 的形狀:", x_train.shape)
         print("train_half3 y_train 的形狀:", y_train.shape)
         client_str = "client3"
-        print("使用 train_half2 進行訓練")
+        print("使用 train_half3 進行訓練")
 
 
     print("use file", file)
@@ -604,6 +668,364 @@ def spiltweakLabelbalance_afterOnehot(weak_label, original_dataset,size):
     
     return weak_label_train, weak_label_test
 
+# Choose Model
+def ChooseUseModel(model_type, input, ouput):
+    if model_type == "DNN":
+        print("choose model is",model_type)
+        class DNN(nn.Module):
+            def __init__(self):
+                super(DNN, self).__init__()
+                self.layer1 = nn.Linear(input, 50)
+                self.fc2 = nn.Linear(50, 50)
+                self.fc3 = nn.Linear(50, 50)
+                self.fc4 = nn.Linear(50, 50)
+                self.fc5 = nn.Linear(50, 50)
+                self.fc6 = nn.Linear(50, 50)
+                self.fc7 = nn.Linear(50, 50)
+                self.fc8 = nn.Linear(50, ouput)
+
+            def forward(self, x):
+                x = F.relu(self.layer1(x))
+                x = F.relu(self.fc2(x))
+                x = F.relu(self.fc3(x))
+                x = F.relu(self.fc4(x))
+                x = F.relu(self.fc5(x))
+                x = F.relu(self.fc6(x))
+                x = F.relu(self.fc7(x))
+                x = self.fc8(x)
+                return x
+        return DNN()  # 返回創建的model instance
+    elif model_type == "ANN":
+        print("choose model is",model_type)
+        class ANN(nn.Module):
+            def __init__(self):
+                super(ANN,self).__init__()
+                # input has two features and
+                self.layer1 = nn.Linear(input,200)
+                self.layer2 = nn.Linear(200,200)
+                self.layer3 = nn.Linear(200,ouput)
+
+            def forward(self,x):
+                x = self.layer1(x)
+                x = F.tanh(x)
+                x = self.layer2(x)
+                x = F.tanh(x)
+                x = self.layer3(x)
+                return x
+        return ANN()  # 返回創建的model instance
+    elif model_type == "MLP":
+        print("choose model is",model_type)
+        class MLP(nn.Module):
+            def __init__(self):
+                super(MLP, self).__init__()
+                self.layer1 = nn.Linear(input, 512)
+                self.fc2 = nn.Linear(512, 512)
+                self.fc3 = nn.Linear(512, 512)
+                self.fc4 = nn.Linear(512, 512)
+                self.layer5 = nn.Linear(512, ouput)
+
+            def forward(self, x):
+                x = F.relu(self.layer1(x))
+                x = F.relu(self.fc2(x))
+                x = F.relu(self.fc3(x))
+                x = F.relu(self.fc4(x))
+                x = self.layer5(x)
+                return x
+        return MLP()  # 返回創建的model instance
+def ChooseDataSetNpFile(Str_ChooseDataset,filepath):
+    if Str_ChooseDataset == "CICIDS2017":
+        # 20240323 non iid client1 use cicids2017 ALLday  chi-square_45 change ip encode
+        x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy", allow_pickle=True)
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy", allow_pickle=True)
+        
+        x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/x_ALLDay_test_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy")
+        y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/y_ALLDay_test_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy")
+    
+    elif Str_ChooseDataset == "TONIOT":
+        # # 20240323 non iid client2 use TONIOT change ts change ip encode
+        x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
+    
+        x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_TONIOT_test_change_ts_change_ip_20240317.npy")
+        y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_TONIOT_test_change_ts_change_ip_20240317.npy")
+
+    elif Str_ChooseDataset == "CICIDS2019":
+
+        x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterFeatureSelect44_20240428.npy", allow_pickle=True)
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240428.npy", allow_pickle=True)
+
+        x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2019/01_12/x_01_12_test_CICIDS2019_AfterFeatureSelect44_20240428.npy")
+        y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2019/01_12/y_01_12_test_CICIDS2019_AfterFeatureSelect44_20240428.npy")
+
+    elif Str_ChooseDataset == "Edge":
+        x_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\Edge\\x_train.txt")
+        y_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\Edge\\y_train.txt")
+            
+        x_test = np.loadtxt(f"./data/dataset_AfterProcessed/Edge/x_test.txt")
+        y_test = np.loadtxt(f"./data/dataset_AfterProcessed/Edge/y_test.txt")
+    
+    elif Str_ChooseDataset == "Kub":
+        x_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\Kub\\x_train.txt")
+        y_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\Kub\\y_train.txt")
+            
+        x_test = np.loadtxt(f"./data/dataset_AfterProcessed/Kub/x_test.txt")
+        y_test = np.loadtxt(f"./data/dataset_AfterProcessed/Kub/y_test.txt")
+
+    elif Str_ChooseDataset == "Wustl":
+        x_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\Wustl\\x_train.txt")
+        y_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\Wustl\\y_train.txt")
+            
+        x_test = np.loadtxt(f"./data/dataset_AfterProcessed/Wustl/x_test.txt")
+        y_test = np.loadtxt(f"./data/dataset_AfterProcessed/Wustl/y_test.txt")
+    
+    return x_train, y_train,x_test,y_test
+
+def DoReSplit(Str_ChooseDataset,df):
+    if Str_ChooseDataset == "CICIDS2017":
+        # BaseLine時
+        # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
+        # encode後對照如下
+        # Heartbleed:8、
+        # Infiltration:9、
+        # Web Attack Sql Injection:13
+            
+    # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+        List_train_Label = []
+        List_test_Label = []
+        for i in range(15):
+            if i == 8 or i == 9 or i ==13:
+                continue
+            train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.2)
+            List_train_Label.append(train_label_split)
+            List_test_Label.append(test_label_split)         
+
+        train_dataframes = pd.concat(List_train_Label)
+        test_dataframes = pd.concat(List_test_Label)
+
+        # Label encode mode  分別取出Label等於8、9、13的數據 對6633分
+        train_label_Heartbleed, test_label_Heartbleed = spiltweakLabelbalance(8,df,0.33)
+        train_label_Infiltration, test_label_Infiltration = spiltweakLabelbalance(9,df,0.33)
+        train_label_WebAttackSql_Injection, test_label_WebAttackSql_Injection = spiltweakLabelbalance(13,df,0.33)
+
+        # # 刪除Label相當於8、9、13的行
+        test_dataframes = test_dataframes[~test_dataframes['Label'].isin([8, 9,13])]
+        train_dataframes = train_dataframes[~train_dataframes['Label'].isin([8, 9,13])]
+        # 合併Label8、9、13回去
+        test_dataframes = pd.concat([test_dataframes, test_label_Heartbleed, test_label_Infiltration, test_label_WebAttackSql_Injection])
+        train_dataframes = pd.concat([train_dataframes,train_label_Heartbleed, train_label_Infiltration,train_label_WebAttackSql_Injection])
+        print("test",test_dataframes['Label'].value_counts())
+
+        # 紀錄資料筆數
+        with open(f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/encode_and_count_resplit.csv", "a+") as file:
+            label_counts = test_dataframes['Label'].value_counts()
+            print("test_dataframes\n", label_counts)
+            file.write("test_dataframes_label_counts\n")
+            file.write(str(label_counts) + "\n")
+            
+            label_counts = train_dataframes['Label'].value_counts()
+            print("train_dataframes\n", label_counts)
+            file.write("train_dataframes_label_counts\n")
+            file.write(str(label_counts) + "\n")
+
+        SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/{today}", f"Resplit_train_dataframes_{today}")
+        SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/{today}", f"Resplit_test_dataframes_{today}")
+        SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/{today}", f"Resplit_test",today)
+        SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/{today}", f"Resplit_train",today)
+
+    elif Str_ChooseDataset == "CICIDS2019":
+        # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+        List_train_Label = []
+        List_test_Label = []
+        for i in range(34):
+            if i==0 or (i >= 23 and i <= 34):
+                train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.2)
+                List_train_Label.append(train_label_split)
+                List_test_Label.append(test_label_split)         
+        
+        train_dataframes = pd.concat(List_train_Label)
+        test_dataframes = pd.concat(List_test_Label)
+        # encode後對照如下
+        # WebDDoS:34
+        # Label encode mode  分別取出Label等於12的數據 對6633分
+        train_label_WebDDoS, test_label_WebDDoS = spiltweakLabelbalance(34,df,0.33)
+        # # 刪除Label相當於12的行
+        test_dataframes = test_dataframes[~test_dataframes['Label'].isin([34])]
+        train_dataframes = train_dataframes[~train_dataframes['Label'].isin([34])]
+        # 合併Label12回去
+        test_dataframes = pd.concat([test_dataframes, test_label_WebDDoS])
+        train_dataframes = pd.concat([train_dataframes,train_label_WebDDoS])            
+        # 紀錄資料筆數
+        with open(f"./data/dataset_AfterProcessed/CICIDS2019/01_12/encode_and_count_resplit.csv", "a+") as file:
+            label_counts = test_dataframes['Label'].value_counts()
+            print("test_dataframes\n", label_counts)
+            file.write("test_dataframes_label_counts\n")
+            file.write(str(label_counts) + "\n")
+            
+            label_counts = train_dataframes['Label'].value_counts()
+            print("train_dataframes\n", label_counts)
+            file.write("train_dataframes_label_counts\n")
+            file.write(str(label_counts) + "\n")
+
+        SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2019/01_12/{today}", f"01_12_Resplit_train_dataframes_{today}")
+        SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/CICIDS2019/01_12/{today}", f"01_12_Resplit_test_dataframes_{today}")
+        SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/CICIDS2019/01_12/{today}", f"01_12_Resplit_test",today)
+        SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2019/01_12/{today}", f"01_12_Resplit_train",today)
+
+    elif Str_ChooseDataset == "Edge":
+        # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+        List_train_Label = []
+        List_test_Label = []
+        for i in range(15):
+            train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+            List_train_Label.append(train_label_split)
+            List_test_Label.append(test_label_split)         
+
+        train_dataframes = pd.concat(List_train_Label)
+        test_dataframes = pd.concat(List_test_Label)
+
+        print("test",test_dataframes['Label'].value_counts())
+
+        # 紀錄資料筆數
+        with open(f"./data/dataset_AfterProcessed/Edge/encode_and_count_resplit.csv", "a+") as file:
+            label_counts = test_dataframes['Label'].value_counts()
+            print("test_dataframes\n", label_counts)
+            file.write("test_dataframes_label_counts\n")
+            file.write(str(label_counts) + "\n")
+            
+            label_counts = train_dataframes['Label'].value_counts()
+            print("train_dataframes\n", label_counts)
+            file.write("train_dataframes_label_counts\n")
+            file.write(str(label_counts) + "\n")
+
+        SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/Edge/{today}", f"Resplit_train_dataframes_{today}")
+        SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/Edge/{today}", f"Resplit_test_dataframes_{today}")
+        SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/Edge/{today}", f"Resplit_test",today)
+        SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/Edge/{today}", f"Resplit_train",today)
+    elif Str_ChooseDataset == "Kub":
+        # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+        List_train_Label = []
+        List_test_Label = []
+        for i in range(4):
+            train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+            List_train_Label.append(train_label_split)
+            List_test_Label.append(test_label_split)         
+
+        train_dataframes = pd.concat(List_train_Label)
+        test_dataframes = pd.concat(List_test_Label)
+
+        print("test",test_dataframes['Label'].value_counts())
+
+        # 紀錄資料筆數
+        with open(f"./data/dataset_AfterProcessed/Kub/encode_and_count_resplit.csv", "a+") as file:
+            label_counts = test_dataframes['Label'].value_counts()
+            print("test_dataframes\n", label_counts)
+            file.write("test_dataframes_label_counts\n")
+            file.write(str(label_counts) + "\n")
+            
+            label_counts = train_dataframes['Label'].value_counts()
+            print("train_dataframes\n", label_counts)
+            file.write("train_dataframes_label_counts\n")
+            file.write(str(label_counts) + "\n")
+
+        SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/Kub/{today}", f"Resplit_train_dataframes_{today}")
+        SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/Kub/{today}", f"Resplit_test_dataframes_{today}")
+        SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/Kub/{today}", f"Resplit_test",today)
+        SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/Kub/{today}", f"Resplit_train",today)
+    elif Str_ChooseDataset == "Wustl":
+        # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+        List_train_Label = []
+        List_test_Label = []
+        for i in range(5):
+            train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+            List_train_Label.append(train_label_split)
+            List_test_Label.append(test_label_split)         
+
+        train_dataframes = pd.concat(List_train_Label)
+        test_dataframes = pd.concat(List_test_Label)
+
+        print("test",test_dataframes['Label'].value_counts())
+
+        # 紀錄資料筆數
+        with open(f"./data/dataset_AfterProcessed/Kub/encode_and_count_resplit.csv", "a+") as file:
+            label_counts = test_dataframes['Label'].value_counts()
+            print("test_dataframes\n", label_counts)
+            file.write("test_dataframes_label_counts\n")
+            file.write(str(label_counts) + "\n")
+            
+            label_counts = train_dataframes['Label'].value_counts()
+            print("train_dataframes\n", label_counts)
+            file.write("train_dataframes_label_counts\n")
+            file.write(str(label_counts) + "\n")
+
+        SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/Wustl/{today}", f"Resplit_train_dataframes_{today}")
+        SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/Wustl/{today}", f"Resplit_test_dataframes_{today}")
+        SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/Wustl/{today}", f"Resplit_test",today)
+        SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/Wustl/{today}", f"Resplit_train",today)
+
+def DoReStoreNpFileToCsv(x_train, y_train,x_test,y_test,Str_ChooseDataset):
+     # 將特徵數據和標籤數據合併成一個 DataFrame
+    columns_x = [f'feature_{i}' for i in range(x_train.shape[1])]
+    df_train_x = pd.DataFrame(x_train,columns=columns_x)
+    df_train_y = pd.DataFrame(y_train, columns=['Label'])
+
+    df_test_x = pd.DataFrame(x_test,columns=columns_x)
+    df_test_y = pd.DataFrame(y_test, columns=['Label'])
+    
+
+
+    if(CheckFileExists(f'./Restore_{Str_ChooseDataset}.csv')!=True):
+        # 合併 x 和 y DataFrame
+        df_train_combined = pd.concat([df_train_x, df_train_y], axis=1)
+        df_test_combined = pd.concat([df_test_x,df_test_y ], axis=1)
+
+        df_combined = pd.concat([df_train_combined, df_test_combined], axis=0)
+        df_combined.to_csv(f'./Restore_{Str_ChooseDataset}.csv', index=False)
+        df_combined = pd.read_csv(f'./Restore_{Str_ChooseDataset}.csv')
+    else:
+        df_combined = pd.read_csv(f'./Restore_{Str_ChooseDataset}.csv')
+        
+    return df_combined
+
+### Replace the number of greater than 10,000
+def ReplaceMorethanTenthousandQuantity(df):
+    label_counts = df['Label'].value_counts()
+    # 打印提取后的DataFrame
+    print(label_counts)
+    # 创建一个空的DataFrame来存储结果
+    extracted_df = pd.DataFrame()
+
+    # 获取所有不同的标签
+    unique_labels = df['Label'].unique()
+
+    # 遍历每个标签
+    for label in unique_labels:
+        # 选择特定标签的行
+        label_df = df[df['Label'] == label]
+    
+        # 如果标签的数量超过1万，提取前1万行；否则提取所有行
+        # if len(label_df) > 10000:
+            # label_df = label_df.head(10000)
+            
+        # 如果標籤的數量超過1萬，隨機提取1萬行；否則提取所有行
+        if len(label_df) > 10000:
+            label_df = label_df.sample(n=10000, random_state=42)  # 使用指定的隨機種子(random_state)以保證可重現性
+    
+        # 将结果添加到提取的DataFrame中
+        extracted_df = pd.concat([extracted_df, label_df])
+
+    # 将更新后的DataFrame保存到文件
+    # SaveDataToCsvfile(extracted_df, "./data/dataset_AfterProcessed","total_encoded_updated_10000")
+
+    # 打印修改后的结果
+    print(extracted_df['Label'].value_counts())
+    return extracted_df
+
+
+def ResotreTrainAndTestToCSVandReSplit(Str_ChooseDataset,filepath):
+    x_train, y_train,x_test,y_test = ChooseDataSetNpFile(Str_ChooseDataset,filepath)
+    df_combined = DoReStoreNpFileToCsv(x_train, y_train,x_test,y_test,Str_ChooseDataset)
+    df_combined = ReplaceMorethanTenthousandQuantity(df_combined)
+    DoReSplit(Str_ChooseDataset,df_combined)
 ## 將結合weakLabel Label8 的train_half1轉成np array
 # gan_dataframe = pd.read_csv("D:\\Labtest20230911\\GAN_data_train_half1\\GAN_data_train_half1_ADD_weakLabel_8.csv")
 # SaveDataframeTonpArray(gan_dataframe, "train_half1","weakpoint_8")
