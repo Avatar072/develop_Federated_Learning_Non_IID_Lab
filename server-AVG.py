@@ -40,7 +40,17 @@ class MLP(nn.Module):
 
 # 初始化模型和優化器
 # model = MLP()
-model = ChooseUseModel("MLP", 44, 35)
+#CICIIDS2017 or Edge 62個特徵
+# labelCount = 15
+#CICIIDS2019
+# labelCount = 13
+#Wustl 41個特徵
+labelCount = 5
+#Kub 36個特徵
+# labelCount = 4
+#CICIIDS2017、TONIOT、CICIIDS2019 聯集
+# labelCount = 35
+model = ChooseUseModel("MLP", 41, labelCount)
 
 optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001)
 
