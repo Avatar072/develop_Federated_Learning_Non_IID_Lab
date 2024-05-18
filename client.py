@@ -28,12 +28,16 @@ from mytoolfunction import ChooseUseModel, getStartorEndtime
 from collections import Counter
 
 
-#CICIIDS2017
+#CICIIDS2017 or Edge 62個特徵
 # labelCount = 15
 #CICIIDS2019
 # labelCount = 13
+#Wustl 41個特徵
+labelCount = 5
+#Kub 36個特徵
+# labelCount = 4
 #CICIIDS2017、TONIOT、CICIIDS2019 聯集
-labelCount = 35
+# labelCount = 35
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
@@ -111,8 +115,20 @@ getStartorEndtime("starttime",start_IDS,f"./FL_AnalyseReportfolder/{today}/{clie
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
 
 # 20240506 after do labelencode and minmax cicids2017 ALLDay and toniot  cicids2019 Chi_square_45
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_cicids2019_Chi_square_45_change_ip.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_cicids2019_Chi_square_45_change_ip.npy", allow_pickle=True)
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_cicids2019_Chi_square_45_change_ip.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_cicids2019_Chi_square_45_change_ip.npy", allow_pickle=True)
+
+# 20240507 after do labelencode and minmax Edge iid
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\x_Resplit_test_20240507.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\y_Resplit_test_20240507.npy", allow_pickle=True)
+
+# 20240507 after do labelencode and minmax Kub iid
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\x_Resplit_test_20240507.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\y_Resplit_test_20240507.npy", allow_pickle=True)
+
+# 20240507 after do labelencode and minmax Wustl iid
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\x_Resplit_test_20240507.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Resplit_test_20240507.npy", allow_pickle=True)
 
 counter = Counter(y_test)
 print("test",counter)

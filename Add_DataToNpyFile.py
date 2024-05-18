@@ -4,7 +4,7 @@ import time
 import datetime
 from mytoolfunction import generatefolder
 from mytoolfunction import clearDirtyData,label_Encoding,splitdatasetbalancehalf,spiltweakLabelbalance,SaveDataframeTonpArray,generatefolder
-from mytoolfunction import SaveDataToCsvfile,printFeatureCountAndLabelCountInfo,CheckFileExists
+from mytoolfunction import SaveDataToCsvfile,ChooseDataSetNpFile,CheckFileExists,DoReStoreNpFileToCsv,ResotreTrainAndTestToCSVandReSplit
 
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
@@ -124,166 +124,15 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
     # 將 DataFrame 轉換為 CSV 文件並保存
     df_combined.to_csv(f'{save_filename}.csv', index=False)
 
-def ChooseDataSetNpFile(Str_ChooseDataset):
-    if Str_ChooseDataset == "CICIDS2017":
-        # 20240323 non iid client1 use cicids2017 ALLday  chi-square_45 change ip encode
-        x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy", allow_pickle=True)
-        y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy", allow_pickle=True)
-        
-        x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/x_ALLDay_test_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy")
-        y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/y_ALLDay_test_dataframes_AfterFeatureSelect_Noniid_change_ip_20240323.npy")
-    
-    elif Str_ChooseDataset == "TONIOT":
-        # # 20240323 non iid client2 use TONIOT change ts change ip encode
-        x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
-        y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
-    
-        x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_TONIOT_test_change_ts_change_ip_20240317.npy")
-        y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_TONIOT_test_change_ts_change_ip_20240317.npy")
-
-    elif Str_ChooseDataset == "CICIDS2019":
-
-        x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterFeatureSelect44_20240428.npy", allow_pickle=True)
-        y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240428.npy", allow_pickle=True)
-
-        x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2019/01_12/x_01_12_test_CICIDS2019_AfterFeatureSelect44_20240428.npy")
-        y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2019/01_12/y_01_12_test_CICIDS2019_AfterFeatureSelect44_20240428.npy")
-        
-    return x_train, y_train,x_test,y_test
-
-
-def DoReSplit(Str_ChooseDataset,df):
-    if Str_ChooseDataset == "CICIDS2017":
-        # BaseLine時
-        # 單獨把Heartbleed、Infiltration、Web Attack Sql Injection测试集的比例为33%
-        # encode後對照如下
-        # Heartbleed:8、
-        # Infiltration:9、
-        # Web Attack Sql Injection:13
-            
-    # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
-        List_train_Label = []
-        List_test_Label = []
-        for i in range(15):
-            if i == 8 or i == 9 or i ==13:
-                continue
-            train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.2)
-            List_train_Label.append(train_label_split)
-            List_test_Label.append(test_label_split)         
-
-        train_dataframes = pd.concat(List_train_Label)
-        test_dataframes = pd.concat(List_test_Label)
-
-        # Label encode mode  分別取出Label等於8、9、13的數據 對6633分
-        train_label_Heartbleed, test_label_Heartbleed = spiltweakLabelbalance(8,df,0.33)
-        train_label_Infiltration, test_label_Infiltration = spiltweakLabelbalance(9,df,0.33)
-        train_label_WebAttackSql_Injection, test_label_WebAttackSql_Injection = spiltweakLabelbalance(13,df,0.33)
-
-        # # 刪除Label相當於8、9、13的行
-        test_dataframes = test_dataframes[~test_dataframes['Label'].isin([8, 9,13])]
-        train_dataframes = train_dataframes[~train_dataframes['Label'].isin([8, 9,13])]
-        # 合併Label8、9、13回去
-        test_dataframes = pd.concat([test_dataframes, test_label_Heartbleed, test_label_Infiltration, test_label_WebAttackSql_Injection])
-        train_dataframes = pd.concat([train_dataframes,train_label_Heartbleed, train_label_Infiltration,train_label_WebAttackSql_Injection])
-        print("test",test_dataframes['Label'].value_counts())
-
-        # 紀錄資料筆數
-        with open(f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/encode_and_count_resplit.csv", "a+") as file:
-            label_counts = test_dataframes['Label'].value_counts()
-            print("test_dataframes\n", label_counts)
-            file.write("test_dataframes_label_counts\n")
-            file.write(str(label_counts) + "\n")
-            
-            label_counts = train_dataframes['Label'].value_counts()
-            print("train_dataframes\n", label_counts)
-            file.write("train_dataframes_label_counts\n")
-            file.write(str(label_counts) + "\n")
-
-        SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/{today}", f"Resplit_train_dataframes_{today}")
-        SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/{today}", f"Resplit_test_dataframes_{today}")
-        SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/{today}", f"Resplit_test",today)
-        SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/{today}", f"Resplit_train",today)
-
-    elif Str_ChooseDataset == "CICIDS2019":
-        # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
-        List_train_Label = []
-        List_test_Label = []
-        for i in range(34):
-            if i==0 or (i >= 23 and i <= 34):
-                train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.2)
-                List_train_Label.append(train_label_split)
-                List_test_Label.append(test_label_split)         
-        
-        train_dataframes = pd.concat(List_train_Label)
-        test_dataframes = pd.concat(List_test_Label)
-        # encode後對照如下
-        # WebDDoS:34
-        # Label encode mode  分別取出Label等於12的數據 對6633分
-        train_label_WebDDoS, test_label_WebDDoS = spiltweakLabelbalance(34,df,0.33)
-        # # 刪除Label相當於12的行
-        test_dataframes = test_dataframes[~test_dataframes['Label'].isin([34])]
-        train_dataframes = train_dataframes[~train_dataframes['Label'].isin([34])]
-        # 合併Label12回去
-        test_dataframes = pd.concat([test_dataframes, test_label_WebDDoS])
-        train_dataframes = pd.concat([train_dataframes,train_label_WebDDoS])            
-    # 紀錄資料筆數
-    with open(f"./data/dataset_AfterProcessed/CICIDS2019/01_12/encode_and_count_resplit.csv", "a+") as file:
-        label_counts = test_dataframes['Label'].value_counts()
-        print("test_dataframes\n", label_counts)
-        file.write("test_dataframes_label_counts\n")
-        file.write(str(label_counts) + "\n")
-        
-        label_counts = train_dataframes['Label'].value_counts()
-        print("train_dataframes\n", label_counts)
-        file.write("train_dataframes_label_counts\n")
-        file.write(str(label_counts) + "\n")
-
-    SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2019/01_12/{today}", f"01_12_Resplit_train_dataframes_{today}")
-    SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/CICIDS2019/01_12/{today}", f"01_12_Resplit_test_dataframes_{today}")
-    SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/CICIDS2019/01_12/{today}", f"01_12_Resplit_test",today)
-    SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2019/01_12/{today}", f"01_12_Resplit_train",today)
-
-
-
-    # 將 DataFrame 轉換為 CSV 文件並保存
-    # df_train_combined.to_csv(f'{save_filename}.csv', index=False)
-
-
-def ResotreTrainAndTestToCSVandReSplit(Str_ChooseDataset):
-    x_train, y_train,x_test,y_test = ChooseDataSetNpFile(Str_ChooseDataset)
-
-    # 將特徵數據和標籤數據合併成一個 DataFrame
-    columns_x = [f'feature_{i}' for i in range(x_train.shape[1])]
-    df_train_x = pd.DataFrame(x_train,columns=columns_x)
-    df_train_y = pd.DataFrame(y_train, columns=['Label'])
-
-    df_test_x = pd.DataFrame(x_test,columns=columns_x)
-    df_test_y = pd.DataFrame(y_test, columns=['Label'])
-    
-
-
-    if(CheckFileExists(f'./Resore_{Str_ChooseDataset}.csv')!=True):
-        # 合併 x 和 y DataFrame
-        df_train_combined = pd.concat([df_train_x, df_train_y], axis=1)
-        df_test_combined = pd.concat([df_test_x,df_test_y ], axis=1)
-
-        df_combined = pd.concat([df_train_combined, df_test_combined], axis=0)
-        df_combined.to_csv(f'./Resore_{Str_ChooseDataset}.csv', index=False)
-        df_combined = pd.read_csv(f'./Resore_{Str_ChooseDataset}.csv')
-    else:
-        df_combined = pd.read_csv(f'./Resore_{Str_ChooseDataset}.csv')
-
-    DoReSplit(Str_ChooseDataset,df_combined)
-
 
 # mergecompelete_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_original.csv")
 
-# ResotreTrainAndTestToCSVandReSplit("CICIDS2017")
-# ResotreTrainAndTestToCSVandReSplit("CICIDS2019")
+ResotreTrainAndTestToCSVandReSplit("CICIDS2017",filepath)
+# ResotreTrainAndTestToCSVandReSplit("CICIDS2019",filepath)
 
 #
 # DoAddLabelToTrainData("CICIDS2017")
-DoAddLabelToTrainData("CICIDS2019")
+# DoAddLabelToTrainData("CICIDS2019")
 #
 # DoAddLabelToTrainData("TONIOT")
 #
