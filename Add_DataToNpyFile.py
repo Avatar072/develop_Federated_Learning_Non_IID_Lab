@@ -50,7 +50,19 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
         save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\" + today + "\\CICIDS2019_AddedLabel"
         add_Labels = np.array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22])
 
+    elif Str_ChooseDataset == "EdgeIIOT":
+
+        # 20240519 EdgeIIoT after do labelencode and minmax  75 25分
+        x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_20240519.npy", allow_pickle=True)
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_20240519.npy", allow_pickle=True)    
     
+        x_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_test_20240519.npy", allow_pickle=True)
+        y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_20240519.npy", allow_pickle=True)
+   
+        print(generatefolder(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\", today))
+        save_filename = filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\" + today + "\\EdgeIIoT_AddedLabel"
+        add_Labels = np.array([1,2,3,4,5,6,7,8,9,11,12,13,14,16,17,21])
+
     if Int_add_Label_count != None:
         # 二維寫法如下範例 注意括號
         # e.g:
@@ -127,7 +139,7 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
 
 # mergecompelete_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\CICIDS2017_original.csv")
 
-ResotreTrainAndTestToCSVandReSplit("CICIDS2017",filepath)
+# ResotreTrainAndTestToCSVandReSplit("CICIDS2017",filepath)
 # ResotreTrainAndTestToCSVandReSplit("CICIDS2019",filepath)
 
 #
@@ -137,3 +149,70 @@ ResotreTrainAndTestToCSVandReSplit("CICIDS2017",filepath)
 # DoAddLabelToTrainData("TONIOT")
 #
 # DoAddLabelToTrainData("CICIDS2019",4)
+
+
+def NpfileChangeLabelEncodeValue():
+    y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_20240519.npy", allow_pickle=True)  
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_20240519.npy", allow_pickle=True)    
+
+    # EdgeIIOT将 y_train和y_test進行Label encode值替換 for Noniid實驗
+                        # 0: '0_BENIGN', 
+                        # 1: '10_PortScan', 
+                        # 2: '15_backdoor', 
+                        # 3: '18_mitm',
+                        # 4: '19_password', 
+                        # 5: '20_ransomware', 
+                        # 6: '22_xss', 
+                        # 7: '23_DDoS_UDP', 
+                        # 8: '24_DDoS_ICMP', 
+                        # 9: '25_SQL_injection', 
+                        # 10: '26_Vulnerability_scanner', 
+                        # 11: '27_DDoS_TCP', 
+                        # 12: '28_DDoS_HTTP',
+                        # 13: '29_Uploading', 
+                        # 14: '30_Fingerprinting'
+
+    y_train_After_Change = np.where(y_train == 1, 10,
+                                    np.where(y_train == 2, 15,
+                                    np.where(y_train == 3, 18,
+                                    np.where(y_train == 4, 19,
+                                    np.where(y_train == 5, 20,
+                                    np.where(y_train == 6, 22,
+                                    np.where(y_train == 7, 23,
+                                    np.where(y_train == 8, 24,
+                                    np.where(y_train == 9, 25,
+                                    np.where(y_train == 10, 26,
+                                    np.where(y_train == 11, 27,
+                                    np.where(y_train == 12, 28,
+                                    np.where(y_train == 13, 29,
+                                    np.where(y_train == 14, 30,
+                                    y_train))))))))))))))
+    
+    y_test_After_Change = np.where(y_test == 1, 10,
+                                    np.where(y_test == 2, 15,
+                                    np.where(y_test == 3, 18,
+                                    np.where(y_test == 4, 19,
+                                    np.where(y_test == 5, 20,
+                                    np.where(y_test == 6, 22,
+                                    np.where(y_test == 7, 23,
+                                    np.where(y_test == 8, 24,
+                                    np.where(y_test == 9, 25,
+                                    np.where(y_test == 10, 26,
+                                    np.where(y_test == 11, 27,
+                                    np.where(y_test == 12, 28,
+                                    np.where(y_test == 13, 29,
+                                    np.where(y_test == 14, 30,
+                                    y_test))))))))))))))
+
+    #np.save
+    np.save(f"{filepath}\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_After_ChangeLabelEncode_for_Noniid.npy", y_train_After_Change)
+    np.save(f"{filepath}\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_After_ChangeLabelEncode_for_Noniid.npy", y_test_After_Change)
+
+    y_train_unique_values = np.unique(y_train_After_Change)
+    print("唯一值数量:", len(y_train_unique_values))
+    print("唯一值:", y_train_unique_values)
+    y_test_unique_values = np.unique(y_test_After_Change)
+    print("唯一值数量:", len(y_test_unique_values))
+    print("唯一值:", y_test_unique_values)
+
+NpfileChangeLabelEncodeValue()
