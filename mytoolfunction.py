@@ -175,9 +175,9 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "x_train_ToN-IoT_afterPCA_20231220.npy", allow_pickle=True)
             # y_train = np.load(filepath + "y_train_ToN-IoT_afterPCA_20231220.npy", allow_pickle=True)
             
-            # 20240502 CIC-IDS2017 after do labelencode and minmax  75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_20240502.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_20240502.npy", allow_pickle=True)    
+            # # 20240502 CIC-IDS2017 after do labelencode and minmax  75 25分
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_20240502.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_20240502.npy", allow_pickle=True)    
             
             # 20240422 CIC-IDS2019 after do labelencode and minmax 
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
@@ -186,6 +186,15 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
         
+            # 20240519 EdgeIIoT after do labelencode and minmax  75 25分
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_20240519.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_20240519.npy", allow_pickle=True)    
+            
+            # 20240520 EdgeIIoT after do labelencode and minmax chi_square45 75 25分
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
+
+
         elif (Choose_method == 'SMOTE'):
             # x_train = np.load(filepath + "x_total_train_SMOTE_ALL_Label.npy", allow_pickle=True)
             # y_train = np.load(filepath + "y_total_train_SMOTE_ALL_Label.npy", allow_pickle=True)
@@ -284,9 +293,9 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\CICIDS2017_AddedLabel_x.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\CICIDS2017_AddedLabel_y.npy", allow_pickle=True)
 
-            # 20240507 after do labelencode and minmax Edge iid
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\x_Edge_train_half1_20240507.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\y_Edge_train_half1_20240507.npy", allow_pickle=True)
+            # 20240507 after do labelencode and minmax EdgeIIoT iid
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_half1_20240507.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_half1_20240507.npy", allow_pickle=True)
 
             # 20240507 after do labelencode and minmax Kub iid
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\x_Kub_train_half1_20240507.npy", allow_pickle=True)
@@ -362,9 +371,9 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\TONIIOT_AddedLabel_x.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\\TONIOT\\TONIIOT_AddedLabel_y.npy", allow_pickle=True)
 
-            # 20240507 after do labelencode and minmax Edge iid
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\x_Edge_train_half2_20240507.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\y_Edge_train_half2_20240507.npy", allow_pickle=True)
+            # 20240507 after do labelencode and minmax EdgeIIoT iid
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_half2_20240507.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_half2_20240507.npy", allow_pickle=True)
 
             # 20240507 after do labelencode and minmax Kub iid
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\x_Kub_train_half2_20240507.npy", allow_pickle=True)
@@ -610,6 +619,7 @@ def label_Encoding(label,df):
     df[label] = label_encoder.fit_transform(df[label])
     df[label].unique()
     print(f"{label}",df[label].unique())
+    return df
 
 
 # ##  清除CIC-IDS-2017 資料集中的dirty data，包含NaN、Infinity、包含空白或小于ASCII 32的字符
@@ -757,12 +767,12 @@ def ChooseDataSetNpFile(Str_ChooseDataset,filepath):
         x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2019/01_12/x_01_12_test_CICIDS2019_AfterFeatureSelect44_20240428.npy")
         y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2019/01_12/y_01_12_test_CICIDS2019_AfterFeatureSelect44_20240428.npy")
 
-    elif Str_ChooseDataset == "Edge":
-        x_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\Edge\\x_train.txt")
-        y_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\Edge\\y_train.txt")
+    elif Str_ChooseDataset == "EdgeIIoT":
+        x_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_train.txt")
+        y_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_train.txt")
             
-        x_test = np.loadtxt(f"./data/dataset_AfterProcessed/Edge/x_test.txt")
-        y_test = np.loadtxt(f"./data/dataset_AfterProcessed/Edge/y_test.txt")
+        x_test = np.loadtxt(f"./data/dataset_AfterProcessed/EdgeIIoT/x_test.txt")
+        y_test = np.loadtxt(f"./data/dataset_AfterProcessed/EdgeIIoT/y_test.txt")
     
     elif Str_ChooseDataset == "Kub":
         x_train = np.loadtxt(filepath + "\\dataset_AfterProcessed\\Kub\\x_train.txt")
@@ -871,7 +881,7 @@ def DoReSplit(Str_ChooseDataset,df):
         SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/CICIDS2019/01_12/{today}", f"01_12_Resplit_test",today)
         SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2019/01_12/{today}", f"01_12_Resplit_train",today)
 
-    elif Str_ChooseDataset == "Edge":
+    elif Str_ChooseDataset == "EdgeIIoT":
         # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
         List_train_Label = []
         List_test_Label = []
@@ -886,7 +896,7 @@ def DoReSplit(Str_ChooseDataset,df):
         print("test",test_dataframes['Label'].value_counts())
 
         # 紀錄資料筆數
-        with open(f"./data/dataset_AfterProcessed/Edge/encode_and_count_resplit.csv", "a+") as file:
+        with open(f"./data/dataset_AfterProcessed/EdgeIIoT/encode_and_count_resplit.csv", "a+") as file:
             label_counts = test_dataframes['Label'].value_counts()
             print("test_dataframes\n", label_counts)
             file.write("test_dataframes_label_counts\n")
@@ -897,10 +907,10 @@ def DoReSplit(Str_ChooseDataset,df):
             file.write("train_dataframes_label_counts\n")
             file.write(str(label_counts) + "\n")
 
-        SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/Edge/{today}", f"Resplit_train_dataframes_{today}")
-        SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/Edge/{today}", f"Resplit_test_dataframes_{today}")
-        SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/Edge/{today}", f"Resplit_test",today)
-        SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/Edge/{today}", f"Resplit_train",today)
+        SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/EdgeIIoT/{today}", f"Resplit_train_dataframes_{today}")
+        SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/EdgeIIoT/{today}", f"Resplit_test_dataframes_{today}")
+        SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/EdgeIIoT/{today}", f"Resplit_test",today)
+        SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/EdgeIIoT/{today}", f"Resplit_train",today)
     elif Str_ChooseDataset == "Kub":
         # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
         List_train_Label = []
@@ -987,20 +997,20 @@ def DoReStoreNpFileToCsv(x_train, y_train,x_test,y_test,Str_ChooseDataset):
     return df_combined
 
 ### Replace the number of greater than 10,000
-def ReplaceMorethanTenthousandQuantity(df):
-    label_counts = df['Label'].value_counts()
+def ReplaceMorethanTenthousandQuantity(df,str_column_name):
+    label_counts = df[str_column_name].value_counts()
     # 打印提取后的DataFrame
     print(label_counts)
     # 创建一个空的DataFrame来存储结果
     extracted_df = pd.DataFrame()
 
     # 获取所有不同的标签
-    unique_labels = df['Label'].unique()
+    unique_labels = df[str_column_name].unique()
 
     # 遍历每个标签
     for label in unique_labels:
         # 选择特定标签的行
-        label_df = df[df['Label'] == label]
+        label_df = df[df[str_column_name] == label]
     
         # 如果标签的数量超过1万，提取前1万行；否则提取所有行
         # if len(label_df) > 10000:
@@ -1017,7 +1027,7 @@ def ReplaceMorethanTenthousandQuantity(df):
     # SaveDataToCsvfile(extracted_df, "./data/dataset_AfterProcessed","total_encoded_updated_10000")
 
     # 打印修改后的结果
-    print(extracted_df['Label'].value_counts())
+    print(extracted_df[str_column_name].value_counts())
     return extracted_df
 
 

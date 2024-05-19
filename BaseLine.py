@@ -20,10 +20,16 @@ from mytoolfunction import ChooseUseModel, getStartorEndtime
 from collections import Counter
 ####################################################################################################
 
-#CICIIDS2017
+#CICIIDS2017 or Edge 62個特徵
 # labelCount = 15
 #CICIIDS2019
-labelCount = 13
+# labelCount = 13
+#Wustl 41個特徵
+# labelCount = 5
+#Kub 36個特徵
+# labelCount = 4
+#CICIIDS2017、TONIOT、CICIIDS2019 聯集
+# labelCount = 35
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -75,8 +81,16 @@ getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/{today}/{
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
 
 # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_20240502.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_20240502.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
+
+# 20240519 EdgeIIoT after do labelencode and minmax  75 25分
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_test_20240519.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_20240519.npy", allow_pickle=True)    
+            
+# 20240520 EdgeIIoT after do labelencode and minmax chi_square45 75 25分
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)            
 
 counter = Counter(y_test)
 print("test筆數",counter)
@@ -87,29 +101,17 @@ y_train = torch.from_numpy(y_train).type(torch.LongTensor)
 x_test = torch.from_numpy(x_test).type(torch.FloatTensor)
 y_test = torch.from_numpy(y_test).type(torch.LongTensor)
 
+
+labelCount=len(y_test.unique())
+print("唯一值数量:", labelCount)
+
 # 將測試數據移動到 GPU 上
 x_train = x_train.to(DEVICE)
 y_train = y_train.to(DEVICE)
 x_test = x_test.to(DEVICE)
 y_test = y_test.to(DEVICE)
 
-# 定義你的神經網絡模型
-class MLP(nn.Module):
-    def __init__(self):
-        super(MLP, self).__init__()
-        self.layer1 = nn.Linear(x_train.shape[1], 512)
-        self.fc2 = nn.Linear(512, 512)
-        self.fc3 = nn.Linear(512, 512)
-        self.fc4 = nn.Linear(512, 512)
-        self.layer5 = nn.Linear(512, 13)
 
-    def forward(self, x):
-        x = F.relu(self.layer1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-        x = self.layer5(x)
-        return x
 
 # 定義訓練函數
 def train(net, trainloader, epochs):
@@ -232,23 +234,49 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         #                 # 21: '21_scanning',
         #                 # 22: '22_xss'
         #                 } 
-        # CICIDS2019
+        # # CICIDS2019
+        # class_names = {
+        #                 0: '0_BENIGN', 
+        #                 1: '1_DrDoS_DNS', 
+        #                 2: '2_DrDoS_LDAP', 
+        #                 3: '3_DrDoS_MSSQL',
+        #                 4: '4_DrDoS_NTP', 
+        #                 5: '5_DrDoS_NetBIOS', 
+        #                 6: '6_DrDoS_SNMP', 
+        #                 7: '7_DrDoS_SSDP', 
+        #                 8: '8_DrDoS_UDP', 
+        #                 9: '9_Syn', 
+        #                 10: '10_TFTP', 
+        #                 11: '11_UDPlag', 
+        #                 12: '12_WebDDoS'
+        #                 # 13: '13_Web Attack Sql Injection', 
+        #                 # 14: '14_Web Attack XSS'
+        #                 # 15: '15_backdoor',
+        #                 # 16: '16_dos',
+        #                 # 17: '17_injection',
+        #                 # 18: '18_mitm',
+        #                 # 19: '19_password',
+        #                 # 20: '20_ransomware',
+        #                 # 21: '21_scanning',
+        #                 # 22: '22_xss'
+        #                 } 
+        # EdgeIIoT
         class_names = {
                         0: '0_BENIGN', 
-                        1: '1_DrDoS_DNS', 
-                        2: '2_DrDoS_LDAP', 
-                        3: '3_DrDoS_MSSQL',
-                        4: '4_DrDoS_NTP', 
-                        5: '5_DrDoS_NetBIOS', 
-                        6: '6_DrDoS_SNMP', 
-                        7: '7_DrDoS_SSDP', 
-                        8: '8_DrDoS_UDP', 
-                        9: '9_Syn', 
-                        10: '10_TFTP', 
-                        11: '11_UDPlag', 
-                        12: '12_WebDDoS'
-                        # 13: '13_Web Attack Sql Injection', 
-                        # 14: '14_Web Attack XSS'
+                        1: '10_PortScan', 
+                        2: '15_backdoor', 
+                        3: '18_mitm',
+                        4: '19_password', 
+                        5: '20_ransomware', 
+                        6: '22_xss', 
+                        7: '23_DDoS_UDP', 
+                        8: '24_DDoS_ICMP', 
+                        9: '25_SQL_injection', 
+                        10: '26_Vulnerability_scanner', 
+                        11: '27_DDoS_TCP', 
+                        12: '28_DDoS_HTTP',
+                        13: '29_Uploading', 
+                        14: '30_Fingerprinting'
                         # 15: '15_backdoor',
                         # 16: '16_dos',
                         # 17: '17_injection',
@@ -275,8 +303,8 @@ testloader = DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 
 # 初始化神經網絡模型
 # net = MLP().to(DEVICE)
-#CICIDS2019
-net = ChooseUseModel("ANN", x_train.shape[1], labelCount).to(DEVICE)
+
+net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 # 訓練模型
 train(net, trainloader, epochs=num_epochs)
 

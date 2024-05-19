@@ -41,11 +41,11 @@ class MLP(nn.Module):
 # 初始化模型和優化器
 # model = MLP()
 #CICIIDS2017 or Edge 62個特徵
-# labelCount = 15
+labelCount = 15
 #CICIIDS2019
 # labelCount = 13
 #Wustl 41個特徵
-labelCount = 5
+# labelCount = 5
 #Kub 36個特徵
 # labelCount = 4
 #CICIIDS2017、TONIOT、CICIIDS2019 聯集

@@ -43,7 +43,8 @@ def writeData(file_path, bool_Rmove_Benign):
         # 找到不包含"BENIGN"值的Label 這邊Label帶進來前面要空格 
         # 下面兩者寫法都行
         # df = df[~(df[' Label']=='BENIGN')]
-        # 只留Monday的BENIGN，其他天移掉
+        # 只留Monday的BENIGN，其他天移掉，
+        # " Label"前面空格是故意空格， 因一開始原檔是有智障空格，要加空格才讀的到值，後面過濾時會清掉
         df = df[~df[" Label"].isin(["BENIGN"])]
     return df
 
@@ -124,13 +125,6 @@ def ChecktotalCsvFileIsexists(file,choose_merge_days):
         print(f"文件 {file} 已存在，不执行合并和保存操作。")
 
     return file
-
-### label encoding
-def label_Encoding(label,df):
-    label_encoder = preprocessing.LabelEncoder()
-    df[label] = label_encoder.fit_transform(df[label])
-    df[label].unique()
-    return df
 
 ### show original label name and after labelenocode
 def label_encoding(label, dataset):
