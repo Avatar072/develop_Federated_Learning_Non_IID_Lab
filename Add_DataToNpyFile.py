@@ -16,12 +16,19 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
     # 載入已有的特徵數據和標籤數據
     if Str_ChooseDataset == "CICIDS2017":
         # 20240323 non iid client1 use cicids2017 ALLday  chi-square_45 change ip encode
-        x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_Resplit_train_20240506.npy", allow_pickle=True)
-        y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_Resplit_train_20240506.npy", allow_pickle=True)
+        # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_Resplit_train_20240506.npy", allow_pickle=True)
+        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_Resplit_train_20240506.npy", allow_pickle=True)
         
+        # # 20240502 non iid us BaseLine npfile CIC-IDS2017 after do labelencode and minmax chi_square45 75 25分
+        x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLday_train_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLday_train_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)    
+            
         generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\", today)
         save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\" + today + "\\CICIDS2017_AddedLabel"
-        add_Labels = np.array([15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34])
+        # Add TONIOT CICIDS2019
+        # add_Labels = np.array([15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34])
+        # Add TONIOT EDGEIIoT
+        add_Labels = np.array([15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30])
         # add_Labels = np.array([23,24,25,26,27,28,29,30,31,32,33,34])
   
 
@@ -36,31 +43,37 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
 
         generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT\\", today)
         save_filename = filepath + "\\dataset_AfterProcessed\\TONIOT\\" + today + "\\TONIIOT_AddedLabel"
+        # Add CICIDS2017 CICIDS2019
         # add_Labels = np.array([1,3,4,5,6,7,8,9,10,11,12,13,14,23,24,25,26,27,28,29,30,31,32,33,34])
+        # Add CICIDS2019
         add_Labels = np.array([23,24,25,26,27,28,29,30,31,32,33,34])  
 
 
     elif Str_ChooseDataset == "CICIDS2019":
-
+        # 20240506 non iid client3 use CICIDS2019 mimmax 75 25 分
         x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_Resplit_train_20240506.npy", allow_pickle=True)
         y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_Resplit_train_20240506.npy", allow_pickle=True)
-
-   
         print(generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\", today))
         save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\" + today + "\\CICIDS2019_AddedLabel"
+        # Add TONIOT CICIDS2017
         add_Labels = np.array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22])
 
     elif Str_ChooseDataset == "EdgeIIOT":
-
         # 20240519 EdgeIIoT after do labelencode and minmax  75 25分
-        x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_20240519.npy", allow_pickle=True)
-        y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_20240519.npy", allow_pickle=True)    
+        # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_20240519.npy", allow_pickle=True)
+        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_20240519.npy", allow_pickle=True)    
     
-        x_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_test_20240519.npy", allow_pickle=True)
-        y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_20240519.npy", allow_pickle=True)
+        # x_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_test_20240519.npy", allow_pickle=True)
+        # y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_20240519.npy", allow_pickle=True)
    
+        # 20240520  non iid client3 use EdgeIIoT after do labelencode and minmax chi_square45 75 25分
+        x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
+
+
         print(generatefolder(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\", today))
         save_filename = filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\" + today + "\\EdgeIIoT_AddedLabel"
+        # Add TONIOT CICIDS2017
         add_Labels = np.array([1,2,3,4,5,6,7,8,9,11,12,13,14,16,17,21])
 
     if Int_add_Label_count != None:
@@ -156,52 +169,52 @@ def NpfileChangeLabelEncodeValue():
     y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_20240519.npy", allow_pickle=True)    
 
     # EdgeIIOT将 y_train和y_test進行Label encode值替換 for Noniid實驗
-                        # 0: '0_BENIGN', 
-                        # 1: '10_PortScan', 
-                        # 2: '15_backdoor', 
-                        # 3: '18_mitm',
-                        # 4: '19_password', 
-                        # 5: '20_ransomware', 
-                        # 6: '22_xss', 
-                        # 7: '23_DDoS_UDP', 
-                        # 8: '24_DDoS_ICMP', 
-                        # 9: '25_SQL_injection', 
-                        # 10: '26_Vulnerability_scanner', 
-                        # 11: '27_DDoS_TCP', 
-                        # 12: '28_DDoS_HTTP',
-                        # 13: '29_Uploading', 
-                        # 14: '30_Fingerprinting'
+    # 0: 'BENIGN',  				改encode		'BENIGN': 0,
+    # 1: 'DDoS_HTTP', 				改encode		'DDoS_HTTP': 28, 
+    # 2: 'DDoS_ICMP', 				改encode		'DDoS_ICMP': 24, 
+    # 3: 'DDoS_TCP',				改encode		'DDoS_TCP': 27,
+    # 4: 'DDoS_UDP', 				改encode		'DDoS_UDP': 23,
+    # 5: 'Fingerprinting', 			改encode		'Fingerprinting': 30
+    # 6: 'PortScan', 				改encode		'PortScan': 10, 
+    # 7: 'SQL_injection', 			改encode		'SQL_injection': 25,
+    # 8: 'Uploading', 				改encode		'Uploading': 29,
+    # 9: 'Vulnerability_scanner',	改encode 	    'Vulnerability_scanner': 26,
+    # 10: 'backdoor', 				改encode		'backdoor': 15, 
+    # 11: 'mitm',					改encode		'mitm': 18,
+    # 12: 'password',				改encode		'password': 19,
+    # 13: 'ransomware', 			改encode		'ransomware': 20,
+    # 14: 'xss'						改encode		'xss': 22, 
 
-    y_train_After_Change = np.where(y_train == 1, 10,
-                                    np.where(y_train == 2, 15,
-                                    np.where(y_train == 3, 18,
-                                    np.where(y_train == 4, 19,
-                                    np.where(y_train == 5, 20,
-                                    np.where(y_train == 6, 22,
-                                    np.where(y_train == 7, 23,
-                                    np.where(y_train == 8, 24,
-                                    np.where(y_train == 9, 25,
-                                    np.where(y_train == 10, 26,
-                                    np.where(y_train == 11, 27,
-                                    np.where(y_train == 12, 28,
-                                    np.where(y_train == 13, 29,
-                                    np.where(y_train == 14, 30,
+    y_train_After_Change = np.where(y_train == 1, 28,
+                                    np.where(y_train == 2, 24,
+                                    np.where(y_train == 3, 27,
+                                    np.where(y_train == 4, 23,
+                                    np.where(y_train == 5, 30,
+                                    np.where(y_train == 6, 10,
+                                    np.where(y_train == 7, 25,
+                                    np.where(y_train == 8, 29,
+                                    np.where(y_train == 9, 26,
+                                    np.where(y_train == 10, 15,
+                                    np.where(y_train == 11, 18,
+                                    np.where(y_train == 12, 19,
+                                    np.where(y_train == 13, 20,
+                                    np.where(y_train == 14, 22,
                                     y_train))))))))))))))
     
-    y_test_After_Change = np.where(y_test == 1, 10,
-                                    np.where(y_test == 2, 15,
-                                    np.where(y_test == 3, 18,
-                                    np.where(y_test == 4, 19,
-                                    np.where(y_test == 5, 20,
-                                    np.where(y_test == 6, 22,
-                                    np.where(y_test == 7, 23,
-                                    np.where(y_test == 8, 24,
-                                    np.where(y_test == 9, 25,
-                                    np.where(y_test == 10, 26,
-                                    np.where(y_test == 11, 27,
-                                    np.where(y_test == 12, 28,
-                                    np.where(y_test == 13, 29,
-                                    np.where(y_test == 14, 30,
+    y_test_After_Change = np.where(y_test == 1, 28,
+                                    np.where(y_test == 2, 24,
+                                    np.where(y_test == 3, 27,
+                                    np.where(y_test == 4, 23,
+                                    np.where(y_test == 5, 30,
+                                    np.where(y_test == 6, 10,
+                                    np.where(y_test == 7, 25,
+                                    np.where(y_test == 8, 29,
+                                    np.where(y_test == 9, 26,
+                                    np.where(y_test == 10, 15,
+                                    np.where(y_test == 11, 18,
+                                    np.where(y_test == 12, 19,
+                                    np.where(y_test == 13, 20,
+                                    np.where(y_test == 14, 22,
                                     y_test))))))))))))))
 
     #np.save
