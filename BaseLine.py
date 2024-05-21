@@ -72,6 +72,10 @@ getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/{today}/{
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_20240502.npy", allow_pickle=True)
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_20240502.npy", allow_pickle=True)   
 
+# # 20240502 CIC-IDS2017 after do labelencode and minmax chi_square45 75 25分
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)    
+            
 # 20240422 CICIDS2019 after PCA do labelencode and minmax
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
@@ -89,8 +93,8 @@ getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/{today}/{
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_20240519.npy", allow_pickle=True)    
             
 # 20240520 EdgeIIoT after do labelencode and minmax chi_square45 75 25分
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)            
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)            
 
 counter = Counter(y_test)
 print("test筆數",counter)
@@ -209,31 +213,31 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
         #CICIDS2017
-        # class_names = {
-        #                 0: '0_BENIGN', 
-        #                 1: '1_Bot', 
-        #                 2: '2_DDoS', 
-        #                 3: '3_DoS GoldenEye', 
-        #                 4: '4_DoS Hulk', 
-        #                 5: '5_DoS Slowhttptest', 
-        #                 6: '6_DoS slowloris', 
-        #                 7: '7_FTP-Patator', 
-        #                 8: '8_Heartbleed', 
-        #                 9: '9_Infiltration', 
-        #                 10: '10_PortScan', 
-        #                 11: '11_SSH-Patator', 
-        #                 12: '12_Web Attack Brute Force', 
-        #                 13: '13_Web Attack Sql Injection', 
-        #                 14: '14_Web Attack XSS'
-        #                 # 15: '15_backdoor',
-        #                 # 16: '16_dos',
-        #                 # 17: '17_injection',
-        #                 # 18: '18_mitm',
-        #                 # 19: '19_password',
-        #                 # 20: '20_ransomware',
-        #                 # 21: '21_scanning',
-        #                 # 22: '22_xss'
-        #                 } 
+        class_names = {
+                        0: '0_BENIGN', 
+                        1: '1_Bot', 
+                        2: '2_DDoS', 
+                        3: '3_DoS GoldenEye', 
+                        4: '4_DoS Hulk', 
+                        5: '5_DoS Slowhttptest', 
+                        6: '6_DoS slowloris', 
+                        7: '7_FTP-Patator', 
+                        8: '8_Heartbleed', 
+                        9: '9_Infiltration', 
+                        10: '10_PortScan', 
+                        11: '11_SSH-Patator', 
+                        12: '12_Web Attack Brute Force', 
+                        13: '13_Web Attack Sql Injection', 
+                        14: '14_Web Attack XSS'
+                        # 15: '15_backdoor',
+                        # 16: '16_dos',
+                        # 17: '17_injection',
+                        # 18: '18_mitm',
+                        # 19: '19_password',
+                        # 20: '20_ransomware',
+                        # 21: '21_scanning',
+                        # 22: '22_xss'
+                        } 
         # # CICIDS2019
         # class_names = {
         #                 0: '0_BENIGN', 
@@ -261,31 +265,23 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         #                 # 22: '22_xss'
         #                 } 
         # EdgeIIoT
-        class_names = {
-                        0: '0_BENIGN', 
-                        1: '10_PortScan', 
-                        2: '15_backdoor', 
-                        3: '18_mitm',
-                        4: '19_password', 
-                        5: '20_ransomware', 
-                        6: '22_xss', 
-                        7: '23_DDoS_UDP', 
-                        8: '24_DDoS_ICMP', 
-                        9: '25_SQL_injection', 
-                        10: '26_Vulnerability_scanner', 
-                        11: '27_DDoS_TCP', 
-                        12: '28_DDoS_HTTP',
-                        13: '29_Uploading', 
-                        14: '30_Fingerprinting'
-                        # 15: '15_backdoor',
-                        # 16: '16_dos',
-                        # 17: '17_injection',
-                        # 18: '18_mitm',
-                        # 19: '19_password',
-                        # 20: '20_ransomware',
-                        # 21: '21_scanning',
-                        # 22: '22_xss'
-                        } 
+        # class_names = {
+        #                 0: 'BENIGN', 
+        #                 1: 'DDoS_HTTP', 
+        #                 2: 'DDoS_ICMP', 
+        #                 3: 'DDoS_TCP',
+        #                 4: 'DDoS_UDP', 
+        #                 5: 'Fingerprinting', 
+        #                 6: 'PortScan', 
+        #                 7: 'SQL_injection', 
+        #                 8: 'Uploading', 
+        #                 9: 'Vulnerability_scanner', 
+        #                 10: 'backdoor', 
+        #                 11: 'mitm', 
+        #                 12: 'password',
+        #                 13: 'ransomware', 
+        #                 14: 'xss'
+        #                 } 
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
         plt.figure(figsize = (9,6))
         sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn')
