@@ -9,7 +9,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import OneHotEncoder
-from mytoolfunction import generatefolder,SaveDataToCsvfile,SaveDataframeTonpArray,CheckFileExists,splitdatasetbalancehalf,printFeatureCountAndLabelCountInfo
+from mytoolfunction import generatefolder,SaveDataToCsvfile,SaveDataframeTonpArray,CheckFileExists,spiltweakLabelbalance,printFeatureCountAndLabelCountInfo
 
 # filepath = "D:\\ToN-IoT-Network\\TON_IoT Datasets\\UNSW-ToN-IoT"
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
@@ -207,6 +207,13 @@ def DoAddLabelToTONIOT(df,add_mergedays_label_or_dataset_label):
 
     return df
 
+def DoRenameLabel(df):
+    df['type'] = df['type'].replace({'normal': 'BENIGN'})
+    df['type'] = df['type'].replace({'ddos': 'DDoS'})
+
+    # 將 'type' 列重命名為 'Label'
+    # df.rename(columns={'type': 'Label'}, inplace=True)
+    return df
 
 def DoMinMaxAndLabelEncoding(afterprocess_dataset,bool_doencode):
     ### label encoding
@@ -296,6 +303,8 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,bool_doencode):
             file.write(str(encoded_type_values) + "\n")
     #保存Lable做label_encoding的DataFrame方便後續BaseLine實驗
     else:
+        # Rename Label方便後續Noniid實驗
+        afterminmax_dataset = DoRenameLabel(afterminmax_dataset)
         encoded_type_values, afterminmax_dataset = label_encoding("type", afterminmax_dataset)
         # afterminmax_dataset.to_csv(filepath + 
                                 #    "\\dataset_AfterProcessed\\CICIDS2017\\"+choose_merge_days+"\\CICIDS2017_AfterProcessed_DoLabelencode_"+choose_merge_days+".csv", index=False)
@@ -321,7 +330,7 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,bool_doencode):
 # do Labelencode and minmax 
 def DoSpiltAllfeatureAfterMinMax(df,bool_Noniid):  
     train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
-    #不能用手動劃分 因問其劃分時不是random沒有將資料打亂會造成資料誤判
+    #不能用手動劃分 因其劃分時不是random沒有將資料打亂會造成資料誤判
     # train_dataframes, test_dataframes = manualspiltdataset(df)#test_size=0.2表示将数据集分成测试集的比例为20%
 
     if bool_Noniid !=True:
@@ -334,11 +343,18 @@ def DoSpiltAllfeatureAfterMinMax(df,bool_Noniid):
             train_dataframes = pd.concat([train_dataframes,train_dataframes_add])
     else:
         # BaseLine時
-            label_counts = test_dataframes['type'].value_counts()
-            print("test_dataframes\n", label_counts)
-            label_counts = train_dataframes['type'].value_counts()
-            print("train_dataframes\n", label_counts)
-    
+            # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+            List_train_Label = []
+            List_test_Label = []
+            for i in range(10):
+                train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+                List_train_Label.append(train_label_split)
+                List_test_Label.append(test_label_split)         
+
+            train_dataframes = pd.concat(List_train_Label)
+            test_dataframes = pd.concat(List_test_Label)
+
+            print("test",test_dataframes['type'].value_counts())
     # 紀錄資料筆數
     with open(f"./data/dataset_AfterProcessed/TONIOT/encode_and_count_{bool_Noniid}.csv", "a+") as file:
         label_counts = test_dataframes['type'].value_counts()
@@ -492,4 +508,5 @@ def forBaseLineUseData(bool_Noniid):
 
 # True for BaseLine
 # False for Noniid
-forBaseLineUseData(False)
+# forBaseLineUseData(False)
+forBaseLineUseData(True)

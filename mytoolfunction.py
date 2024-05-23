@@ -198,6 +198,9 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
 
+            # 20240523 TONIoT after do labelencode and minmax  75 25分
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
 
         elif (Choose_method == 'SMOTE'):
             # x_train = np.load(filepath + "x_total_train_SMOTE_ALL_Label.npy", allow_pickle=True)
@@ -306,8 +309,12 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\y_Kub_train_half1_20240507.npy", allow_pickle=True)
 
             # 20240507 after do labelencode and minmax Wustl iid
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\x_Wustl_train_half1_20240507.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Wustl_train_half1_20240507.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\x_Wustl_train_half1_20240507.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Wustl_train_half1_20240507.npy", allow_pickle=True)
+
+            # 20240523 non iid after do labelencode and minmax chi-square_45 cicids2017 ALLday
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\CICIDS2017_AddedLabel_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\CICIDS2017_AddedLabel_y.npy", allow_pickle=True)
 
         elif (Choose_method == 'SMOTE'):
             # # # # 20240317 Chi-square 45 SMOTE  K=5         
@@ -384,8 +391,12 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\y_Kub_train_half2_20240507.npy", allow_pickle=True)
 
             # 20240507 after do labelencode and minmax Wustl iid
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\x_Wustl_train_half2_20240507.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Wustl_train_half2_20240507.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\x_Wustl_train_half2_20240507.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Wustl_train_half2_20240507.npy", allow_pickle=True)
+
+            # 20240523 non iid after do labelencode and minmax chi-square_45 TONIoT
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\TONIIOT_AddedLabel_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\TONIIOT_AddedLabel_y.npy", allow_pickle=True)
 
 
         elif (Choose_method == 'SMOTE'):
@@ -452,9 +463,12 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240428.npy", allow_pickle=True)
             
             # # 20240506 non iid client3 use cicids2019 chi45
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\CICIDS2019_AddedLabel_x.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\CICIDS2019_AddedLabel_y.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\CICIDS2019_AddedLabel_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\CICIDS2019_AddedLabel_y.npy", allow_pickle=True)
             
+            # 20240523 non iid after do labelencode and minmax chi-square_45 EdgeIIoT
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\EdgeIIoT_AddedLabel_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\EdgeIIoT_AddedLabel_y.npy", allow_pickle=True)
 
 
         elif (Choose_method == 'SMOTE'):
