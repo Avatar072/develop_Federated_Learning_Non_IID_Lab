@@ -33,11 +33,14 @@ from collections import Counter
 #CICIIDS2019
 # labelCount = 13
 #Wustl 41個特徵
-labelCount = 5
+# labelCount = 5
 #Kub 36個特徵
 # labelCount = 4
 #CICIIDS2017、TONIOT、CICIIDS2019 聯集
 # labelCount = 35
+
+# CICIIDS2017、TONIOT、EdgwIIOT 聯集
+labelCount = 31
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
@@ -126,9 +129,13 @@ getStartorEndtime("starttime",start_IDS,f"./FL_AnalyseReportfolder/{today}/{clie
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\x_Resplit_test_20240507.npy", allow_pickle=True)
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\y_Resplit_test_20240507.npy", allow_pickle=True)
 
-# 20240507 after do labelencode and minmax Wustl iid
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\x_Resplit_test_20240507.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Resplit_test_20240507.npy", allow_pickle=True)
+# # 20240507 after do labelencode and minmax Wustl iid
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\x_Resplit_test_20240507.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Resplit_test_20240507.npy", allow_pickle=True)
+
+# 20240523 after do labelencode and minmax cicids2017 ALLDay and toniot EdgwIIoT Chi_square_45
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\merged_x_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\merged_y_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", allow_pickle=True)
 
 counter = Counter(y_test)
 print("test",counter)
@@ -272,6 +279,45 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
         # class_names = [str(i) for i in range(labelCount)]
+        # CICIDS2017 TONIOT CICIDS2019
+        # class_names = {
+        #                 0: '0_BENIGN', 
+        #                 1: '1_Bot', 
+        #                 2: '2_DDoS', 
+        #                 3: '3_DoS GoldenEye', 
+        #                 4: '4_DoS Hulk', 
+        #                 5: '5_DoS Slowhttptest', 
+        #                 6: '6_DoS slowloris', 
+        #                 7: '7_FTP-Patator', 
+        #                 8: '8_Heartbleed', 
+        #                 9: '9_Infiltration', 
+        #                 10: '10_PortScan', 
+        #                 11: '11_SSH-Patator', 
+        #                 12: '12_Web Attack Brute Force', 
+        #                 13: '13_Web Attack Sql Injection', 
+        #                 14: '14_Web Attack XSS',
+        #                 15: '15_backdoor',
+        #                 16: '16_dos',
+        #                 17: '17_injection',
+        #                 18: '18_mitm',
+        #                 19: '19_password',
+        #                 20: '20_ransomware',
+        #                 21: '21_scanning',
+        #                 22: '22_xss',
+        #                 23: '23_DrDoS_DNS',
+        #                 24: '24_DrDoS_LDAP',
+        #                 25: '25_DrDoS_MSSQL',
+        #                 26: '26_DrDoS_NTP', 
+        #                 27: '27_DrDoS_NetBIOS',
+        #                 28: '28_DrDoS_SNMP' ,
+        #                 29: '29_DrDoS_SSDP',
+        #                 30: '30_DrDoS_UDP',
+        #                 31: '31_Syn',
+        #                 32: '32_TFTP',
+        #                 33: '33_UDPlag',
+        #                 34: '34_WebDDoS' 
+        #                 }
+        # CICIDS2017 TONIOT EdgeIIOT 
         class_names = {
                         0: '0_BENIGN', 
                         1: '1_Bot', 
@@ -296,29 +342,45 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
                         20: '20_ransomware',
                         21: '21_scanning',
                         22: '22_xss',
-                        23: '23_DrDoS_DNS',
-                        24: '24_DrDoS_LDAP',
-                        25: '25_DrDoS_MSSQL',
-                        26: '26_DrDoS_NTP', 
-                        27: '27_DrDoS_NetBIOS',
-                        28: '28_DrDoS_SNMP' ,
-                        29: '29_DrDoS_SSDP',
-                        30: '30_DrDoS_UDP',
-                        31: '31_Syn',
-                        32: '32_TFTP',
-                        33: '33_UDPlag',
-                        34: '34_WebDDoS' 
-                        }      
+                        23: '23_DDoS_UDP',
+                        24: '24_DDoS_ICMP',
+                        25: '25_SQL_injection',
+                        26: '26_Vulnerability_scanner', 
+                        27: '27_DDoS_TCP',
+                        28: '28_DDoS_HTTP' ,
+                        29: '29_Uploading',
+                        30: '30_Fingerprinting'
+                        }         
         # class_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11','12','13','14','15','16','17','18','20','21']
         # class_names = ['0', '1', '2', '3']
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
+        
+        # 設置字體比例
+        sns.set(font_scale=1.2)
+        
+        # 設置圖像大小和繪製熱圖
         plt.figure(figsize = (20,10))
-        sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn', annot_kws={"size": 10})
-        plt.title(client_str +"_"+ Choose_method)
-        plt.xlabel("prediction",fontsize=12)
-        # plt.ylabel("label (ground truth)",fontsize=5,labelpad=0, va='top')
-        plt.xticks(rotation=0, fontsize=12)
-        plt.yticks(fontsize=11)
+
+        # 使用 heatmap 繪製混淆矩陣
+        # annot=True 表示在單元格內顯示數值
+        # fmt="d" 表示數值的格式為整數
+        # cmap='BuGn' 設置顏色圖
+        # annot_kws={"size": 13} 設置單元格內數值的字體大小
+        sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn', annot_kws={"size": 13})
+        
+        # 設置標題和標籤
+        plt.title(client_str +"_"+ Choose_method) # 圖片標題
+        plt.xlabel("prediction",fontsize=15) # x 軸標籤
+        plt.ylabel("Label (ground truth)", fontsize=18) # y 軸標籤
+       
+        # 設置 x 軸和 y 軸的字體大小和旋轉角度
+        plt.xticks(rotation=0, fontsize=15) # x 軸刻度標籤不旋轉，字體大小為 15
+        plt.yticks(rotation=0, fontsize=15) # y 軸刻度標籤不旋轉，字體大小為 15
+        
+        # 調整圖像間距
+        # left, right, top, bottom 控制圖像在畫布上的邊距
+        plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.2)
+        # 保存圖像到指定路徑
         plt.savefig(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_{str_globalOrlocal}_confusion_matrix.png")
         # plt.show()
 
@@ -376,8 +438,8 @@ net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 
 # 启动Flower客户端
 fl.client.start_numpy_client(
-    # server_address="127.0.0.1:53388",
-    server_address="192.168.1.137:53388",
+    server_address="127.0.0.1:53388",
+    # server_address="192.168.1.137:53388",
     client=FlowerClient(),
     
 )

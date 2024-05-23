@@ -12,6 +12,15 @@ today = datetime.date.today()
 today = today.strftime("%Y%m%d")
 
 
+#########
+# TONIOT和EdgeIIOT用baseline的Np file先將轉原Label encode的值轉換調，使用下面這兩個function
+# EdgeIIOTNpfileChangeLabelEncodeValue和TONIoTNpfileChangeLabelEncodeValue
+
+# 在用轉換掉Label encode值得npfile去add label，
+# 使用DoAddLabelToTrainData
+#########
+
+
 def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
     # 載入已有的特徵數據和標籤數據
     if Str_ChooseDataset == "CICIDS2017":
@@ -27,26 +36,35 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
         save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\" + today + "\\CICIDS2017_AddedLabel"
         # Add TONIOT CICIDS2019
         # add_Labels = np.array([15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34])
-        # Add TONIOT EDGEIIoT
+        # Add TONIOT EdgeIIoT
         add_Labels = np.array([15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30])
         # add_Labels = np.array([23,24,25,26,27,28,29,30,31,32,33,34])
   
 
     elif Str_ChooseDataset == "TONIOT":
         # # 20240323 non iid client2 use TONIOT change ts change ip encode
-        x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
-        y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
+        # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
+        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_change_ts_change_ip_20240317.npy", allow_pickle=True)
     
-        x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_TONIOT_test_change_ts_change_ip_20240317.npy")
-        y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_TONIOT_test_change_ts_change_ip_20240317.npy")
+        # x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_TONIOT_test_change_ts_change_ip_20240317.npy")
+        # y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_TONIOT_test_change_ts_change_ip_20240317.npy")
 
+        # 20240523 non iid us BaseLine npfile TONIoT after do labelencode and minmax  75 25分
+        #因non iid所以 y_train要使用ChangeLabelEncode
+        x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
+        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
 
         generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT\\", today)
         save_filename = filepath + "\\dataset_AfterProcessed\\TONIOT\\" + today + "\\TONIIOT_AddedLabel"
         # Add CICIDS2017 CICIDS2019
         # add_Labels = np.array([1,3,4,5,6,7,8,9,10,11,12,13,14,23,24,25,26,27,28,29,30,31,32,33,34])
         # Add CICIDS2019
-        add_Labels = np.array([23,24,25,26,27,28,29,30,31,32,33,34])  
+        # add_Labels = np.array([23,24,25,26,27,28,29,30,31,32,33,34])
+        # Add EdgeIIoT  
+        add_Labels = np.array([23,24,25,26,27,28,29,30])  
+        # Add CICIDS2017 EdgeIIoT
+        add_Labels = np.array([1,3,4,5,6,7,8,9,10,11,12,13,14,23,24,25,26,27,28,29,30])
 
 
     elif Str_ChooseDataset == "CICIDS2019":
@@ -67,8 +85,10 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
         # y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_20240519.npy", allow_pickle=True)
    
         # 20240520  non iid client3 use EdgeIIoT after do labelencode and minmax chi_square45 75 25分
+        #因non iid所以 y_train要使用ChangeLabelEncode
         x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
-        y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
+        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
 
 
         print(generatefolder(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\", today))
@@ -118,7 +138,7 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
     add_feature = np.zeros((Int_add_Label_count, x_train.shape[1]))
 
     # TONIOT的第43個欄位 攻擊都是1 normal是0
-    if Str_ChooseDataset == "TONIOT":
+    if Str_ChooseDataset == "TONIOT" or Str_ChooseDataset == "EdgeIIOT":
         # 將特定列填充為1，但排除Label encode值等於0的情況
         column_index = 43  # 要插入的index欄位，是第43列
         for i in range(Int_add_Label_count):
@@ -159,15 +179,15 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
 # DoAddLabelToTrainData("CICIDS2017")
 # DoAddLabelToTrainData("CICIDS2019")
 #
-# DoAddLabelToTrainData("TONIOT")
+DoAddLabelToTrainData("TONIOT")
 #
 # DoAddLabelToTrainData("CICIDS2019",4)
 
+# DoAddLabelToTrainData("EdgeIIOT")
 
-def NpfileChangeLabelEncodeValue():
-    y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_20240519.npy", allow_pickle=True)  
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_20240519.npy", allow_pickle=True)    
-
+def EdgeIIOTNpfileChangeLabelEncodeValue():
+    y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
     # EdgeIIOT将 y_train和y_test進行Label encode值替換 for Noniid實驗
     # 0: 'BENIGN',  				改encode		'BENIGN': 0,
     # 1: 'DDoS_HTTP', 				改encode		'DDoS_HTTP': 28, 
@@ -228,4 +248,53 @@ def NpfileChangeLabelEncodeValue():
     print("唯一值数量:", len(y_test_unique_values))
     print("唯一值:", y_test_unique_values)
 
-NpfileChangeLabelEncodeValue()
+def TONIoTNpfileChangeLabelEncodeValue():
+    y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
+
+    #  0: 'BENIGN',           改encode	    0: 'BENIGN', 
+    #  1: 'DDoS',             改encode		2: 'DDoS', 
+    #  2: 'backdoor',         改encode		15: 'backdoor', 
+    #  3: 'dos',              改encode		16: 'dos', 
+    #  4: 'injection',        改encode		17: 'injection', 
+    #  5: 'mitm',             改encode		18: 'mitm', 
+    #  6: 'password',         改encode		19: 'password', 
+    #  7: 'ransomware',       改encode		20: 'ransomware',
+    #  8: 'scanning',         改encode		21: 'scanning', 
+    #  9: 'xss',              改encode 	    22: 'xss', 
+
+    y_train_After_Change = np.where(y_train == 1, 2,
+                                    np.where(y_train == 2, 15,
+                                    np.where(y_train == 3, 16,
+                                    np.where(y_train == 4, 17,
+                                    np.where(y_train == 5, 18,
+                                    np.where(y_train == 6, 19,
+                                    np.where(y_train == 7, 20,
+                                    np.where(y_train == 8, 21,
+                                    np.where(y_train == 9, 22,
+                                    y_train)))))))))
+    
+    y_test_After_Change = np.where(y_test == 1, 2,
+									np.where(y_test == 2, 15,
+                                    np.where(y_test == 3, 16,
+                                    np.where(y_test == 4, 17,
+                                    np.where(y_test == 5, 18,
+                                    np.where(y_test == 6, 19,
+                                    np.where(y_test == 7, 20,
+                                    np.where(y_test == 8, 21,
+                                    np.where(y_test == 9, 22,
+                                    y_test)))))))))
+
+    #np.save
+    np.save(f"{filepath}\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_After_ChangeLabelEncode_for_Noniid.npy", y_train_After_Change)
+    np.save(f"{filepath}\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_test_After_ChangeLabelEncode_for_Noniid.npy", y_test_After_Change)
+
+    y_train_unique_values = np.unique(y_train_After_Change)
+    print("唯一值数量:", len(y_train_unique_values))
+    print("唯一值:", y_train_unique_values)
+    y_test_unique_values = np.unique(y_test_After_Change)
+    print("唯一值数量:", len(y_test_unique_values))
+    print("唯一值:", y_test_unique_values)
+
+# EdgeIIOTNpfileChangeLabelEncodeValue()
+# TONIoTNpfileChangeLabelEncodeValue()

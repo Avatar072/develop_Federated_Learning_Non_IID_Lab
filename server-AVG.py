@@ -41,7 +41,7 @@ class MLP(nn.Module):
 # 初始化模型和優化器
 # model = MLP()
 #CICIIDS2017 or Edge 62個特徵
-labelCount = 15
+# labelCount = 15
 #CICIIDS2019
 # labelCount = 13
 #Wustl 41個特徵
@@ -50,7 +50,10 @@ labelCount = 15
 # labelCount = 4
 #CICIIDS2017、TONIOT、CICIIDS2019 聯集
 # labelCount = 35
-model = ChooseUseModel("MLP", 41, labelCount)
+#CICIIDS2017、TONIOT、EdgwIIOT 聯集
+labelCount = 31
+
+model = ChooseUseModel("MLP", 44, labelCount)
 
 optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001)
 
@@ -113,11 +116,11 @@ strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, ev
 
 # Start Flower server
 fl.server.start_server(
-    # server_address="127.0.0.1:53388",
+    server_address="127.0.0.1:53388",
     # server_address="127.0.0.1:8080",
-    server_address="192.168.1.137:53388",
+    # server_address="192.168.1.137:53388",
 
-    config=fl.server.ServerConfig(num_rounds=50),
+    config=fl.server.ServerConfig(num_rounds=1),
     # config=fl.server.ServerConfig(num_rounds=20),
 
     strategy=strategy,
