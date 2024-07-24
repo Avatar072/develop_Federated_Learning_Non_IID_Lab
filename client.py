@@ -30,6 +30,8 @@ from collections import Counter
 
 #CICIIDS2017 or Edge 62個特徵
 # labelCount = 15
+#TONIOT 44個特徵
+labelCount = 10
 #CICIIDS2019
 # labelCount = 13
 #Wustl 41個特徵
@@ -40,7 +42,7 @@ from collections import Counter
 # labelCount = 35
 
 # CICIIDS2017、TONIOT、EdgwIIOT 聯集
-labelCount = 31
+# labelCount = 31
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
@@ -134,8 +136,17 @@ getStartorEndtime("starttime",start_IDS,f"./FL_AnalyseReportfolder/{today}/{clie
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Resplit_test_20240507.npy", allow_pickle=True)
 
 # 20240523 after do labelencode and minmax cicids2017 ALLDay and toniot EdgwIIoT Chi_square_45
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\merged_x_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\merged_y_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", allow_pickle=True)
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\merged_x_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\merged_y_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", allow_pickle=True)
+
+# 20240523 TONIoT after do labelencode and minmax  75 25分
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
+
+
+# 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA attack for FL Client3
+# x_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/x_DoJSMA_test_20240722.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/y_DoJSMA_test_20240722.npy")
 
 counter = Counter(y_test)
 print("test",counter)
@@ -279,6 +290,32 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
         # class_names = [str(i) for i in range(labelCount)]
+        #TONIoT
+        class_names = {
+                        0: 'BENIGN', 
+                        1: 'DDoS', 
+                        2: 'backdoor', 
+                        3: 'dos', 
+                        4: 'injection', 
+                        5: 'mitm', 
+                        6: 'password', 
+                        7: 'ransomware', 
+                        8: 'scanning', 
+                        9: 'xss', 
+                        # 10: '10_PortScan', 
+                        # 11: '11_SSH-Patator', 
+                        # 12: '12_Web Attack Brute Force', 
+                        # 13: '13_Web Attack Sql Injection', 
+                        # 14: '14_Web Attack XSS'
+                        # 15: '15_backdoor',
+                        # 16: '16_dos',
+                        # 17: '17_injection',
+                        # 18: '18_mitm',
+                        # 19: '19_password',
+                        # 20: '20_ransomware',
+                        # 21: '21_scanning',
+                        # 22: '22_xss'
+                        } 
         # CICIDS2017 TONIOT CICIDS2019
         # class_names = {
         #                 0: '0_BENIGN', 
@@ -318,39 +355,39 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         #                 34: '34_WebDDoS' 
         #                 }
         # CICIDS2017 TONIOT EdgeIIOT 
-        class_names = {
-                        0: '0_BENIGN', 
-                        1: '1_Bot', 
-                        2: '2_DDoS', 
-                        3: '3_DoS GoldenEye', 
-                        4: '4_DoS Hulk', 
-                        5: '5_DoS Slowhttptest', 
-                        6: '6_DoS slowloris', 
-                        7: '7_FTP-Patator', 
-                        8: '8_Heartbleed', 
-                        9: '9_Infiltration', 
-                        10: '10_PortScan', 
-                        11: '11_SSH-Patator', 
-                        12: '12_Web Attack Brute Force', 
-                        13: '13_Web Attack Sql Injection', 
-                        14: '14_Web Attack XSS',
-                        15: '15_backdoor',
-                        16: '16_dos',
-                        17: '17_injection',
-                        18: '18_mitm',
-                        19: '19_password',
-                        20: '20_ransomware',
-                        21: '21_scanning',
-                        22: '22_xss',
-                        23: '23_DDoS_UDP',
-                        24: '24_DDoS_ICMP',
-                        25: '25_SQL_injection',
-                        26: '26_Vulnerability_scanner', 
-                        27: '27_DDoS_TCP',
-                        28: '28_DDoS_HTTP' ,
-                        29: '29_Uploading',
-                        30: '30_Fingerprinting'
-                        }         
+        # class_names = {
+        #                 0: '0_BENIGN', 
+        #                 1: '1_Bot', 
+        #                 2: '2_DDoS', 
+        #                 3: '3_DoS GoldenEye', 
+        #                 4: '4_DoS Hulk', 
+        #                 5: '5_DoS Slowhttptest', 
+        #                 6: '6_DoS slowloris', 
+        #                 7: '7_FTP-Patator', 
+        #                 8: '8_Heartbleed', 
+        #                 9: '9_Infiltration', 
+        #                 10: '10_PortScan', 
+        #                 11: '11_SSH-Patator', 
+        #                 12: '12_Web Attack Brute Force', 
+        #                 13: '13_Web Attack Sql Injection', 
+        #                 14: '14_Web Attack XSS',
+        #                 15: '15_backdoor',
+        #                 16: '16_dos',
+        #                 17: '17_injection',
+        #                 18: '18_mitm',
+        #                 19: '19_password',
+        #                 20: '20_ransomware',
+        #                 21: '21_scanning',
+        #                 22: '22_xss',
+        #                 23: '23_DDoS_UDP',
+        #                 24: '24_DDoS_ICMP',
+        #                 25: '25_SQL_injection',
+        #                 26: '26_Vulnerability_scanner', 
+        #                 27: '27_DDoS_TCP',
+        #                 28: '28_DDoS_HTTP' ,
+        #                 29: '29_Uploading',
+        #                 30: '30_Fingerprinting'
+        #                 }         
         # class_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11','12','13','14','15','16','17','18','20','21']
         # class_names = ['0', '1', '2', '3']
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
@@ -366,7 +403,7 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         # fmt="d" 表示數值的格式為整數
         # cmap='BuGn' 設置顏色圖
         # annot_kws={"size": 13} 設置單元格內數值的字體大小
-        sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn', annot_kws={"size": 13})
+        sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn', annot_kws={"size": 15})
         
         # 設置標題和標籤
         plt.title(client_str +"_"+ Choose_method) # 圖片標題
@@ -436,10 +473,15 @@ class FlowerClient(fl.client.NumPyClient):
 # 初始化神经网络模型
 net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 
+# if client_str == "client3":
+#     model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20240722\\client3\\1st\\normal\\After_local_train_model.pth'
+
+#     net.load_state_dict(torch.load(model_path))
+
 # 启动Flower客户端
 fl.client.start_numpy_client(
-    server_address="127.0.0.1:53388",
-    # server_address="192.168.1.137:53388",
+    # server_address="127.0.0.1:53388",
+    server_address="192.168.1.137:53388",
     client=FlowerClient(),
     
 )
