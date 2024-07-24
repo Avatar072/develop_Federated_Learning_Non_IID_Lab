@@ -11,156 +11,95 @@ from sklearn.metrics import classification_report
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-warnings.filterwarnings("ignore")#https://blog.csdn.net/qq_43391414/article/details/120543028
+warnings.filterwarnings("ignore")  # https://blog.csdn.net/qq_43391414/article/details/120543028
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
 from sklearn.metrics import confusion_matrix
-from mytoolfunction import generatefolder, ChooseLoadNpArray,ChooseTrainDatastes, ParseCommandLineArgs,ChooseTestDataSet
+from mytoolfunction import generatefolder, ChooseLoadNpArray, ChooseTrainDatastes, ParseCommandLineArgs, ChooseTestDataSet
 from mytoolfunction import ChooseUseModel, getStartorEndtime
 from collections import Counter
 ####################################################################################################
 
-#CICIIDS2017 or Edge 62個特徵
-# labelCount = 15
-#CICIIDS2019
-# labelCount = 13
-#TONIoT
-labelCount = 10
-#Wustl 41個特徵
-# labelCount = 5
-#Kub 36個特徵
-# labelCount = 4
-#CICIIDS2017、TONIOT、CICIIDS2019 聯集
-# labelCount = 35
+# python LoadModeForTestl.py --dataset train_half1 --epochs 100
+# python LoadModeForTestl.py --dataset train_half2 --epochs 100
+# python LoadModeForTestl.py --dataset total_train --epochs 500 --method normal
+
+labelCount = 10  # TONIoT
+
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(torch.cuda.is_available())
 print(torch.__version__)
 
-# python BaseLine.py --dataset train_half1 --epochs 100
-# python BaseLine.py --dataset train_half2 --epochs 100
-# python BaseLine.py --dataset total_train --epochs 500 --method normal
-file, num_epochs,Choose_method = ParseCommandLineArgs(["dataset", "epochs", "method"])
+file, num_epochs, Choose_method = ParseCommandLineArgs(["dataset", "epochs", "method"])
 print(f"Dataset: {file}")
 print(f"Number of epochs: {num_epochs}")
 print(f"Choose_method: {Choose_method}")
-# ChooseLoadNpArray function  return x_train、y_train 和 client_str and Choose_method
+
 x_train, y_train, client_str = ChooseLoadNpArray(filepath, file, Choose_method)
-# x_train, y_train, client_str = ChooseTrainDatastes(filepath, file, Choose_method)   
-print("特徵數",x_train.shape[1])
+print("特徵數", x_train.shape[1])
 print(y_train)
-# print(client_str)
 counter = Counter(y_train)
-print("train筆數",counter)
-today = datetime.date.today()
-today = today.strftime("%Y%m%d")
-# 在single_AnalyseReportFolder產生天日期的資料夾
-# generatefolder(filepath, "\\single_AnalyseReportFolder")
+print("train筆數", counter)
+today = datetime.date.today().strftime("%Y%m%d")
 generatefolder(f"./single_AnalyseReportFolder/", today)
 generatefolder(f"./single_AnalyseReportFolder/{today}/", client_str)
 generatefolder(f"./single_AnalyseReportFolder/{today}/{client_str}/", Choose_method)
-getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}")
-
-# 20240324 after do chi-square
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_cicids2017_AfterFeatureSelect44_BaseLine_SpiltIP_20240323.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_cicids2017_AfterFeatureSelect44_BaseLine_SpiltIP_20240323.npy", allow_pickle=True)
-
-# 20240325 after do PCA
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_AfterPCA38_20240325.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_AfterPCA38_20240325.npy", allow_pickle=True)
-
-# 20240502 CIC-IDS2017 after do labelencode and minmax  75 25分
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_20240502.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_20240502.npy", allow_pickle=True)   
+getStartorEndtime("starttime", start_IDS, f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}")
 
 # # 20240502 CIC-IDS2017 after do labelencode and minmax chi_square45 75 25分
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)    
-            
-# 20240422 CICIDS2019 after PCA do labelencode and minmax
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
 
-# 20240422 CICIDS2019 after PCA do labelencode and minmax chi-square 45
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
+# # 20240502 CIC-IDS2017 after do labelencode and minmax chi_square45 75 25分 Do JSMA
+# x_test  = np.load(f"./Adversarial_Attack_Test/20240717/x_DoJSMA_test_20240718.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20240717/y_DoJSMA_test_20240718.npy")
 
-# 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_20240502.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
+# x_test  = np.load(f"./Adversarial_Attack_Test/20240718/theta_0.05_gamma_0.02/x_DoJSMA_test_20240718.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20240718/theta_0.05_gamma_0.02/y_DoJSMA_test_20240718.npy")
 
-# 20240519 EdgeIIoT after do labelencode and minmax  75 25分
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_test_20240519.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_20240519.npy", allow_pickle=True)    
-            
-# 20240520 EdgeIIoT after do labelencode and minmax chi_square45 75 25分
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)            
+# 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA attack
+# x_test  = np.load(f"./Adversarial_Attack_Test/20240721_bk_0.5_0.5/x_DoJSMA_test_20240721.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20240721_bk_0.5_0.5/y_DoJSMA_test_20240721.npy")
+
+x_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.05_0.02/x_DoJSMA_test_20240721.npy")
+y_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.05_0.02/y_DoJSMA_test_20240721.npy")
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
 
-# 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA
-# x_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.5_0.5/x_DoJSMA_test_20240721.npy")
-# y_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.5_0.5/y_DoJSMA_test_20240721.npy")
-
-# x_test  = np.load(f"./Adversarial_Attack_Test/20240722_0.1_1.0/x_DoJSMA_test_20240722.npy")
-# y_test  = np.load(f"./Adversarial_Attack_Test/20240722_0.1_1.0/y_DoJSMA_test_20240722.npy")
+# 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA attack for FL Client3
+# x_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/x_DoJSMA_test_20240722.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/y_DoJSMA_test_20240722.npy")
 
 
 counter = Counter(y_test)
-print("test筆數",counter)
+print("test筆數", counter)
 
 x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
 y_train = torch.from_numpy(y_train).type(torch.LongTensor)
-
 x_test = torch.from_numpy(x_test).type(torch.FloatTensor)
 y_test = torch.from_numpy(y_test).type(torch.LongTensor)
 
-
-labelCount=len(y_test.unique())
+labelCount = len(y_test.unique())
 print("唯一值数量:", labelCount)
 
-# 將測試數據移動到 GPU 上
 x_train = x_train.to(DEVICE)
 y_train = y_train.to(DEVICE)
 x_test = x_test.to(DEVICE)
 y_test = y_test.to(DEVICE)
 
-
-
-# 定義訓練函數
-def train(net, trainloader, epochs):
-    print("訓練中")
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001)
-
-    for epoch in range(epochs):
-        print("epoch",epoch)
-        net.train()# PyTorch 中的一個方法，模型切換為訓練模式
-        for images, labels in tqdm(trainloader):
-            optimizer.zero_grad()
-            output = net(images)
-            labels = labels.long()
-            loss = criterion(output, labels)
-            loss.backward()
-            optimizer.step()
-        ###訓練的過程    
-        test_accuracy = test(net, testloader, start_IDS, client_str,False)
-        print(f"訓練週期 [{epoch+1}/{epochs}] - 測試準確度: {test_accuracy:.4f}")
-
 # 定義測試函數
-def test(net, testloader, start_time, client_str,plot_confusion_matrix):
-    # print("測試中")
+def test(net, testloader, start_time, client_str, plot_confusion_matrix):
     criterion = nn.CrossEntropyLoss()
     correct = 0
     total = 0
     loss = 0.0
-    ave_loss = 0.0  # 初始化 ave_loss
+    ave_loss = 0.0
 
-    net.eval()  #PyTorch 中的一個方法，用於將神經網絡模型設置為測試模式
+    net.eval()
     with torch.no_grad():
         for images, labels in testloader:
             images, labels = images.to(DEVICE), labels.to(DEVICE)
@@ -170,18 +109,14 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
-            # 計算滑動平均損失
             ave_loss = ave_loss * 0.9 + loss * 0.1
 
-            # 將標籤和預測結果轉換為 NumPy 陣列
             y_true = labels.data.cpu().numpy()
             y_pred = predicted.data.cpu().numpy()
         
-            # 計算每個類別的召回率
             acc = classification_report(y_true, y_pred, digits=4, output_dict=True)
             accuracy = correct / total
 
-            # 將每個類別的召回率寫入 "recall-baseline.csv" 檔案
             RecordRecall = ()
             RecordAccuracy = ()
            
@@ -191,28 +126,23 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
             RecordAccuracy = RecordAccuracy + (accuracy, time.time() - start_time,)
             RecordRecall = str(RecordRecall)[1:-1]
 
-            # 標誌來跟踪是否已經添加了標題行
             header_written = False
             with open(f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
                 if not header_written:
-                    # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
                     header_written = True
                 file.write(str(RecordRecall) + "\n")
         
-            # 將總體準確度和其他信息寫入 "accuracy-baseline.csv" 檔案
             with open(f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}.csv", "a+") as file:
                 if not header_written:
-                    # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
                     header_written = True
                 file.write(f"精確度,時間\n")
                 file.write(f"{accuracy},{time.time() - start_time}\n")
 
-                # 生成分類報告
                 GenrateReport = classification_report(y_true, y_pred, digits=4, output_dict=True)
                 report_df = pd.DataFrame(GenrateReport).transpose()
-                report_df.to_csv(f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/baseline_report_{client_str}.csv",header=True)
+                report_df.to_csv(f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/baseline_report_{client_str}.csv", header=True)
 
-    draw_confusion_matrix(y_true, y_pred,plot_confusion_matrix)
+    draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix)
     accuracy = correct / total
     print(f"測試準確度: {accuracy:.4f}")
     return accuracy
@@ -331,27 +261,26 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         plt.savefig(f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
         plt.show()
 
-# 創建用於訓練和測試的數據加載器
 train_data = TensorDataset(x_train, y_train)
 test_data = TensorDataset(x_test, y_test)
 trainloader = DataLoader(train_data, batch_size=500, shuffle=True)
 testloader = DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 
-# 初始化神經網絡模型
-# net = MLP().to(DEVICE)
-
 net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
-# 訓練模型
-train(net, trainloader, epochs=num_epochs)
 
-#紀錄結束時間
+# Load the saved model
+# model_path = f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/BaseLine_After_local_train_model.pth"
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240719_TONIOT\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
+model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20240722\\client3\\1st\\normal\\After_local_train_model.pth'
+
+net.load_state_dict(torch.load(model_path))
+print("Loaded model from", model_path)
+
+# Test the loaded model
+test_accuracy = test(net, testloader, start_IDS, client_str, True)
+
 end_IDS = time.time()
-getStartorEndtime("endtime",end_IDS,f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}")
-
-# 評估模型
-test_accuracy = test(net, testloader, start_IDS, client_str,True)
-# 在训练或测试结束后，保存模型
-torch.save(net.state_dict(), f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/BaseLine_After_local_train_model.pth")
+getStartorEndtime("endtime", end_IDS, f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}")
 
 print("測試數據量:\n", len(test_data))
 print("訓練數據量:\n", len(train_data))
