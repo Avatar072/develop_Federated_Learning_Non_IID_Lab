@@ -448,6 +448,57 @@ def DoSpiltAfterDoPCA(df,number_of_components,bool_Noniid,bool_add_cicids2017fea
                            f"train_ToN-IoT_train_AfterPCA{number_of_components}",today)
 
 
+# do split train to half for iid and Labelencode and minmax 
+def DoSplitthrildClientForiid():
+        # 75 train分3份
+        df_ALLtrain = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_20240523.csv")
+                    # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+        List_train_half1_Label = []
+        List_train_half2_Label = []
+        List_train_half3_Label = []
+
+        for i in range(10):
+            # 第一次拆分：将数据拆分成 33.3% 和 66.7%
+            train_half1_label_split, train_half2_label_split = spiltweakLabelbalance(i,df_ALLtrain,0.3333)
+            # 第二次拆分：将 66.7% 的数据再拆分成 50% 和 50%（即 33.3% 和 33.3%）
+            train_half1_label_split_half1,train_half1_label_split_half2 = spiltweakLabelbalance(i,train_half1_label_split,0.5)
+
+            List_train_half1_Label.append(train_half1_label_split_half1)
+            List_train_half2_Label.append(train_half2_label_split)    
+            List_train_half3_Label.append(train_half1_label_split_half2)      
+            
+        df_train_half1 = pd.concat(List_train_half1_Label)
+        df_train_half2 = pd.concat(List_train_half2_Label)
+        df_train_half3 = pd.concat(List_train_half3_Label)
+            
+
+        # 紀錄資料筆數
+        with open(f"./data/dataset_AfterProcessed/TONIOT/encode_and_count_iid.csv", "a+") as file:
+            label_counts = df_train_half1['type'].value_counts()
+            print("df_train_half1\n", label_counts)
+            file.write("df_train_half1_label_counts\n")
+            file.write(str(label_counts) + "\n")
+            
+            label_counts = df_train_half2['type'].value_counts()
+            print("df_train_half2\n", label_counts)
+            file.write("df_train_half2_label_counts\n")
+            file.write(str(label_counts) + "\n")
+
+            label_counts = df_train_half3['type'].value_counts()
+            print("df_train_half3\n", label_counts)
+            file.write("df_train_half2_label_counts\n")
+            file.write(str(label_counts) + "\n")
+
+
+        SaveDataToCsvfile(df_train_half1, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half1_20240523")
+        SaveDataToCsvfile(df_train_half2,  f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half2_20240523")
+        SaveDataToCsvfile(df_train_half3,  f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half3_20240523")
+
+        SaveDataframeTonpArray(df_train_half1, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half1",20240523)
+        SaveDataframeTonpArray(df_train_half2, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half2",20240523)
+        SaveDataframeTonpArray(df_train_half3, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half3",20240523)
+
+
 
 #手動劃分
 def manualspiltdataset(df):
@@ -509,4 +560,5 @@ def forBaseLineUseData(bool_Noniid):
 # True for BaseLine
 # False for Noniid
 # forBaseLineUseData(False)
-forBaseLineUseData(True)
+# forBaseLineUseData(True)
+DoSplitthrildClientForiid()
