@@ -193,7 +193,7 @@ def plot_detailed_feature_comparison(original_samples, adversarial_samples):
         'conn_state', 'missed_bytes', 'src_pkts', 'src_ip_bytes', 
         'dst_pkts', 'dst_ip_bytes', 'dns_query', 'dns_qclass', 'dns_qtype', 
         'dns_rcode', 'dns_AA', 'dns_RD', 'dns_RA', 'dns_rejected', 'ssl_version', 
-        'ssl_cipher', 'ssl_resumed', 'ssl_established', 'ssl_subject', 'Fwd PSH Flags', 'Bwd PSH Flags', 
+        'ssl_cipher', 'ssl_resumed', 'ssl_established', 'ssl_subject', 
         'ssl_issuer', 'http_trans_depth', 'http_method', 'http_uri', 'http_version', 
         'http_request_body_len', 'http_response_body_len', 'http_status_code', 'http_user_agent', 'http_orig_mime_types', 
         'http_resp_mime_types', 'weird_name', 'weird_addl', 'weird_notice', 
