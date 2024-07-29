@@ -26,6 +26,7 @@ from sklearn.metrics import confusion_matrix
 from mytoolfunction import generatefolder, ChooseLoadNpArray,ParseCommandLineArgs,ChooseTrainDatastes
 from mytoolfunction import ChooseUseModel, getStartorEndtime
 from collections import Counter
+from Add_ALL_LayerToCount import DoCountModelWeightSum,evaluateWeightDifferences
 
 
 #CICIIDS2017 or Edge 62個特徵
@@ -265,7 +266,7 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal,bool_plot_co
                 # file.write(str(RecordAccuracy))
                 # file.writelines("\n")
                 # 添加标题行
-                file.write(f"{client_str}_Accuracy,Time\n")
+                # file.write(f"{client_str}_Accuracy,Time\n")
                 # 写入Accuracy数据
                 file.write(str(RecordAccuracy) + "\n")
 
@@ -292,8 +293,10 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         # class_names = [str(i) for i in range(labelCount)]
         #TONIoT
         class_names = {
-                        0: 'BENIGN', 
-                        1: 'DDoS', 
+                        # 0: 'BENIGN', 
+                        # 1: 'DDoS', 
+                        0: 'normal', 
+                        1: 'ddos',
                         2: 'backdoor', 
                         3: 'dos', 
                         4: 'injection', 
@@ -433,6 +436,11 @@ testloader = DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 
 # 定义Flower客户端类
 class FlowerClient(fl.client.NumPyClient):
+    def __init__(self):
+        self.total_Local_abs_weight_sum = 0
+        self.total_FedAVG_abs_weight_sum = 0
+        self.array = np.zeros(8)
+        self.client_id = str(client_str)
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -447,6 +455,11 @@ class FlowerClient(fl.client.NumPyClient):
         # 通常第1 round測出來會是0
         # 在训练或测试结束后，保存模型
         torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Before_local_train_model.pth")
+        
+        # 算聚合完的權重總和
+        weights_after_FedAVG = net.state_dict()
+        self.total_FedAVG_abs_weight_sum = DoCountModelWeightSum(weights_after_FedAVG,True,self.client_id)   
+        
         accuracy = test(net, testloader, start_IDS, client_str,f"global_test",True)
         print("accuracy",accuracy)
                     # 将总体准确率和其他信息写入 "accuracy-baseline.csv" 文件
@@ -459,16 +472,45 @@ class FlowerClient(fl.client.NumPyClient):
             file.write(str(accuracy) + "\n")
 
         train(net, trainloader, epochs=num_epochs)
-        return self.get_parameters(config={}), len(trainloader.dataset), {}#step1上傳給權重，#step2在server做聚合，step3往下傳給server
+
+        # 在本地训练后保存和打印权重
+        weights_after_Localtrain = net.state_dict()
+        torch.save(weights_after_Localtrain, 
+                   f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/After_local_train_weight.pth")
+        print("Weights after local training:")
+        # 在本地训练后打印权重
+        # 算Local train完的權重總和
+        self.total_Local_abs_weight_sum = DoCountModelWeightSum(weights_after_Localtrain,
+                                          True,
+                                        self.client_id)    
+        
+        # local train計算權重加總 - FedAVG計算權重加總
+        self.array[0],self.array[1],self.array[2],self.array[3] = evaluateWeightDifferences("Local-FedAVG",
+                                                                                            self.total_Local_abs_weight_sum, 
+                                                                                            self.total_FedAVG_abs_weight_sum)
+        
+        return self.get_parameters(config={}), len(trainloader.dataset), {"accuracy": accuracy}#step1上傳給權重，#step2在server做聚合，step3往下傳給server
 
     def evaluate(self, parameters, config):
         # local test
         # 這邊的測試結果會受到local train的影響
         # 在训练或测试结束后，保存模型
+        # client_id = config.get("client_id",str(client_str))
+        # self.client_id = client_id
+        print("client_id",self.client_id)
         torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/After_local_train_model.pth")
         accuracy = test(net, testloader, start_IDS, client_str,f"local_test",True)
         self.set_parameters(parameters)#更新現有的知識#step4 更新model
-        return accuracy, len(testloader.dataset), {"accuracy": accuracy}
+        print(f"Client {self.client_id} returning metrics: {{accuracy: {accuracy}, client_id: {self.client_id}}}")
+        
+        with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_train_weight_sum-FedAVG weight_sum_{client_str}.csv", "a+") as file:
+            file.write(f"{self.total_Local_abs_weight_sum,self.total_FedAVG_abs_weight_sum,self.array[0]}"+ "\n")
+
+        return accuracy, len(testloader.dataset), {"accuracy": accuracy,
+                                                   "client_id": self.client_id,
+                                                   "Local_train_weight_sum":self.total_Local_abs_weight_sum,
+                                                   "FedAVG_weight_sum":self.total_FedAVG_abs_weight_sum,
+                                                   "Local_train_weight_sum-FedAVG weight_sum":self.array[0]}
 
 # 初始化神经网络模型
 net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
@@ -480,8 +522,8 @@ net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 
 # 启动Flower客户端
 fl.client.start_numpy_client(
-    # server_address="127.0.0.1:53388",
-    server_address="192.168.1.137:53388",
+    server_address="127.0.0.1:53388",
+    # server_address="192.168.1.137:53388",
     client=FlowerClient(),
     
 )

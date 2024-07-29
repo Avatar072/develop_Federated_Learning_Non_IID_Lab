@@ -254,8 +254,10 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         #                 } 
         #TONIoT
         class_names = {
-                        0: 'BENIGN', 
-                        1: 'DDoS', 
+                        # 0: 'BENIGN', 
+                        # 1: 'DDoS', 
+                        0: 'normal', 
+                        1: 'ddoS',
                         2: 'backdoor', 
                         3: 'dos', 
                         4: 'injection', 
