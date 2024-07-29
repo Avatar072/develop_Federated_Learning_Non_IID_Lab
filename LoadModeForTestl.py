@@ -62,9 +62,14 @@ getStartorEndtime("starttime", start_IDS, f"./single_AnalyseReportFolder/{today}
 # 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA attack
 # x_test  = np.load(f"./Adversarial_Attack_Test/20240721_bk_0.5_0.5/x_DoJSMA_test_20240721.npy")
 # y_test  = np.load(f"./Adversarial_Attack_Test/20240721_bk_0.5_0.5/y_DoJSMA_test_20240721.npy")
+# 每層神經元512下所訓練出來的model
+# x_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.05_0.02/x_DoJSMA_test_20240721.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.05_0.02/y_DoJSMA_test_20240721.npy")
 
-x_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.05_0.02/x_DoJSMA_test_20240721.npy")
-y_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.05_0.02/y_DoJSMA_test_20240721.npy")
+# 每層神經元64下所訓練出來的model
+x_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05_0.02/x_DoJSMA_test_20240729.npy")
+y_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05_0.02/y_DoJSMA_test_20240729.npy")
+
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
@@ -184,8 +189,8 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         #                 } 
         #TONIoT
         class_names = {
-                        0: 'BENIGN', 
-                        1: 'DDoS', 
+                        0: 'normal', 
+                        1: 'ddoS', 
                         2: 'backdoor', 
                         3: 'dos', 
                         4: 'injection', 
@@ -270,8 +275,13 @@ net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 
 # Load the saved model
 # model_path = f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/BaseLine_After_local_train_model.pth"
-# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240719_TONIOT\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
-model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20240722\\client3\\1st\\normal\\After_local_train_model.pth'
+# 每層神經元512下所訓練出來的model
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240719_TONIOT_神經元512\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
+
+# 每層神經元64下所訓練出來的model
+model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240729_TONIOT_神經元64\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
+
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20240722\\client3\\1st\\normal\\After_local_train_model.pth'
 
 net.load_state_dict(torch.load(model_path))
 print("Loaded model from", model_path)

@@ -479,12 +479,12 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\EdgeIIoT_AddedLabel_y.npy", allow_pickle=True)
 
             # 20240523 client3 use TONIoT after do labelencode and minmax  75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_train_half3_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half3_20240523.npy", allow_pickle=True)  
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_train_half3_20240523.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half3_20240523.npy", allow_pickle=True)  
 
-            # 20240523 client3 use TONIoT after do labelencode and minmax  75 25分 DoJSMA
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_20240722.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_20240722.npy", allow_pickle=True)  
+            # 20240523 client3 use TONIoT after do labelencode and minmax  75 25分 DoJSMA 0.0.5 0.02
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240725.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240725.npy", allow_pickle=True)  
 
 
         elif (Choose_method == 'SMOTE'):
@@ -762,11 +762,17 @@ def ChooseUseModel(model_type, input, ouput):
         class MLP(nn.Module):
             def __init__(self):
                 super(MLP, self).__init__()
-                self.layer1 = nn.Linear(input, 512)
-                self.fc2 = nn.Linear(512, 512)
-                self.fc3 = nn.Linear(512, 512)
-                self.fc4 = nn.Linear(512, 512)
-                self.layer5 = nn.Linear(512, ouput)
+                # self.layer1 = nn.Linear(input, 512)
+                # self.fc2 = nn.Linear(512, 512)
+                # self.fc3 = nn.Linear(512, 512)
+                # self.fc4 = nn.Linear(512, 512)
+                # self.layer5 = nn.Linear(512, ouput)
+                # 每層64神經元
+                self.layer1 = nn.Linear(input, 64)
+                self.fc2 = nn.Linear(64, 64)
+                self.fc3 = nn.Linear(64, 64)
+                self.fc4 = nn.Linear(64, 64)
+                self.layer5 = nn.Linear(64, ouput)
 
             def forward(self, x):
                 x = F.relu(self.layer1(x))
