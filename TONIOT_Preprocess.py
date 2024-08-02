@@ -450,7 +450,7 @@ def DoSpiltAfterDoPCA(df,number_of_components,bool_Noniid,bool_add_cicids2017fea
 
 # do split train to half for iid and Labelencode and minmax 
 def DoSplitthrildClientForiid():
-        # 75 train分3份
+        # 75 train分 均勻分3份
         df_ALLtrain = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_20240523.csv")
                     # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
         List_train_half1_Label = []
@@ -497,6 +497,92 @@ def DoSplitthrildClientForiid():
         SaveDataframeTonpArray(df_train_half1, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half1",20240523)
         SaveDataframeTonpArray(df_train_half2, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half2",20240523)
         SaveDataframeTonpArray(df_train_half3, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half3",20240523)
+
+
+
+# do split train to half for iid and Labelencode and minmax 
+import random
+def DoRandomSplitthrildClientForiid():
+        # 75 train分3份
+        df_ALLtrain = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_20240523.csv")
+                    # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+        List_train_half1_Label = []
+        List_train_half2_Label = []
+        List_train_half3_Label = []
+        
+        # random 劃分
+        # 随机调整比例，除了标签5
+        first_random_size_dict = {}
+        second_random_size_dict = {}
+        total_first_random_size = 0
+        total_second_random_size = 0
+        # 数据划分
+        for i in range(10):
+            if i == 5:
+                first_random_size = 0.3333
+                second_random_size = 0.5 
+            else:
+            # 获取标签 i 对应的随机比例
+                # first_random_size = first_random_size_dict.get(i, 0.5)
+                # second_random_size = second_random_size_dict.get(i, 0.5)
+                first_random_size = round(random.uniform(0.2, 0.7), 4)
+                # 生成0.2到1之间的随机比例
+                # second_random_size = round(random.uniform(0.5, 1), 4)
+
+                # # 确保两个比例的和不超过1
+                # if first_random_size + second_random_size <= 1:
+                #     first_random_size_dict[i] = first_random_size
+                #     second_random_size_dict[i] = second_random_size
+                #     break  # 退出循环
+            
+            # 计算所有其他标签的比例总和
+            total_first_random_size = sum(first_random_size_dict.values())
+            total_second_random_size = sum(second_random_size_dict.values())
+            # 输出结果
+            print("First Random Size Dict:", total_first_random_size)
+            print("Second Random Size Dict:", total_second_random_size)
+
+            # 第一次拆分
+            train_half1_label_split, train_half2_label_split = spiltweakLabelbalance(i, df_ALLtrain, first_random_size)
+            # 第二次拆分
+            train_half1_label_split_half1, train_half1_label_split_half2 = spiltweakLabelbalance(i, train_half1_label_split, first_random_size)
+
+            # 保存到相应的列表中
+            List_train_half1_Label.append(train_half1_label_split_half1)
+            List_train_half2_Label.append(train_half2_label_split)
+            List_train_half3_Label.append(train_half1_label_split_half2)
+
+        df_train_half1 = pd.concat(List_train_half1_Label)
+        df_train_half2 = pd.concat(List_train_half2_Label)
+        df_train_half3 = pd.concat(List_train_half3_Label)
+            
+
+        # 紀錄資料筆數
+        with open(f"./data/dataset_AfterProcessed/TONIOT/encode_and_count_iid.csv", "a+") as file:
+            label_counts = df_train_half1['type'].value_counts()
+            print("df_train_half1\n", label_counts)
+            file.write("df_train_half1_label_counts\n")
+            file.write(str(label_counts) + "\n")
+            
+            label_counts = df_train_half2['type'].value_counts()
+            print("df_train_half2\n", label_counts)
+            file.write("df_train_half2_label_counts\n")
+            file.write(str(label_counts) + "\n")
+
+            label_counts = df_train_half3['type'].value_counts()
+            print("df_train_half3\n", label_counts)
+            file.write("df_train_half2_label_counts\n")
+            file.write(str(label_counts) + "\n")
+
+        # random 劃分
+        SaveDataToCsvfile(df_train_half1, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half1_random_20240523")
+        SaveDataToCsvfile(df_train_half2,  f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half2_random_20240523")
+        SaveDataToCsvfile(df_train_half3,  f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_train_half3_random_20240523")
+
+        SaveDataframeTonpArray(df_train_half1, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_random_train_half1",20240523)
+        SaveDataframeTonpArray(df_train_half2, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_random_train_half2",20240523)
+        SaveDataframeTonpArray(df_train_half3, f"./data/dataset_AfterProcessed/TONIOT/20240523", f"train_ToN-IoT_dataframes_random_train_half3",20240523)
+
 
 
 
@@ -561,4 +647,5 @@ def forBaseLineUseData(bool_Noniid):
 # False for Noniid
 # forBaseLineUseData(False)
 # forBaseLineUseData(True)
-DoSplitthrildClientForiid()
+# DoSplitthrildClientForiid()
+DoRandomSplitthrildClientForiid()

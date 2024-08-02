@@ -47,6 +47,7 @@ labelCount = 10
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
+# count_global_round = 0  # 声明使用全局变量 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
 # #############################################################################
@@ -439,8 +440,13 @@ class FlowerClient(fl.client.NumPyClient):
     def __init__(self):
         self.total_Local_abs_weight_sum = 0
         self.total_FedAVG_abs_weight_sum = 0
+        self.global_round =0
         self.array = np.zeros(8)
         self.client_id = str(client_str)
+        self.original_trainloader = trainloader  # 保存原始訓練數據
+        self.Previous_globlround_FedAvg_Weight = 0  # 保存上一回的權重
+
+
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -450,7 +456,12 @@ class FlowerClient(fl.client.NumPyClient):
         net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
+        # 从 config 获取当前的 global round 数
+        self.global_round += 1
+        print(f"Current global round: {self.global_round}")
+
         self.set_parameters(parameters)# 剛聚合完的權重
+        self.Previous_globlround_FedAvg_Weight = self.set_parameters(parameters)  # 保存上一回的權重
         #global test 對每global round剛聚合完的gobal model進行測試 要在Local_train之前測試
         # 通常第1 round測出來會是0
         # 在训练或测试结束后，保存模型
@@ -458,8 +469,12 @@ class FlowerClient(fl.client.NumPyClient):
         
         # 算聚合完的權重總和
         weights_after_FedAVG = net.state_dict()
-        self.total_FedAVG_abs_weight_sum = DoCountModelWeightSum(weights_after_FedAVG,True,self.client_id)   
-        
+        # True 以絕對值加總 False 為直接加總
+        self.total_FedAVG_abs_weight_sum = DoCountModelWeightSum(weights_after_FedAVG,False,"After_FedAVG")   
+        if self.global_round == 1 :
+            self.total_FedAVG_abs_weight_sum = 1
+        print("After_FedAVG",self.total_FedAVG_abs_weight_sum)
+
         accuracy = test(net, testloader, start_IDS, client_str,f"global_test",True)
         print("accuracy",accuracy)
                     # 将总体准确率和其他信息写入 "accuracy-baseline.csv" 文件
@@ -471,6 +486,23 @@ class FlowerClient(fl.client.NumPyClient):
             # 写入Accuracy数据
             file.write(str(accuracy) + "\n")
 
+        ### 訓練中途加入JSMA Attack
+        if self.global_round >= 50 and self.client_id == "client3":
+            print(f"*********************在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
+            
+            # 載入被攻擊的數據
+            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            
+            x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
+            y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
+            
+            train_data_attacked = TensorDataset(x_train_attacked, y_train_attacked)
+            trainloader = DataLoader(train_data_attacked, batch_size=512, shuffle=True)
+        else:
+            trainloader = self.original_trainloader
+        
+        # 訓練階段
         train(net, trainloader, epochs=num_epochs)
 
         # 在本地训练后保存和打印权重
@@ -480,10 +512,13 @@ class FlowerClient(fl.client.NumPyClient):
         print("Weights after local training:")
         # 在本地训练后打印权重
         # 算Local train完的權重總和
+        # True 以絕對值加總 False 為直接加總
         self.total_Local_abs_weight_sum = DoCountModelWeightSum(weights_after_Localtrain,
-                                          True,
+                                          False,
                                         self.client_id)    
         
+        print("self.total_Local_abs_weight_sum",self.total_Local_abs_weight_sum)
+        print("self.total_FedAVG_abs_weight_sum",self.total_FedAVG_abs_weight_sum)
         # local train計算權重加總 - FedAVG計算權重加總
         self.array[0],self.array[1],self.array[2],self.array[3] = evaluateWeightDifferences("Local-FedAVG",
                                                                                             self.total_Local_abs_weight_sum, 
@@ -495,8 +530,9 @@ class FlowerClient(fl.client.NumPyClient):
         # local test
         # 這邊的測試結果會受到local train的影響
         # 在训练或测试结束后，保存模型
-        # client_id = config.get("client_id",str(client_str))
-        # self.client_id = client_id
+        # 当前 global round 数
+        print(f"Evaluating global round: {self.global_round}")
+
         print("client_id",self.client_id)
         torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/After_local_train_model.pth")
         accuracy = test(net, testloader, start_IDS, client_str,f"local_test",True)
@@ -509,16 +545,12 @@ class FlowerClient(fl.client.NumPyClient):
         return accuracy, len(testloader.dataset), {"accuracy": accuracy,
                                                    "client_id": self.client_id,
                                                    "Local_train_weight_sum":self.total_Local_abs_weight_sum,
+                                                   "Previous_round_FedAVG_weight_sum":self.Previous_globlround_FedAvg_Weight,
                                                    "FedAVG_weight_sum":self.total_FedAVG_abs_weight_sum,
-                                                   "Local_train_weight_sum-FedAVG weight_sum":self.array[0]}
+                                                   "Local_train_weight_sum-FedAVG weight_sum": float(self.array[0])}
 
 # 初始化神经网络模型
 net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
-
-# if client_str == "client3":
-#     model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20240722\\client3\\1st\\normal\\After_local_train_model.pth'
-
-#     net.load_state_dict(torch.load(model_path))
 
 # 启动Flower客户端
 fl.client.start_numpy_client(
@@ -531,4 +563,3 @@ fl.client.start_numpy_client(
 #紀錄結束時間
 end_IDS = time.time()
 getStartorEndtime("endtime",end_IDS,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}")
-        

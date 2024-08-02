@@ -25,10 +25,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 # 加载TONIOT test
-afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\test_ToN-IoT_dataframes_20240523.csv")
+# afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\test_ToN-IoT_dataframes_20240523.csv")
 
-# 加载TONIOT client3 train
+# 加载TONIOT client3 train 均勻劃分
 # afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half3_20240523.csv")
+# 加载TONIOT client3 train 隨機劃分
+afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half3_random_20240523.csv")
+
 print("Dataset loaded.")
 
 # 移除字符串类型特征
@@ -50,39 +53,39 @@ model = ChooseUseModel("MLP", 38, 10).to(device)
 # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240719_TONIOT_神經元512\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
 
 # BaseLine每層神經元64下所訓練出來的model
-model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240729_TONIOT_神經元64\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240729_TONIOT_神經元64\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
 
 # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\\Adversarial_Attack_Test\\20240722_FL_cleint3_.0.5_0.02\\After_JSMA_Attack_model.pth'
 
 
-def LoadingModelforeval(model):
-    # 加载预训练模型的状态字典
-    pretrained_dict = torch.load(model_path, map_location=device)
-    # 重命名预训练模型的键
-    rename_dict = {
-        # 'fc1.weight': 'layer1.weight',
-        # 'fc1.bias': 'layer1.bias',
-        # 'fc2.weight': 'layer2.weight',
-        # 'fc2.bias': 'layer2.bias',
-        # 'fc3.weight': 'layer3.weight',
-        # 'fc3.bias': 'layer3.bias',
-        # 'fc4.weight': 'layer4.weight',
-        # 'fc4.bias': 'layer4.bias',
-        # 'fc5.weight': 'layer5.weight',
-        # 'fc5.bias': 'layer5.bias'
-    }
-    # 更新模型字典
-    model_dict = model.state_dict()
-    updated_pretrained_dict = {rename_dict[k]: v for k, v in pretrained_dict.items() if k in rename_dict}
-    model_dict.update(updated_pretrained_dict)
-    # 加载更新后的模型参数
-    model.load_state_dict(model_dict)
-    # 将模型移动到GPU
-    model = model.to(device)
-    model.eval()
-    return model
+# def LoadingModelforeval(model):
+#     # 加载预训练模型的状态字典
+#     pretrained_dict = torch.load(model_path, map_location=device)
+#     # 重命名预训练模型的键
+#     rename_dict = {
+#         # 'fc1.weight': 'layer1.weight',
+#         # 'fc1.bias': 'layer1.bias',
+#         # 'fc2.weight': 'layer2.weight',
+#         # 'fc2.bias': 'layer2.bias',
+#         # 'fc3.weight': 'layer3.weight',
+#         # 'fc3.bias': 'layer3.bias',
+#         # 'fc4.weight': 'layer4.weight',
+#         # 'fc4.bias': 'layer4.bias',
+#         # 'fc5.weight': 'layer5.weight',
+#         # 'fc5.bias': 'layer5.bias'
+#     }
+#     # 更新模型字典
+#     model_dict = model.state_dict()
+#     updated_pretrained_dict = {rename_dict[k]: v for k, v in pretrained_dict.items() if k in rename_dict}
+#     model_dict.update(updated_pretrained_dict)
+#     # 加载更新后的模型参数
+#     model.load_state_dict(model_dict)
+#     # 将模型移动到GPU
+#     model = model.to(device)
+#     model.eval()
+#     return model
 
-model = LoadingModelforeval(model)
+# model = LoadingModelforeval(model)
 
 # 将PyTorch模型转换为ART分类器
 classifier = PyTorchClassifier(
