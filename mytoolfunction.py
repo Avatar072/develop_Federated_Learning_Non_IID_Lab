@@ -316,9 +316,14 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\CICIDS2017_AddedLabel_x.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\CICIDS2017_AddedLabel_y.npy", allow_pickle=True)
 
-            # 20240523 client1 use TONIoT after do labelencode and minmax  75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_train_half1_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half1_20240523.npy", allow_pickle=True)  
+            # 20240523 client1 use TONIoT after do labelencode and minmax  均勻劃分75 25分
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_train_half1_20240523.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half1_20240523.npy", allow_pickle=True)  
+
+            # 20240523 client1 use TONIoT after do labelencode and minmax  隨機劃分75 25分
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half1_20240523.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half1_20240523.npy", allow_pickle=True)  
+
 
         elif (Choose_method == 'SMOTE'):
             # # # # 20240317 Chi-square 45 SMOTE  K=5         
@@ -402,9 +407,13 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\TONIIOT_AddedLabel_x.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\TONIIOT_AddedLabel_y.npy", allow_pickle=True)
 
-            # 20240523 client2 use TONIoT after do labelencode and minmax  75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_train_half2_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half2_20240523.npy", allow_pickle=True)  
+            # 20240523 client2 use TONIoT after do labelencode and minmax  均勻劃分75 25分
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_train_half2_20240523.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half2_20240523.npy", allow_pickle=True)  
+
+            # 20240523 client2 use TONIoT after do labelencode and minmax  隨機劃分75 25分
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half2_20240523.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half2_20240523.npy", allow_pickle=True)  
 
 
         elif (Choose_method == 'SMOTE'):
@@ -478,13 +487,21 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\EdgeIIoT_AddedLabel_x.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\EdgeIIoT_AddedLabel_y.npy", allow_pickle=True)
 
-            # 20240523 client3 use TONIoT after do labelencode and minmax  75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_train_half3_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half3_20240523.npy", allow_pickle=True)  
+            # 20240523 client3 use TONIoT after do labelencode and minmax  均勻劃分75 25分
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_train_half3_20240523.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half3_20240523.npy", allow_pickle=True)  
 
-            # 20240523 client3 use TONIoT after do labelencode and minmax  75 25分 DoJSMA
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_20240722.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_20240722.npy", allow_pickle=True)  
+            # # 20240523 client3 use TONIoT after do labelencode and minmax  均勻劃分75 25分 DoJSMA 0.0.5 0.02
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240725.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240725.npy", allow_pickle=True)  
+
+            # 20240523 client3 use TONIoT after do labelencode and minmax  隨機劃分75 25分
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)  
+
+            # # 20240523 client3 use TONIoT after do labelencode and minmax  隨機劃分75 25分 DoJSMA 0.0.5 0.02
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)  
 
 
         elif (Choose_method == 'SMOTE'):
@@ -762,17 +779,31 @@ def ChooseUseModel(model_type, input, ouput):
         class MLP(nn.Module):
             def __init__(self):
                 super(MLP, self).__init__()
-                self.layer1 = nn.Linear(input, 512)
-                self.fc2 = nn.Linear(512, 512)
-                self.fc3 = nn.Linear(512, 512)
-                self.fc4 = nn.Linear(512, 512)
-                self.layer5 = nn.Linear(512, ouput)
+                # self.layer1 = nn.Linear(input, 512)
+                # self.fc2 = nn.Linear(512, 512)
+                # self.fc3 = nn.Linear(512, 512)
+                # self.fc4 = nn.Linear(512, 512)
+                # self.layer5 = nn.Linear(512, ouput)
+                # 每層64神經元
+                self.layer1 = nn.Linear(input, 64)
+                self.fc2 = nn.Linear(64, 64)
+                self.fc3 = nn.Linear(64, 64)
+                self.fc4 = nn.Linear(64, 64)
+                self.layer5 = nn.Linear(64, ouput)
 
             def forward(self, x):
-                x = F.relu(self.layer1(x))
-                x = F.relu(self.fc2(x))
-                x = F.relu(self.fc3(x))
-                x = F.relu(self.fc4(x))
+                # relu激活函数
+                # 输出范围在 (0, max) 之间
+                # x = F.relu(self.layer1(x))
+                # x = F.relu(self.fc2(x))
+                # x = F.relu(self.fc3(x))
+                # x = F.relu(self.fc4(x))
+                # 修改后的代码使用Sigmoid激活函数
+                # 输出范围在 (0, 1) 之间
+                x = F.sigmoid(self.layer1(x))
+                x = F.sigmoid(self.fc2(x))
+                x = F.sigmoid(self.fc3(x))
+                x = F.sigmoid(self.fc4(x))
                 x = self.layer5(x)
                 return x
         return MLP()  # 返回創建的model instance

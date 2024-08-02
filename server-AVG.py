@@ -1,4 +1,5 @@
-from typing import List, Tuple
+import os
+from typing import List, Tuple, Dict, Any
 
 import flwr as fl
 from flwr.common import Metrics
@@ -100,15 +101,83 @@ for param in model.parameters():
 initial_parameters = fl.common.ndarrays_to_parameters(weights_values)
 
 # Define metric aggregation function
-def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
-    examples = [num_examples for num_examples, _ in metrics]
-    print(examples)
+# 原本
+# def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+#     # Multiply accuracy of each client by number of examples used
+#     accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+#     examples = [num_examples for num_examples, _ in metrics]
+#     print("metrics\n",metrics)
+#     print("accuracies\n",accuracies)
+#     print("examples\n",examples)
+#     print("accuracy\n",sum(accuracies) / sum(examples))
+#     # Aggregate and return custom metric (weighted average)
+#     return {"accuracy": sum(accuracies) / sum(examples)}
 
-    # Aggregate and return custom metric (weighted average)
-    return {"accuracy": sum(accuracies) / sum(examples)}
+#可以顯示出client id的版本
+def weighted_average(metrics: List[Tuple[int, Dict[str, float]]]) -> Dict[str, float]:
+    accuracies = []
+    examples = []
+    client_ids = []  # 用于存储每个客户端的ID
 
+    # 遍历所有客户端提交的数据
+    for num_examples, m in metrics:
+        if "client_id" in m:
+            client_ids.append(m["client_id"])  # 将client_id添加到列表中
+            # if m["client_id"] == "client1":
+            #     print("client1\n",m["Local_train_weight_sum-FedAVG weight_sum"])    
+        else:
+            client_ids.append("Unknown")  # 如果没有client_id，记录为"Unknown"
+
+        if "accuracy" in m:
+            accuracies.append(num_examples * m["accuracy"])  # 计算加权准确度
+            examples.append(num_examples)
+
+    print("Metrics:\n", metrics)
+    print("Client IDs:\n", client_ids)
+    print("Accuracies:\n", accuracies)
+    print("Examples:\n", examples)
+    
+    if not examples:
+        return {"accuracy": 0}  # 防止除以零
+
+    weighted_accuracy = sum(accuracies) / sum(examples)
+    # return {"accuracy": weighted_accuracy, "client_ids": client_ids}
+    return {"accuracy": weighted_accuracy}
+
+#選第三個客戶端的平均每輪權重差最大者14.62
+# def weighted_average(metrics: List[Tuple[int, Dict[str, float]]], threshold: float = 14.62) -> Dict[str, float]:
+
+#     accuracies = []
+#     examples = []
+#     client_ids = []  # 用于存储每个客户端的ID
+#     valid_weights = []  # 用于存储符合阈值条件的权重
+
+#     # 遍历所有客户端提交的数据
+#     for num_examples, m in metrics:
+#         client_id = m.get("client_id", "Unknown")
+#         client_ids.append(client_id)  # 将client_id添加到列表中
+#         weight_diff = m.get("Local_train_weight_sum-FedAVG weight_sum", 0)  # 获取权重差异
+        
+#         # 检查权重差异是否超过阈值
+#         if weight_diff <= threshold:
+#             if "accuracy" in m:
+#                 accuracies.append(num_examples * m["accuracy"])  # 计算加权准确度
+#                 examples.append(num_examples)
+#                 valid_weights.append(weight_diff)  # 添加有效权重
+#         else:
+#             print(f"{client_id} excluded due to weight difference: {weight_diff}")
+
+#     print("Metrics:\n", metrics)
+#     print("Client IDs:\n", client_ids)
+#     print("Valid Weights (within threshold):\n", valid_weights)
+#     print("Accuracies:\n", accuracies)
+#     print("Examples:\n", examples)
+    
+#     if not examples:
+#         return {"accuracy": 0, "client_ids": client_ids}  # 防止除以零
+
+#     weighted_accuracy = sum(accuracies) / sum(examples)
+#     return {"accuracy": weighted_accuracy}
 
 # Define strategy
 strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, evaluate_metrics_aggregation_fn=weighted_average, 
@@ -118,12 +187,12 @@ strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, ev
 
 # Start Flower server
 fl.server.start_server(
-    # server_address="127.0.0.1:53388",
+    server_address="127.0.0.1:53388",
     # server_address="127.0.0.1:8080",
-    server_address="192.168.1.137:53388",
+    # server_address="192.168.1.137:53388",
 
-    config=fl.server.ServerConfig(num_rounds=1),
-    # config=fl.server.ServerConfig(num_rounds=20),
+    # config=fl.server.ServerConfig(num_rounds=5),
+    config=fl.server.ServerConfig(num_rounds=150),
 
     strategy=strategy,
 )
