@@ -9,28 +9,28 @@ import numpy as np
 '''
 
 # 加載了一個保存的模型狀態字典。這個字典包含了模型所有層的權重和偏置。
-# After Local train 150 globla round
-client1_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client1/normal/After_local_train_weight.pth')
-client2_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client2/normal/After_local_train_weight.pth')
-client3_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client3/normal/After_local_train_weight.pth')
+# # After Local train 150 globla round
+# client1_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client1/normal/After_local_train_weight.pth')
+# client2_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client2/normal/After_local_train_weight.pth')
+# client3_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client3/normal/After_local_train_weight.pth')
 
-# After FedAVG 150 global round Before_local_train_model
-client1_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client1/normal/Before_local_train_model.pth')
-client2_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client2/normal/Before_local_train_model.pth')
-client3_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client3/normal/Before_local_train_model.pth')
+# # After FedAVG 150 global round Before_local_train_model
+# client1_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client1/normal/Before_local_train_model.pth')
+# client2_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client2/normal/Before_local_train_model.pth')
+# client3_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client3/normal/Before_local_train_model.pth')
 
 
-# After JSMA_ATTACK
-client1_state_dict_after_JSMA_ATTACK = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client1/normal/After_local_train_weight.pth')
-client2_state_dict_after_JSMA_ATTACK = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client2/normal/After_local_train_weight.pth')
-# only client3 do JSMA!!!!!!
-client3_state_dict_after_JSMA_ATTACK = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client3/normal/After_local_train_weight.pth')
+# # After JSMA_ATTACK
+# client1_state_dict_after_JSMA_ATTACK = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client1/normal/After_local_train_weight.pth')
+# client2_state_dict_after_JSMA_ATTACK = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client2/normal/After_local_train_weight.pth')
+# # only client3 do JSMA!!!!!!
+# client3_state_dict_after_JSMA_ATTACK = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client3/normal/After_local_train_weight.pth')
 
-# After JSMA_ATTACK FedAVG 150 global round Before_local_train_model
-client1_state_dict_after_JSMA_ATTACK_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client1/normal/Before_local_train_model.pth')
-client2_state_dict_after_JSMA_ATTACK_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client2/normal/Before_local_train_model.pth')
-# only client3 do JSMA!!!!!!
-client3_state_dict_after_JSMA_ATTACK_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client3/normal/Before_local_train_model.pth')
+# # After JSMA_ATTACK FedAVG 150 global round Before_local_train_model
+# client1_state_dict_after_JSMA_ATTACK_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client1/normal/Before_local_train_model.pth')
+# client2_state_dict_after_JSMA_ATTACK_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client2/normal/Before_local_train_model.pth')
+# # only client3 do JSMA!!!!!!
+# client3_state_dict_after_JSMA_ATTACK_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G_C3_JSMA/client3/normal/Before_local_train_model.pth')
 
 # 迭代狀態字典中的每個參數：
 '''
@@ -63,30 +63,44 @@ def DoCountModelWeightSum(dict_file,bool_UseABS,str_client):
         print(f"{str_client}_\n"+f"Total absolute weight sum of the model: {total_abs_weight_sum}\n")
 
         return total_abs_weight_sum
+    
     else:
         print(f"{str_client}_Total weight sum of the model:", total_weight_sum)
         # 將張量轉移到 CPU 並轉換為 Python 數字：
-        print(f"{str_client}_Total weight sum of the model: {total_weight_sum.cpu().item():.6f}")
-        return total_weight_sum,
+        # 將張量轉移到 CPU 並轉換為 Python 數字：
+        total_weight_sum = f"{total_weight_sum:.6f}"
+        print(f"{str_client}_Total weight sum of the model: {total_weight_sum}")
+        return float(total_weight_sum)
 
 
 
 
 def evaluateWeightDifferences(str_state,weights1, weights2):
+
+    # 调试信息，检查 weights1 和 weights2 的类型和内容
+    print(f"weights1 类型: {type(weights1)}, 值: {weights1}")
+    print(f"weights2 类型: {type(weights2)}, 值: {weights2}")
+
     # 確保 weights1 和 weights2 是 NumPy 數組
     if isinstance(weights1, torch.Tensor):
         weights1 = weights1.cpu().numpy()
     if isinstance(weights2, torch.Tensor):
         weights2 = weights2.cpu().numpy()
 
+    # 如果 weights1 是元組，取第一個元素
+    if isinstance(weights1, tuple):
+        weights1 = weights1[0]
+    if isinstance(weights2, tuple):
+        weights2 = weights2[0]
+    
     # 確保 weights1 和 weights2 都是數值
     weights1 = float(weights1)
     weights2 = float(weights2)
 
     differences = np.abs(weights1 - weights2)  # 直接計算絕對值差異
-    average_difference = np.mean(differences)
-    max_difference = np.max(differences)
-    min_difference = np.min(differences)
+    average_difference = np.mean(weights1 - weights2)
+    max_difference = np.max(weights1 - weights2)
+    min_difference = np.min(weights1 - weights2)
 
     print(f"{str_state}相減後的差（絕對值）:", differences)
     print(f"{str_state}平均差異:", average_difference)
@@ -95,24 +109,28 @@ def evaluateWeightDifferences(str_state,weights1, weights2):
     return differences ,average_difference,max_difference,min_difference
 
 
-# 正常情况和JSMA攻击后的权重差值
-normal_diffs = np.array([11.74, 11.71, 14.62])
-jsma_diffs = np.array([11.08, 9.99, 18.91])
+# total_FedAVG_abs_weight_sum=0
+# client1_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240801_使用random_第一次/client1/normal/After_local_train_weight.pth')
+# total_FedAVG_abs_weight_sum = DoCountModelWeightSum(client1_state_dict,False,"After_FedAVG")   
 
-# 计算平均值和标准差
-normal_mean = np.mean(normal_diffs)
-normal_std = np.std(normal_diffs)
-jsma_mean = np.mean(jsma_diffs)
-jsma_std = np.std(jsma_diffs)
+# # 正常情况和JSMA攻击后的权重差值
+# normal_diffs = np.array([11.74, 11.71, 14.62])
+# jsma_diffs = np.array([11.08, 9.99, 18.91])
 
-# 打印结果
-print("Normal Weight Diffs Mean:", normal_mean)
-print("Normal Weight Diffs STD:", normal_std)
-print("JSMA Weight Diffs Mean:", jsma_mean)
-print("JSMA Weight Diffs STD:", jsma_std)
+# # 计算平均值和标准差
+# normal_mean = np.mean(normal_diffs)
+# normal_std = np.std(normal_diffs)
+# jsma_mean = np.mean(jsma_diffs)
+# jsma_std = np.std(jsma_diffs)
 
-threshold = normal_mean + 2 * normal_std
-print("Threshold:", threshold)
+# # 打印结果
+# print("Normal Weight Diffs Mean:", normal_mean)
+# print("Normal Weight Diffs STD:", normal_std)
+# print("JSMA Weight Diffs Mean:", jsma_mean)
+# print("JSMA Weight Diffs STD:", jsma_std)
+
+# threshold = normal_mean + 2 * normal_std
+# print("Threshold:", threshold)
 
 
 # 創建一個大小為10的數組，初始值為0
