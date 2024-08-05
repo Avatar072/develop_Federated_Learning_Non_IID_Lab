@@ -114,70 +114,84 @@ initial_parameters = fl.common.ndarrays_to_parameters(weights_values)
 #     return {"accuracy": sum(accuracies) / sum(examples)}
 
 #可以顯示出client id的版本
-def weighted_average(metrics: List[Tuple[int, Dict[str, float]]]) -> Dict[str, float]:
-    accuracies = []
-    examples = []
-    client_ids = []  # 用于存储每个客户端的ID
-
-    # 遍历所有客户端提交的数据
-    for num_examples, m in metrics:
-        if "client_id" in m:
-            client_ids.append(m["client_id"])  # 将client_id添加到列表中
-            # if m["client_id"] == "client1":
-            #     print("client1\n",m["Local_train_weight_sum-FedAVG weight_sum"])    
-        else:
-            client_ids.append("Unknown")  # 如果没有client_id，记录为"Unknown"
-
-        if "accuracy" in m:
-            accuracies.append(num_examples * m["accuracy"])  # 计算加权准确度
-            examples.append(num_examples)
-
-    print("Metrics:\n", metrics)
-    print("Client IDs:\n", client_ids)
-    print("Accuracies:\n", accuracies)
-    print("Examples:\n", examples)
-    
-    if not examples:
-        return {"accuracy": 0}  # 防止除以零
-
-    weighted_accuracy = sum(accuracies) / sum(examples)
-    # return {"accuracy": weighted_accuracy, "client_ids": client_ids}
-    return {"accuracy": weighted_accuracy}
-
-#選第三個客戶端的平均每輪權重差最大者14.62
-# def weighted_average(metrics: List[Tuple[int, Dict[str, float]]], threshold: float = 14.62) -> Dict[str, float]:
-
+# def weighted_average(metrics: List[Tuple[int, Dict[str, float]]]) -> Dict[str, float]:
 #     accuracies = []
 #     examples = []
 #     client_ids = []  # 用于存储每个客户端的ID
-#     valid_weights = []  # 用于存储符合阈值条件的权重
 
 #     # 遍历所有客户端提交的数据
 #     for num_examples, m in metrics:
-#         client_id = m.get("client_id", "Unknown")
-#         client_ids.append(client_id)  # 将client_id添加到列表中
-#         weight_diff = m.get("Local_train_weight_sum-FedAVG weight_sum", 0)  # 获取权重差异
-        
-#         # 检查权重差异是否超过阈值
-#         if weight_diff <= threshold:
-#             if "accuracy" in m:
-#                 accuracies.append(num_examples * m["accuracy"])  # 计算加权准确度
-#                 examples.append(num_examples)
-#                 valid_weights.append(weight_diff)  # 添加有效权重
+#         if "client_id" in m:
+#             client_ids.append(m["client_id"])  # 将client_id添加到列表中
+#             # if m["client_id"] == "client1":
+#             #     print("client1\n",m["Local_train_weight_sum-FedAVG weight_sum"])    
 #         else:
-#             print(f"{client_id} excluded due to weight difference: {weight_diff}")
+#             client_ids.append("Unknown")  # 如果没有client_id，记录为"Unknown"
+
+#         if "accuracy" in m:
+#             accuracies.append(num_examples * m["accuracy"])  # 计算加权准确度
+#             examples.append(num_examples)
 
 #     print("Metrics:\n", metrics)
 #     print("Client IDs:\n", client_ids)
-#     print("Valid Weights (within threshold):\n", valid_weights)
 #     print("Accuracies:\n", accuracies)
 #     print("Examples:\n", examples)
     
 #     if not examples:
-#         return {"accuracy": 0, "client_ids": client_ids}  # 防止除以零
+#         return {"accuracy": 0}  # 防止除以零
 
 #     weighted_accuracy = sum(accuracies) / sum(examples)
+#     # return {"accuracy": weighted_accuracy, "client_ids": client_ids}
 #     return {"accuracy": weighted_accuracy}
+
+#選第三個客戶端的平均每輪權重差最大者14.62
+def weighted_average(metrics: List[Tuple[int, Dict[str, float]]]) -> Dict[str, float]:
+    weighted_sum = 0
+    total_examples = 0  # 重置为0
+    Local_train_accuracies_List = []
+    client_ids = []
+    valid_weights = []
+
+    for num_examples, m in metrics:
+        client_id = m.get("client_id", "Unknown")
+        client_ids.append(client_id)
+        Local_train_accuracy = m.get("Local_train_accuracy", 0)
+        Local_train_accuracies_List.append(Local_train_accuracy)
+        global_round = m.get("global_round", 0)
+        Local_weight_sum = m.get("Local_train_weight_sum", 0)
+        weight_diff = m.get("Local_train_weight_sum-Previous_FedAVG weight_sum", 0)
+        threshold = Local_weight_sum * 0.05
+
+        #前面10round不看
+        if global_round > 10:
+            #權重差異超過當前本地權重總和的5%就要過濾掉  或 Local_train_accuracy大於90%才能列入計算
+            if weight_diff <= threshold or Local_train_accuracy > 0.9:
+                if "accuracy" in m and Local_train_accuracy > 0.9:#Local_train_accuracy大於90%才能列入計算
+                    print(m["accuracy"])
+                    weighted_sum += num_examples * m["accuracy"]
+                    total_examples += num_examples  # 只在满足条件时累加
+                    valid_weights.append(weight_diff)
+            else:
+                print(f"{client_id} excluded due to weight difference: {weight_diff}")
+        # else:
+        #     # 前10轮所有客户端数据都参与计算
+        #     if "accuracy" in m:
+        #         weighted_sum += num_examples * m["accuracy"]
+        #         total_examples += num_examples
+        #         valid_weights.append(weight_diff)
+
+    print("Client IDs:", client_ids)
+    print("Valid Weights (within threshold):", valid_weights)
+    print("Total examples:", total_examples)
+    print("Client IDs, Local train Accuracy:", list(zip(client_ids, Local_train_accuracies_List)))
+    
+    if total_examples == 0:
+        return {"accuracy": 0, "client_ids": client_ids}
+
+    print("weighted_sum:", weighted_sum)
+    print("total_examples:", total_examples)
+    weighted_accuracy = weighted_sum / total_examples
+    return {"accuracy": weighted_accuracy, "client_ids": client_ids}
 
 # Define strategy
 strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, evaluate_metrics_aggregation_fn=weighted_average, 
@@ -191,7 +205,7 @@ fl.server.start_server(
     # server_address="127.0.0.1:8080",
     # server_address="192.168.1.137:53388",
 
-    # config=fl.server.ServerConfig(num_rounds=5),
+    # config=fl.server.ServerConfig(num_rounds=20),
     config=fl.server.ServerConfig(num_rounds=150),
 
     strategy=strategy,
