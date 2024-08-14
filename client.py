@@ -190,8 +190,6 @@ def train(net, trainloader, epochs):
             ###訓練的過程    
         test_accuracy = test(net, testloader, start_IDS, client_str, "local_test",False)
         print(f"訓練週期 [{epoch+1}/{epochs}] - 測試準確度: {test_accuracy:.4f}")
-        
-    return test_accuracy
 
 def test(net, testloader, start_time, client_str, str_globalOrlocal,bool_plot_confusion_matrix):
     print("test")
@@ -443,16 +441,13 @@ class FlowerClient(fl.client.NumPyClient):
     def __init__(self):
         self.Current_total_Local_weight_sum = 0
         self.Current_total_FedAVG_weight_sum = 0
-        self.Previous_total_FedAVG_weight_sum = 0 #用於保存上一回合聚合後的未受攻擊汙染的權重
-        self.Record_Previous_total_FedAVG_weight_sum = 0 #用於紀錄上一回合聚合後的的權重，權重可能已遭受到汙染
-        self.Previous_Temp = 0
+        self.Previous_total_FedAVG_weight_sum = 0 #用於保存上一回合聚合後的權重
         self.global_round =0
         self.Local_train_accuracy = 0
         self.current_array = np.zeros(4)
         self.previous_array = np.zeros(4)
         self.client_id = str(client_str)
         self.original_trainloader = trainloader  # 保存原始訓練數據
-        self.Reocrd_global_model_accuracy =0
 
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
@@ -463,52 +458,32 @@ class FlowerClient(fl.client.NumPyClient):
         net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
-        
         # 从 config 获取当前的 global round 数
         self.global_round += 1
         print(f"Current global round: {self.global_round}")
         
-        # 紀錄上一回合FedAVG後的權重總和，這邊權重可能已遭受到汙染
-        self.Record_Previous_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
-        print("Last_round_After_FedAVG_may have been attacked", self.Record_Previous_total_FedAVG_weight_sum)
-
-        # if self.global_round > 1:
-        if self.Reocrd_global_model_accuracy >= 0.8:
-                self.Previous_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
-                # 保存上一回合未受到攻擊FedAVG後的正常權重總和 進行後續權重差異計算
-                self.Previous_Temp = self.Previous_total_FedAVG_weight_sum
-                print("Last_round_After_FedAVG", self.Previous_total_FedAVG_weight_sum)
-        else:
-                if self.global_round <=10:
-                     self.Previous_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
-                print("Previous_total_FedAVG_weight_sum", self.Previous_total_FedAVG_weight_sum)
-                # self.Previous_Temp = self.Previous_total_FedAVG_weight_sum
-                print("Last_round_After_FedAVG_normal", self.Previous_total_FedAVG_weight_sum)
-
-        # 更新客户端模型参数为新的全局模型参数
+        # 保存上一回合FedAVG後的權重總和
+        self.Previous_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
+        print("Last_round_After_FedAVG", self.Previous_total_FedAVG_weight_sum)
+            
         self.set_parameters(parameters)# 剛聚合完的權重 # 置新參數之前保存權重
         
         #global test 對每global round剛聚合完的gobal model進行測試 要在Local_train之前測試
         # 通常第1 round測出來會是0
         # 在训练或测试结束后，保存模型
-        torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Before_local_train_model_round_{self.global_round}.pth")
-        # 在此处测试刚聚合完的全局模型
-        accuracy = test(net, testloader, start_IDS, client_str,f"global_test",True)
-        self.Reocrd_global_model_accuracy = accuracy
-
-        print("accuracy",accuracy)
-        print("Reocrd_global_model_accuracy",self.Reocrd_global_model_accuracy)
-
+        torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Before_local_train_model.pth")
+        
         # 算聚合完的權重總和
         weights_after_FedAVG = net.state_dict()
         # True 以絕對值加總 False 為直接加總
         self.Current_total_FedAVG_weight_sum = DoCountModelWeightSum(weights_after_FedAVG,False,"After_FedAVG")   
-
         if self.global_round == 1 :
             self.Current_total_FedAVG_weight_sum = 1
         print("After_FedAVG",self.Current_total_FedAVG_weight_sum)
 
-        # 将总体准确率和其他信息写入 "accuracy-baseline.csv" 文件
+        accuracy = test(net, testloader, start_IDS, client_str,f"global_test",True)
+        print("accuracy",accuracy)
+                    # 将总体准确率和其他信息写入 "accuracy-baseline.csv" 文件
         with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-gobal_model_{client_str}.csv", "a+") as file:
             # file.write(str(RecordAccuracy))
             # file.writelines("\n")
@@ -518,9 +493,7 @@ class FlowerClient(fl.client.NumPyClient):
             file.write(f"{accuracy}\n")
 
         ### 訓練中途加入JSMA Attack
-        # if (self.global_round >= 50 and self.global_round <= 100) and self.client_id == "client3":
-        if (self.global_round >= 50 and self.global_round <= 125) and self.client_id == "client3":
-        # if self.global_round >= 50  and self.client_id == "client3":
+        if self.global_round >= 50 and self.client_id == "client3":
             print(f"*********************在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
             # 載入被攻擊的數據
@@ -533,11 +506,10 @@ class FlowerClient(fl.client.NumPyClient):
             train_data_attacked = TensorDataset(x_train_attacked, y_train_attacked)
             trainloader = DataLoader(train_data_attacked, batch_size=512, shuffle=True)
         else:
-            print(f"*********************在第{self.global_round}回合結束攻擊*********************************************")
             trainloader = self.original_trainloader
         
         # 訓練階段
-        self.Local_train_accuracy = train(net, trainloader, epochs=num_epochs)
+        train(net, trainloader, epochs=num_epochs)
 
         # 在本地训练后保存和打印权重
         weights_after_Localtrain = net.state_dict()
@@ -561,17 +533,8 @@ class FlowerClient(fl.client.NumPyClient):
         self.previous_array[0],self.previous_array[1],self.previous_array[2],self.previous_array[3] = evaluateWeightDifferences("Local-Current_FedAVG",
                                                                                                                                  self.Current_total_Local_weight_sum, 
                                                                                                                                  self.Previous_total_FedAVG_weight_sum)
-        #step1上傳給權重，#step2在server做聚合，step3往下傳給server
-        # return self.get_parameters(config={}), len(trainloader.dataset), {"accuracy": accuracy}#step1上傳給權重，#step2在server做聚合，step3往下傳給server
-        return self.get_parameters(config={}), len(testloader.dataset), {"global_round": self.global_round,
-                                                                          "accuracy": accuracy,
-                                                                          "Local_train_accuracy": self.Local_train_accuracy,
-                                                                          "client_id": self.client_id,
-                                                                          "Local_train_weight_sum":self.Current_total_Local_weight_sum,
-                                                                          "Previous_round_FedAVG_weight_sum":self.Previous_total_FedAVG_weight_sum,
-                                                                          "Current_FedAVG_weight_sum":self.Current_total_FedAVG_weight_sum,
-                                                                          "Local_train_weight_sum-Current_FedAVG weight_sum":float(self.current_array[0]),
-                                                                          "Local_train_weight_sum-Previous_FedAVG weight_sum": float(self.previous_array[0])}
+
+        return self.get_parameters(config={}), len(trainloader.dataset), {"accuracy": accuracy}#step1上傳給權重，#step2在server做聚合，step3往下傳給server
 
     def evaluate(self, parameters, config):
         # 当前 global round 数
@@ -590,7 +553,6 @@ class FlowerClient(fl.client.NumPyClient):
                 file.write(f"{self.Current_total_Local_weight_sum},"
                             # f"{self.Current_total_FedAVG_weight_sum},"
                             f"{self.Previous_total_FedAVG_weight_sum},"
-                            f"{self.Record_Previous_total_FedAVG_weight_sum},"
                             # f"{self.current_array[0]},"
                             f"{self.previous_array[0]}\n")
         percentage_five = self.Current_total_Local_weight_sum * 0.05
