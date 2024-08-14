@@ -519,8 +519,8 @@ class FlowerClient(fl.client.NumPyClient):
 
         ### 訓練中途加入JSMA Attack
         # if (self.global_round >= 50 and self.global_round <= 100) and self.client_id == "client3":
-        if (self.global_round >= 50 and self.global_round <= 125) and self.client_id == "client3":
-        # if self.global_round >= 50  and self.client_id == "client3":
+        # if (self.global_round >= 50 and self.global_round <= 125) and self.client_id == "client3":
+        if self.global_round >= 50  and self.client_id == "client3":
             print(f"*********************在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
             # 載入被攻擊的數據
