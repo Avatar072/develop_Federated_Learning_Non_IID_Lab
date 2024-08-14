@@ -1,8 +1,10 @@
 import os
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Optional
 
 import flwr as fl
 from flwr.common import Metrics
+from flwr.common import Parameters, FitRes, EvaluateRes
+from flwr.server import client_proxy, client_manager
 
 import torch
 import torch.nn as nn
@@ -144,8 +146,9 @@ initial_parameters = fl.common.ndarrays_to_parameters(weights_values)
 #     # return {"accuracy": weighted_accuracy, "client_ids": client_ids}
 #     return {"accuracy": weighted_accuracy}
 
-#選第三個客戶端的平均每輪權重差最大者14.62
 def weighted_average(metrics: List[Tuple[int, Dict[str, float]]]) -> Dict[str, float]:
+    
+    print("Received metrics:", metrics)  # 新增：打印輸入的 metrics
     weighted_sum = 0
     total_examples = 0  # 重置为0
     Local_train_accuracies_List = []
@@ -153,11 +156,13 @@ def weighted_average(metrics: List[Tuple[int, Dict[str, float]]]) -> Dict[str, f
     valid_weights = []
 
     for num_examples, m in metrics:
+        print("num_examples:",num_examples)
         client_id = m.get("client_id", "Unknown")
         client_ids.append(client_id)
         Local_train_accuracy = m.get("Local_train_accuracy", 0)
         Local_train_accuracies_List.append(Local_train_accuracy)
         global_round = m.get("global_round", 0)
+        round = global_round
         Local_weight_sum = m.get("Local_train_weight_sum", 0)
         weight_diff = m.get("Local_train_weight_sum-Previous_FedAVG weight_sum", 0)
         threshold = Local_weight_sum * 0.05
@@ -165,8 +170,8 @@ def weighted_average(metrics: List[Tuple[int, Dict[str, float]]]) -> Dict[str, f
         #前面10round不看
         if global_round > 10:
             #權重差異超過當前本地權重總和的5%就要過濾掉  或 Local_train_accuracy大於90%才能列入計算
-            if weight_diff <= threshold or Local_train_accuracy > 0.9:
-                if "accuracy" in m and Local_train_accuracy > 0.9:#Local_train_accuracy大於90%才能列入計算
+            if weight_diff <= threshold or Local_train_accuracy > 0.8:
+                if "accuracy" in m and Local_train_accuracy > 0.8:#Local_train_accuracy大於90%才能列入計算
                     print(m["accuracy"])
                     weighted_sum += num_examples * m["accuracy"]
                     total_examples += num_examples  # 只在满足条件时累加
@@ -191,11 +196,142 @@ def weighted_average(metrics: List[Tuple[int, Dict[str, float]]]) -> Dict[str, f
     print("weighted_sum:", weighted_sum)
     print("total_examples:", total_examples)
     weighted_accuracy = weighted_sum / total_examples
+    print("client_ids:", client_ids)
     return {"accuracy": weighted_accuracy, "client_ids": client_ids}
 
+
+# class CustomFedAvg(fl.server.strategy.FedAvg):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.initial_min_fit_clients = self.min_fit_clients
+#         self.initial_min_evaluate_clients = self.min_evaluate_clients
+#         self.initial_min_available_clients = self.min_available_clients
+#         self.round_counter = 0
+
+#     def aggregate_fit(
+#         self,
+#         rnd: int,
+#         results: List[Tuple[client_proxy.ClientProxy, FitRes]],
+#         failures: List[BaseException],
+#     ) -> Tuple[Optional[Parameters], Optional[Dict[str, Scalar]]]:
+#         self.round_counter = rnd
+#         print(f"第 {rnd} 輪：正在處理總共 {len(results)} 個客戶端")
+        
+#         # 從結果中提取指標
+#         metrics = [(fit_res.num_examples, fit_res.metrics) for _, fit_res in results]
+#         # 計算加權平均
+#         weighted_avg_result = self.weighted_average(metrics)
+#         # 獲取有效客戶端 ID 列表
+#         valid_client_ids = weighted_avg_result.get("Valid client_ids", [])
+        
+#         # 過濾出有效的客戶端結果
+#         filtered_results = []
+#         for client, res in results:
+#             metric_client_id = res.metrics.get("client_id", "Unknown")
+#             if metric_client_id in valid_client_ids:
+#                 filtered_results.append((client, res))
+#             print(f"客戶端{metric_client_id} "f"{client.cid}：{'有效' if metric_client_id in valid_client_ids else '無效'}")
+        
+#         # 計算有效客戶端數量
+#         valid_clients_count = len(filtered_results)
+#         print(f"第 {rnd} 輪：{len(results)} 個客戶端中有 {valid_clients_count} 個有效客戶端")
+        
+#         # 調整最小客戶端數量
+#         self.adjust_min_clients(valid_clients_count)
+
+#         # 根據有效客戶端數量決定使用哪些結果進行聚合
+#         if valid_clients_count >= self.min_fit_clients:
+#             print(f"第 {rnd} 輪：使用 {valid_clients_count} 個有效客戶端進行聚合")
+#             aggregate_result = super().aggregate_fit(rnd, filtered_results, failures)
+#         else:
+#             print(f"第 {rnd} 輪：有效客戶端數量不足，使用所有 {len(results)} 個客戶端進行聚合")
+#             aggregate_result = super().aggregate_fit(rnd, results, failures)
+        
+#         print(f"第 {rnd} 輪：聚合完成")
+#         return aggregate_result
+
+#     def adjust_min_clients(self, valid_clients_count: int):
+#         if self.round_counter <= 10:
+#             self.min_fit_clients = self.initial_min_fit_clients
+#             self.min_evaluate_clients = self.initial_min_evaluate_clients
+#             self.min_available_clients = self.initial_min_available_clients
+#         else:
+#             new_min = valid_clients_count
+#             self.min_fit_clients = new_min
+#             self.min_evaluate_clients = new_min
+#             self.min_available_clients = new_min
+
+#         print(f"第{self.round_counter}輪: 調整後的min_fit_clients = {self.min_fit_clients}, "
+#               f"min_evaluate_clients = {self.min_evaluate_clients}, "
+#               f"min_available_clients = {self.min_available_clients}")
+
+#     def weighted_average(self, metrics: List[Tuple[int, Dict[str, float]]]) -> Dict[str, float]:
+#         # print("Received metrics:", metrics)  # 新增：打印輸入的 metrics
+#         weighted_sum = 0
+#         total_examples = 0  # 重置为0
+#         Local_train_accuracies_List = []
+#         client_ids = []
+#         valid_client_ids = []
+#         valid_weights = []
+
+#         for num_examples, m in metrics:
+#             print("num_examples:",num_examples)
+#             client_id = m.get("client_id", "Unknown")
+#             client_ids.append(client_id)
+#             Local_train_accuracy = m.get("Local_train_accuracy", 0)
+#             Local_train_accuracies_List.append(Local_train_accuracy)
+#             global_round = m.get("global_round", 0)
+#             Local_weight_sum = m.get("Local_train_weight_sum", 0)
+#             weight_diff = m.get("Local_train_weight_sum-Previous_FedAVG weight_sum", 0)
+#             threshold = Local_weight_sum * 0.05
+
+#             #前面10round不看
+#             if global_round > 10:
+#                 #權重差異超過當前本地權重總和的5%就要過濾掉  或 Local_train_accuracy大於90%才能列入計算
+#                 if weight_diff <= threshold or Local_train_accuracy > 0.8:
+#                     if "accuracy" in m and Local_train_accuracy > 0.8:  # Local_train_accuracy大於90%才能列入計算
+#                         print(m["accuracy"])
+#                         weighted_sum += num_examples * m["accuracy"]
+#                         total_examples += num_examples  # 只在满足条件时累加
+#                         valid_weights.append(weight_diff)
+#                         valid_client_ids.append(client_id)
+#                 else:
+#                     print(f"{client_id} excluded due to weight difference: {weight_diff}")
+
+#         print("Valid Weights (within threshold):", valid_weights)
+#         print("Total examples:", total_examples)
+#         print("Client IDs, Local train Accuracy:", list(zip(client_ids, Local_train_accuracies_List)))
+
+#         if total_examples == 0:
+#             return {"accuracy": 0, "client_ids": client_ids}
+
+#         weighted_accuracy = weighted_sum / total_examples
+#         return {
+#             "accuracy": weighted_accuracy,
+#             "client_ids": client_ids,
+#             "Total_examples": total_examples,
+#             "Valid Weights": valid_weights,
+#             "Valid client_ids": valid_client_ids
+#         }
+
+
+
+
+# # 使用自定義策略啟動Flower伺服器
+# strategy = CustomFedAvg(
+#     initial_parameters=initial_parameters,
+#     min_fit_clients=3,
+#     min_evaluate_clients=3,
+#     min_available_clients=3,
+#     # evaluate_metrics_aggregation_fn=weighted_average,
+# )
+
 # Define strategy
-strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, evaluate_metrics_aggregation_fn=weighted_average, 
-    min_fit_clients = 3, min_evaluate_clients = 3, min_available_clients = 3)
+strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, 
+                                     evaluate_metrics_aggregation_fn=weighted_average, 
+                                     min_fit_clients = 3, 
+                                     min_evaluate_clients = 3,
+                                     min_available_clients = 3)
     # min_fit_clients = 2, min_evaluate_clients = 2, min_available_clients = 2)
 
 
