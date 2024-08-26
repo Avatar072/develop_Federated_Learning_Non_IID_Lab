@@ -523,9 +523,13 @@ class FlowerClient(fl.client.NumPyClient):
         if self.global_round >= 50  and self.client_id == "client3":
             print(f"*********************在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
-            # 載入被攻擊的數據
-            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
-            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # 載入被JSMA攻擊的數據
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            
+            # 載入被FGSM攻擊的數據
+            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoFGSM_train_half3_20240826.npy", allow_pickle=True)
+            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoFGSM_train_half3_20240826.npy", allow_pickle=True)
             
             x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
             y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
@@ -589,8 +593,8 @@ class FlowerClient(fl.client.NumPyClient):
         with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_train_weight_sum-FedAVG weight_sum_{client_str}.csv", "a+") as file:
                 file.write(f"{self.Current_total_Local_weight_sum},"
                             # f"{self.Current_total_FedAVG_weight_sum},"
-                            f"{self.Previous_total_FedAVG_weight_sum},"
-                            f"{self.Record_Previous_total_FedAVG_weight_sum},"
+                            f"{self.Previous_total_FedAVG_weight_sum},"#上一回未受到攻擊FedAVG後的權重
+                            f"{self.Record_Previous_total_FedAVG_weight_sum},"#實際上一回FedAVG後的權重
                             # f"{self.current_array[0]},"
                             f"{self.previous_array[0]}\n")
         percentage_five = self.Current_total_Local_weight_sum * 0.05

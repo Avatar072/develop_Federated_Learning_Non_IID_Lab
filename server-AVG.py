@@ -332,7 +332,6 @@ strategy = CustomFedAvg(
 #                                      min_fit_clients = 3, 
 #                                      min_evaluate_clients = 3,
 #                                      min_available_clients = 3)
-    # min_fit_clients = 2, min_evaluate_clients = 2, min_available_clients = 2)
 
 
 # Start Flower server
