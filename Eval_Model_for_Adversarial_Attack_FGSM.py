@@ -27,10 +27,13 @@ print(f"Using device: {device}")
 # 加载TONIOT test
 # afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\test_ToN-IoT_dataframes_20240523.csv")
 
+# 加载TONIOT client3 train 隨機劃分
+afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half2_random_20240523.csv")
+
 # 加载TONIOT client3 train 均勻劃分
 # afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half3_20240523.csv")
 # 加载TONIOT client3 train 隨機劃分
-afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half3_random_20240523.csv")
+# afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half3_random_20240523.csv")
 
 print("Dataset loaded.")
 
@@ -59,15 +62,9 @@ classifier = PyTorchClassifier(
 )
 print("ART classifier created.")
 
-# 使用JSMA攻击方法生成对抗性样本并评估模型的鲁棒性
-# attack = SaliencyMapMethod(classifier=classifier, theta=0.1, gamma=1.0, verbose=True)
-# attack = SaliencyMapMethod(classifier=classifier, theta=0.05, gamma=0.02, verbose=True)
-
 # 创建 FGSM 攻击实例
 epsilon = 0.1  # 设置扰动大小
 attack = FastGradientMethod(estimator=classifier, eps=epsilon)
-
-
 
 print("SaliencyMapMethod attack initialized.")
 
@@ -252,7 +249,10 @@ def compare_samples(save_dir):
     # 保存补充后的对抗样本数据为 CSV 文件
     finalDf.to_csv(os.path.join(save_dir, "final_adver_examples_with_missing.csv"), index=False)
 
-    SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_test", today)
+    # SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_test", today)
+    SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_train_half2", today)
+    # SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_train_half3", today)
+
 
 save_dir = f"./Adversarial_Attack_Test/{today}"
 compare_samples(save_dir)
