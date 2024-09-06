@@ -318,21 +318,20 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
 
 
 # 使用自定義策略啟動Flower伺服器
-strategy = CustomFedAvg(
-    initial_parameters=initial_parameters,
-    min_fit_clients=3,
-    min_evaluate_clients=3,
-    min_available_clients=3,
-    # evaluate_metrics_aggregation_fn=weighted_average,
-)
+# strategy = CustomFedAvg(
+#     initial_parameters=initial_parameters,
+#     min_fit_clients=3,
+#     min_evaluate_clients=3,
+#     min_available_clients=3,
+#     # evaluate_metrics_aggregation_fn=weighted_average,
+# )
 
 # Define strategy
-# strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, 
-#                                      evaluate_metrics_aggregation_fn=weighted_average, 
-#                                      min_fit_clients = 3, 
-#                                      min_evaluate_clients = 3,
-#                                      min_available_clients = 3)
-    # min_fit_clients = 2, min_evaluate_clients = 2, min_available_clients = 2)
+strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, 
+                                     evaluate_metrics_aggregation_fn=weighted_average, 
+                                     min_fit_clients = 3, 
+                                     min_evaluate_clients = 3,
+                                     min_available_clients = 3)
 
 
 # Start Flower server

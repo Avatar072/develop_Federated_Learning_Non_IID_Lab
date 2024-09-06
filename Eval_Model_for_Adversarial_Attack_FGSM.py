@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from art.estimators.classification import PyTorchClassifier
-from art.attacks.evasion import SaliencyMapMethod
+from art.attacks.evasion import SaliencyMapMethod,FastGradientMethod
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -27,15 +27,18 @@ print(f"Using device: {device}")
 # 加载TONIOT test
 # afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\test_ToN-IoT_dataframes_20240523.csv")
 
+# 加载TONIOT client3 train 隨機劃分
+afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half2_random_20240523.csv")
+
 # 加载TONIOT client3 train 均勻劃分
 # afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half3_20240523.csv")
 # 加载TONIOT client3 train 隨機劃分
-afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half3_random_20240523.csv")
+# afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half3_random_20240523.csv")
 
 print("Dataset loaded.")
 
 # 移除字符串类型特征
-def RemoveStringTypeValueForJSMA(afterprocess_dataset):
+def RemoveStringTypeValueForFGSM(afterprocess_dataset):
     crop_dataset = afterprocess_dataset.iloc[:, :]
     columns_to_exclude = ['ts', 'src_ip', 'src_port', 'dst_ip', 'dst_port', 'proto']
     testdata_removestring = crop_dataset[[col for col in crop_dataset.columns if col not in columns_to_exclude]]
@@ -48,45 +51,6 @@ def RemoveStringTypeValueForJSMA(afterprocess_dataset):
 # 创建并加载模型
 model = ChooseUseModel("MLP", 38, 10).to(device)
 
-# 假设你有训练好的PyTorch模型的路径
-# BaseLine每層神經元512下所訓練出來的model
-# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240719_TONIOT_神經元512\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
-
-# BaseLine每層神經元64下所訓練出來的model
-# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240729_TONIOT_神經元64\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
-
-# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\\Adversarial_Attack_Test\\20240722_FL_cleint3_.0.5_0.02\\After_JSMA_Attack_model.pth'
-
-
-# def LoadingModelforeval(model):
-#     # 加载预训练模型的状态字典
-#     pretrained_dict = torch.load(model_path, map_location=device)
-#     # 重命名预训练模型的键
-#     rename_dict = {
-#         # 'fc1.weight': 'layer1.weight',
-#         # 'fc1.bias': 'layer1.bias',
-#         # 'fc2.weight': 'layer2.weight',
-#         # 'fc2.bias': 'layer2.bias',
-#         # 'fc3.weight': 'layer3.weight',
-#         # 'fc3.bias': 'layer3.bias',
-#         # 'fc4.weight': 'layer4.weight',
-#         # 'fc4.bias': 'layer4.bias',
-#         # 'fc5.weight': 'layer5.weight',
-#         # 'fc5.bias': 'layer5.bias'
-#     }
-#     # 更新模型字典
-#     model_dict = model.state_dict()
-#     updated_pretrained_dict = {rename_dict[k]: v for k, v in pretrained_dict.items() if k in rename_dict}
-#     model_dict.update(updated_pretrained_dict)
-#     # 加载更新后的模型参数
-#     model.load_state_dict(model_dict)
-#     # 将模型移动到GPU
-#     model = model.to(device)
-#     model.eval()
-#     return model
-
-# model = LoadingModelforeval(model)
-
 # 将PyTorch模型转换为ART分类器
 classifier = PyTorchClassifier(
     model=model,
@@ -98,14 +62,14 @@ classifier = PyTorchClassifier(
 )
 print("ART classifier created.")
 
-# 使用JSMA攻击方法生成对抗性样本并评估模型的鲁棒性
-# attack = SaliencyMapMethod(classifier=classifier, theta=0.1, gamma=1.0, verbose=True)
-attack = SaliencyMapMethod(classifier=classifier, theta=0.05, gamma=0.02, verbose=True)
+# 创建 FGSM 攻击实例
+epsilon = 0.1  # 设置扰动大小
+attack = FastGradientMethod(estimator=classifier, eps=epsilon)
 
 print("SaliencyMapMethod attack initialized.")
 
 # 加载测试数据
-testdata_removestring, undoScalerdataset = RemoveStringTypeValueForJSMA(afterprocess_dataset)
+testdata_removestring, undoScalerdataset = RemoveStringTypeValueForFGSM(afterprocess_dataset)
 x_test_RemoveString_np = np.load(f"./Adversarial_Attack_Test/{today}/x_testdata_removestring_{today}.npy", allow_pickle=True)
 y_test_RemoveString_np = np.load(f"./Adversarial_Attack_Test/{today}/y_testdata_removestring_{today}.npy", allow_pickle=True)
 original_label_counter = Counter(y_test_RemoveString_np)
@@ -138,19 +102,19 @@ for sample_ind in range(source_samples):
     x_test_gpu = torch.tensor(x_test_RemoveString_np[sample_ind: (sample_ind + 1)]).to(device)
     x_test_gpu_np = x_test_gpu.cpu().numpy()
 
-    # 调用JSMA生成对抗样本
-    x_test_adv_jsma = attack.generate(x=x_test_gpu_np)
+    # 调用FGSM生成对抗样本
+    x_test_adv_FGSM = attack.generate(x=x_test_gpu_np)
 
     # 将生成的对抗样本存储在X_adv中
-    X_adv[sample_ind] = x_test_adv_jsma.flatten()
+    X_adv[sample_ind] = x_test_adv_FGSM.flatten()
 
     # 计算对抗样本的预测结果
-    predictions_adv = classifier.predict(x_test_adv_jsma)
+    predictions_adv = classifier.predict(x_test_adv_FGSM)
     predicted_class = np.argmax(predictions_adv, axis=1)[0]
-    accuracy_adv_jsma = np.sum(np.argmax(predictions_adv, axis=1) == current_class) / 1.0
+    accuracy_adv_FGSM = np.sum(np.argmax(predictions_adv, axis=1) == current_class) / 1.0
 
     if predicted_class != current_class:
-        print(f'Attack successful! Sample index: {sample_ind + 1}, Predicted class: {predicted_class}, Original class: {current_class}, Accuracy: {accuracy_adv_jsma * 100}%')
+        print(f'Attack successful! Sample index: {sample_ind + 1}, Predicted class: {predicted_class}, Original class: {current_class}, Accuracy: {accuracy_adv_FGSM * 100}%')
         successful_attacks.append(sample_ind + 1)
         sample_indices.append(sample_ind + 1)
         original_classes.append(current_class)
@@ -161,21 +125,21 @@ for sample_ind in range(source_samples):
                 'Predicted Class': [predicted_class],
                 'Sample Index': [sample_ind + 1],
                 'Original Class': [current_class],
-                'Accuracy': [accuracy_adv_jsma * 100]
+                'Accuracy': [accuracy_adv_FGSM * 100]
             })
             attack_info.to_csv(file, header=file.tell() == 0, index=False)
         
         # 更新成功标签计数器
         successful_label_counts[current_class] += 1
     else:
-        print(f'Attack unsuccessful. Sample index: {sample_ind + 1}, Predicted class: {predicted_class}, Original class: {current_class}, Accuracy: {accuracy_adv_jsma * 100}%')
+        print(f'Attack unsuccessful. Sample index: {sample_ind + 1}, Predicted class: {predicted_class}, Original class: {current_class}, Accuracy: {accuracy_adv_FGSM * 100}%')
         csv_file_path = f"./Adversarial_Attack_Test/{today}/Label_{current_class}/unsuccessful_attacks.csv"
         with open(csv_file_path, "a+") as file:
             attack_info = pd.DataFrame({
                 'Predicted Class': [predicted_class],
                 'Sample Index': [sample_ind + 1],
                 'Original Class': [current_class],
-                'Accuracy': [accuracy_adv_jsma * 100]
+                'Accuracy': [accuracy_adv_FGSM * 100]
             })
             attack_info.to_csv(file, header=file.tell() == 0, index=False)
         
@@ -214,9 +178,9 @@ def plot_detailed_feature_comparison(original_samples, adversarial_samples):
     adversarial_median = np.median(adversarial_samples, axis=0)
     adversarial_max = np.max(adversarial_samples, axis=0)
     plt.figure(figsize=(15, 6))
-    plt.plot(adversarial_min, 'g--', label='JSMA Min')
-    plt.plot(adversarial_median, 'g-', label='JSMA Median')
-    plt.plot(adversarial_max, 'g:', label='JSMA Max')
+    plt.plot(adversarial_min, 'g--', label='FGSM Min')
+    plt.plot(adversarial_median, 'g-', label='FGSM Median')
+    plt.plot(adversarial_max, 'g:', label='FGSM Max')
     plt.plot(original_min, 'b--', label='Ordinary Min')
     plt.plot(original_median, 'b-', label='Ordinary Median')
     plt.plot(original_max, 'b:', label='Ordinary Max')
@@ -285,13 +249,16 @@ def compare_samples(save_dir):
     # 保存补充后的对抗样本数据为 CSV 文件
     finalDf.to_csv(os.path.join(save_dir, "final_adver_examples_with_missing.csv"), index=False)
 
-    SaveDataframeTonpArray(finalDf, save_dir, f"DoJSMA_test", today)
+    # SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_test", today)
+    SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_train_half2", today)
+    # SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_train_half3", today)
+
 
 save_dir = f"./Adversarial_Attack_Test/{today}"
 compare_samples(save_dir)
 
 
-torch.save(model.state_dict(), f"./Adversarial_Attack_Test/{today}/After_JSMA_Attack_model.pth")
+torch.save(model.state_dict(), f"./Adversarial_Attack_Test/{today}/After_FGSM_Attack_model.pth")
 
 # 紀錄結束時間
 end_IDS = time.time()
