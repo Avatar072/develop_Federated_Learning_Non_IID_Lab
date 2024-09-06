@@ -99,8 +99,17 @@ classifier = PyTorchClassifier(
 print("ART classifier created.")
 
 # 使用JSMA攻击方法生成对抗性样本并评估模型的鲁棒性
+# - theta：控制擾動的幅度。增加theta的值可以增加擾動的大小。
+# - gamma：控制對每個特徵的影響程度。較大的gamma值可以使攻擊更加集中在少數幾個特徵上，增加其擾動的顯著性
 # attack = SaliencyMapMethod(classifier=classifier, theta=0.1, gamma=1.0, verbose=True)
-attack = SaliencyMapMethod(classifier=classifier, theta=0.05, gamma=0.02, verbose=True)
+# attack = SaliencyMapMethod(classifier=classifier, theta=0.05, gamma=0.02, verbose=True)
+# attack = SaliencyMapMethod(classifier=classifier, theta=0.1, gamma=0.02, verbose=True)
+# attack = SaliencyMapMethod(classifier=classifier, theta=0.15, gamma=0.02, verbose=True)
+# attack = SaliencyMapMethod(classifier=classifier, theta=0.2, gamma=0.02, verbose=True)
+attack = SaliencyMapMethod(classifier=classifier, theta=0.25, gamma=0.02, verbose=True)
+
+
+
 
 print("SaliencyMapMethod attack initialized.")
 
@@ -285,7 +294,12 @@ def compare_samples(save_dir):
     # 保存补充后的对抗样本数据为 CSV 文件
     finalDf.to_csv(os.path.join(save_dir, "final_adver_examples_with_missing.csv"), index=False)
 
-    SaveDataframeTonpArray(finalDf, save_dir, f"DoJSMA_test", today)
+    # SaveDataframeTonpArray(finalDf, save_dir, f"DoJSMA_test", today)
+    # SaveDataframeTonpArray(finalDf, save_dir, f"DoJSMA_train_half3", today)
+    # SaveDataframeTonpArray(finalDf, save_dir, f"DoJSMA_train_half3_theta_0.15", today)
+    # SaveDataframeTonpArray(finalDf, save_dir, f"DoJSMA_train_half3_theta_0.2", today)
+    SaveDataframeTonpArray(finalDf, save_dir, f"DoJSMA_train_half3_theta_0.25", today)
+
 
 save_dir = f"./Adversarial_Attack_Test/{today}"
 compare_samples(save_dir)

@@ -521,9 +521,9 @@ class FlowerClient(fl.client.NumPyClient):
         # if (self.global_round >= 50 and self.global_round <= 100) and self.client_id == "client3":
         # if (self.global_round >= 50 and self.global_round <= 125) and self.client_id == "client3":
         if (self.global_round >= 30 and self.global_round <= 80)  and self.client_id == "client2":
-            print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
+        #     print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
-            # 載入被FGSM攻擊的數據
+        #     # 載入被FGSM攻擊的數據
             x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoFGSM_train_half2_20240827.npy", allow_pickle=True)
             y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoFGSM_train_half2_20240827.npy", allow_pickle=True)
             
@@ -535,9 +535,22 @@ class FlowerClient(fl.client.NumPyClient):
         elif self.global_round >= 50  and self.client_id == "client3":
             print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
-            # 載入被JSMA攻擊的數據
+            # 載入被JSMA攻擊的數據 theta=0.05
             x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
             y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            
+            # 載入被JSMA攻擊的數據 theta=0.1
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
+            
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_theta_0.15_20240901.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_theta_0.15_20240901.npy", allow_pickle=True)
+            
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_theta_0.2_20240901.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_theta_0.2_20240901.npy", allow_pickle=True)
+            
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_theta_0.25_20240901.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_theta_0.25_20240901.npy", allow_pickle=True)
             
             # 載入被FGSM攻擊的數據
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoFGSM_train_half3_20240826.npy", allow_pickle=True)
