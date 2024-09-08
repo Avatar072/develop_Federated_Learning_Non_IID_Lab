@@ -1,21 +1,22 @@
 import torch
 import numpy as np
-
+import csv
 '''
 寫法優點
 函數加載了一個保存的模型狀態字典。這個字典包含了模型所有層的權重和偏置。
 不需要預先知道模型的結構或層的名稱。
 避免了將不同大小的張量填充到相同大小的問題。
 '''
+folder_path = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 
 # 加載了一個保存的模型狀態字典。這個字典包含了模型所有層的權重和偏置。
 # # After Local train 150 globla round
-# client1_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client1/normal/After_local_train_weight.pth')
+client1_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240728_150_G/client1/normal/After_local_train_weight.pth')
 # client2_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client2/normal/After_local_train_weight.pth')
 # client3_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client3/normal/After_local_train_weight.pth')
 
 # # After FedAVG 150 global round Before_local_train_model
-# client1_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client1/normal/Before_local_train_model.pth')
+client1_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240728_150_G/client1/normal/Before_local_train_model.pth')
 # client2_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client2/normal/Before_local_train_model.pth')
 # client3_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client3/normal/Before_local_train_model.pth')
 
@@ -42,6 +43,7 @@ client1_state_dict.values() 返回字典中所有的值，
 # .sum(): 計算這個一維張量的所有元素之和。
 # 然後，這個和被加到total_weight_sum 上
 
+#將模型每層加總求總和
 def DoCountModelWeightSum(dict_file,bool_UseABS,str_client):
     # 初始化總權重和：
     total_weight_sum = 0
@@ -108,6 +110,131 @@ def evaluateWeightDifferences(str_state,weights1, weights2):
     print(f"{str_state}最小差異:", min_difference)
     return differences ,average_difference,max_difference,min_difference
 
+
+# 計算兩個 state_dict 之間每一層的權重差距 以距離來看
+'''
+各種權重差距算法
+torch.norm() 是 PyTorch 中的一個函數，用來計算張量的範數（也就是距離度量）。這個函數根據你指定的 p 值來計算不同類型的範數。
+e.g
+# torch.norm(input, p='fro', dim=None, keepdim=False, dtype=None, out=None)
+input: 需要計算範數的張量。
+p: 用來指定範數的類型。
+p=1：計算 L1 範數（曼哈頓距離）。
+p=2：計算 L2 範數（歐幾里得距離，默認值）。
+p=float('inf')：計算 L∞ 範數（最大值範數）。
+p='fro'：計算 Frobenius 範數（矩陣的L2範數），適用於2D張量（矩陣）。
+dim: 指定要沿著哪個維度計算範數。這對於多維張量非常有用。例如，如果是2D張量，指定 dim=(0,1) 表示對所有元素計算範數。
+keepdim: 如果設置為 True，將保留輸出的維度，默認為 False。
+dtype: 指定返回的數據類型。
+out: 可以選擇將結果寫入到一個已存在的張量中。
+///////////////////////////////////////////////////////////////
+e.g
+# 創建兩個張量
+# tensor1 = torch.tensor([1.0, 2.0, 3.0])
+# tensor2 = torch.tensor([4.0, 6.0, 8.0])
+
+# # L2範數（歐幾里得距離） 
+# l2_diff = torch.norm(tensor1 - tensor2, p=2)
+# print(f"L2範數差距（歐幾里得距離）: {l2_diff}")
+
+# # L1範數（曼哈頓距離）
+# l1_diff = torch.norm(tensor1 - tensor2, p=1)
+# print(f"L1範數差距（曼哈頓距離）: {l1_diff}")
+
+# # L∞範數（最大值距離）
+# l_inf_diff = torch.norm(tensor1 - tensor2, p=float('inf'))
+# print(f"L∞範數差距（最大值距離）: {l_inf_diff}")
+
+'''
+
+def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_path, Str_abs_Or_dis):
+    weight_diff_List = []
+    total_weight_diff = 0  # 初始化總和變量
+
+    for (name1, param1), (name2, param2) in zip(state_dict1.items(), state_dict2.items()):
+        # 確保比較的名稱和參數是一致的
+        if 'weight' in name1 and 'weight' in name2:
+            # 確保兩個層的形狀一致，才能比較
+            if param1.shape == param2.shape:
+                # 打印每層的權重來檢查差異
+                # print(f"正在比較層: {name1}")
+                # print(f"權重1: {param1}")
+                # print(f"權重2: {param2}")
+                if Str_abs_Or_dis == "distance":
+                    # 計算每層對應權重的 L2 範數(歐幾里得範數)差距 後再將差值加總
+                    weight_diff = torch.norm(param1 - param2, p=2).item()
+                    print(f'{name1}層的距離權重差距',weight_diff)
+                    weight_diff_List.append((name1, weight_diff))
+
+                    # 加到 weight_diff_List 時立即計算總和
+                    total_weight_diff += weight_diff
+
+                elif Str_abs_Or_dis == "absolute":
+                    # 計算兩個 state_dict 之間每一層的權重絕對差值 後再將差值加總
+                    # 計算每層對應權重的絕對差值
+                    # torch.abs() 計算的是逐元素的絕對值
+                    # 計算權重的逐元素絕對值差異。這意味著每個權重之間的差異都被單獨計算並展示出來
+                    # 會顯示很多元素計算結果出來，
+                    # 而這些差異取決於每個權重的具體數值變化，可能在不同的層次之間有較大的變動。
+
+                    abs_diff = torch.abs(param1 - param2)
+                    print(f'個元素絕對差異',torch.sum(abs_diff))
+                    # 計算個元素絕對差異的總和
+                    element_sum_difference = torch.sum(abs_diff).item()
+                    print(f'{name1}層的權重絕對值差距',element_sum_difference)
+                    # 累加所有層的絕對差異總
+                    total_weight_diff += element_sum_difference  
+                    average_difference = torch.mean(abs_diff).item()
+                    max_difference = torch.max(abs_diff).item()
+                    min_difference = torch.min(abs_diff).item()
+                    weight_diff_List.append({
+                                            'layer': name1,
+                                            'element_abs_difference': element_sum_difference,
+                                            'total_sum_diff': total_weight_diff,
+                                            'average_difference': average_difference,
+                                            'max_difference': max_difference,
+                                            'min_difference': min_difference
+                                             })
+            else:
+                print(f"警告: {name1} 和 {name2} 的形狀不一致，無法比較")
+    
+    # 確認 weight_diff_List 是否正確填充數據
+    # print("weight_diff_List 檢查:", weight_diff_List)
+    # 最後輸出結果
+    print(f"所有層的權重差距總和: {total_weight_diff}")
+    # 寫入文件
+    with open(file_path, "a+") as file:
+        if Str_abs_Or_dis == "distance":
+            file.write("layer,distance_difference,total_sum_diff\n")
+            for layer_name, diff in weight_diff_List:
+                file.write(f"{layer_name},{diff},{total_weight_diff}\n")
+        elif Str_abs_Or_dis == "absolute":
+            file.write("layer,element_abs_difference,total_sum_diff,average_difference,max_difference,min_difference\n")
+            for diff_info in weight_diff_List:
+                file.write(f"{diff_info['layer']},"
+                           f"{diff_info['element_abs_difference']},"
+                           f"{diff_info['total_sum_diff']},"
+                           f"{diff_info['average_difference']},"
+                           f"{diff_info['max_difference']},"
+                           f"{diff_info['min_difference']}\n")
+
+    print(f"weight_diffs 已經保存到 {file_path}")
+
+    return weight_diff_List, total_weight_diff
+
+
+# 計算兩個模型的每層權重差距（以距離）
+file_path = f"{folder_path}/weight_diffs_dis_test.csv"
+weight_diffs_dis, total_weight_diff= Calculate_Weight_Diffs_Distance_OR_Absolute(client1_state_dict, 
+                                                                    client1_state_dict_after_FedAVG,
+                                                                    file_path,
+                                                                    "distance")
+# 計算兩個模型的每層權重差距（絕對值）
+file_path = f"{folder_path}/weight_diffs_abs_test.csv"
+weight_diffs_abs, total_sum_diff_abs = Calculate_Weight_Diffs_Distance_OR_Absolute(client1_state_dict, 
+                                                                    client1_state_dict_after_FedAVG,
+                                                                    file_path,
+                                                                    "absolute")
 
 # total_FedAVG_abs_weight_sum=0
 # client1_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240801_使用random_第一次/client1/normal/After_local_train_weight.pth')
