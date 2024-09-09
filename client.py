@@ -548,12 +548,12 @@ class FlowerClient(fl.client.NumPyClient):
             print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
             # 載入被JSMA攻擊的數據 theta=0.05
-            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
-            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.1
-            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
-            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
+            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
+            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.15
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_theta_0.15_20240901.npy", allow_pickle=True)
@@ -598,13 +598,31 @@ class FlowerClient(fl.client.NumPyClient):
         print("self.Current_total_FedAVG_weight_sum",self.Current_total_FedAVG_weight_sum)
         
         #####################################################模型每層差異求總和#################################################  
+        # 檢查 state_dict1 和 state_dict2 是否為 None
+        if weights_after_Localtrain is None:
+            print("weights_after_Localtrain is None")
+        if After_FedAVG_model is None:
+            print("After_FedAVG_model is None")
+        if After_FedAVG_model_unattack is None:
+            print("After_FedAVG_model_unattack is None")
         # 上一回合未受到攻擊剛聚合完的全局模型 
         # 前10回合 或是 測試完小於0.8 用當前的聚合後的模型
-        if self.global_round <=10 or self.Reocrd_global_model_accuracy < 0.8: 
-            After_FedAVG_model_unattack = After_FedAVG_model
-        else:    
-            After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Before_local_train_model_round_unattack.pth')
-
+        if self.global_round <=10: 
+            try:
+                After_FedAVG_model_unattack = After_FedAVG_model
+            except Exception as e:
+                print(f"Error loading After_FedAVG_model: {e}")
+                After_FedAVG_model = None
+        else:
+            if self.Reocrd_global_model_accuracy > 0.8:
+                try:
+                    After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Before_local_train_model_round_unattack.pth')
+                except Exception as e:
+                    print(f"Error loading After_FedAVG_model_unattack: {e}")
+                    After_FedAVG_model_unattack = None
+            
+                # After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Before_local_train_model_round_unattack.pth')
+            
         # 計算兩個模型的每層權重差距 將每層權重差距值相加（以距離(distance)計算）
         diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}.csv"
         weight_diffs_dis, self.Current_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
