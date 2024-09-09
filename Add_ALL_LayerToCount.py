@@ -11,12 +11,12 @@ folder_path = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 
 # 加載了一個保存的模型狀態字典。這個字典包含了模型所有層的權重和偏置。
 # # After Local train 150 globla round
-client1_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240728_150_G/client1/normal/After_local_train_weight.pth')
+# client1_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240728_150_G/client1/normal/After_local_train_weight.pth')
 # client2_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client2/normal/After_local_train_weight.pth')
 # client3_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client3/normal/After_local_train_weight.pth')
 
 # # After FedAVG 150 global round Before_local_train_model
-client1_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240728_150_G/client1/normal/Before_local_train_model.pth')
+# client1_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240728_150_G/client1/normal/Before_local_train_model.pth')
 # client2_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client2/normal/Before_local_train_model.pth')
 # client3_state_dict_after_FedAVG = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240726_150_G/client3/normal/Before_local_train_model.pth')
 
@@ -300,17 +300,17 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
 
 
 # 計算兩個模型的每層權重差距（以距離）
-file_path = f"{folder_path}/weight_diffs_dis_test.csv"
-weight_diffs_dis, total_weight_diff= Calculate_Weight_Diffs_Distance_OR_Absolute(client1_state_dict, 
-                                                                    client1_state_dict_after_FedAVG,
-                                                                    file_path,
-                                                                    "distance")
-# 計算兩個模型的每層權重差距（絕對值）
-file_path = f"{folder_path}/weight_diffs_abs_test.csv"
-weight_diffs_abs, total_sum_diff_abs = Calculate_Weight_Diffs_Distance_OR_Absolute(client1_state_dict, 
-                                                                    client1_state_dict_after_FedAVG,
-                                                                    file_path,
-                                                                    "absolute")
+# file_path = f"{folder_path}/weight_diffs_dis_test.csv"
+# weight_diffs_dis, total_weight_diff= Calculate_Weight_Diffs_Distance_OR_Absolute(client1_state_dict, 
+#                                                                     client1_state_dict_after_FedAVG,
+#                                                                     file_path,
+#                                                                     "distance")
+# # 計算兩個模型的每層權重差距（絕對值）
+# file_path = f"{folder_path}/weight_diffs_abs_test.csv"
+# weight_diffs_abs, total_sum_diff_abs = Calculate_Weight_Diffs_Distance_OR_Absolute(client1_state_dict, 
+#                                                                     client1_state_dict_after_FedAVG,
+#                                                                     file_path,
+#                                                                     "absolute")
 
 # total_FedAVG_abs_weight_sum=0
 # client1_state_dict = torch.load('D:/develop_Federated_Learning_Non_IID_Lab/FL_AnalyseReportfolder/20240801_使用random_第一次/client1/normal/After_local_train_weight.pth')
