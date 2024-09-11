@@ -231,7 +231,8 @@ e.g
 def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_path, Str_abs_Or_dis):
     weight_diff_List = []
     total_weight_diff = 0  # 初始化總和變量
-
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # 使用 GPU 或 CPU
+    
     if state_dict1 is None:
         print(f"{state_dict1} is None")
     if state_dict2 is None:
@@ -241,9 +242,8 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
     if isinstance(state_dict1, dict) and isinstance(state_dict2, dict):
         for key in state_dict1:
             if key in state_dict2:  # 確保 state_dict2 中也有相同的鍵
-                param1 = state_dict1[key]
-                param2 = state_dict2[key]
-                
+                param1 = state_dict1[key].to(device)  # 將 param1 移動到指定設備
+                param2 = state_dict2[key].to(device)  # 將 param2 移動到指定設備
                 if 'weight' in key:
                     # 確保兩個層的形狀一致，才能比較
                     if param1.shape == param2.shape:
@@ -258,7 +258,8 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
                             abs_diff = torch.abs(param1 - param2)
                             element_sum_difference = torch.sum(abs_diff).item()
                             print(f'{key}層的權重絕對值差距', element_sum_difference)
-                            total_weight_diff += element_sum_difference  
+                            total_weight_diff += element_sum_difference 
+                            print(f"累加後的 total_weight_diff: {total_weight_diff}") 
                             average_difference = torch.mean(abs_diff).item()
                             max_difference = torch.max(abs_diff).item()
                             min_difference = torch.min(abs_diff).item()
