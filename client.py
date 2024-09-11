@@ -469,8 +469,11 @@ class FlowerClient(fl.client.NumPyClient):
 
     def fit(self, parameters, config):
        
-        After_FedAVG_model_unattack = None # 確保變數已經初始化
-
+        # 初始化一個模型 用於保存聚合後的未受攻擊汙染的全局模型
+        # After_FedAVG_model_unattack_initial_model = ChooseUseModel("MLP", 44, labelCount)
+        # 獲取初始化模型的 state_dict
+        # After_FedAVG_model_unattack = After_FedAVG_model_unattack_initial_model.state_dict()
+        After_FedAVG_model_unattack = net
         # 从 config 获取当前的 global round 数
         self.global_round += 1
         print(f"Current global round: {self.global_round}")
@@ -548,12 +551,12 @@ class FlowerClient(fl.client.NumPyClient):
             print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
             # 載入被JSMA攻擊的數據 theta=0.05
-            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
-            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.1
-            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
-            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.15
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_theta_0.15_20240901.npy", allow_pickle=True)
@@ -586,7 +589,7 @@ class FlowerClient(fl.client.NumPyClient):
         # 在本地训练后保存和打印权重
         weights_after_Localtrain = net.state_dict()
         torch.save(weights_after_Localtrain, 
-                   f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/After_local_train_weight.pth")
+                   f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/After_local_train_weight_{self.global_round}.pth")
         print("Weights after local training:")
         # 在本地训练后打印权重
         # 算Local train完的權重總和
@@ -606,7 +609,7 @@ class FlowerClient(fl.client.NumPyClient):
         if After_FedAVG_model_unattack is None:
             print("After_FedAVG_model_unattack is None")
         # 上一回合未受到攻擊剛聚合完的全局模型 
-        # 前10回合 或是 測試完小於0.8 用當前的聚合後的模型
+        # 前10回合當前的聚合後的模型
         if self.global_round <=10: 
             try:
                 After_FedAVG_model_unattack = After_FedAVG_model
@@ -614,17 +617,20 @@ class FlowerClient(fl.client.NumPyClient):
                 print(f"Error loading After_FedAVG_model: {e}")
                 After_FedAVG_model = None
         else:
-            if self.Reocrd_global_model_accuracy > 0.8:
+            # 測試完小於0.8 用上一回合未受到攻擊剛聚合完的全局模型 
+            if self.Reocrd_global_model_accuracy < 0.8:
                 try:
                     After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Before_local_train_model_round_unattack.pth')
                 except Exception as e:
                     print(f"Error loading After_FedAVG_model_unattack: {e}")
                     After_FedAVG_model_unattack = None
             
-                # After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Before_local_train_model_round_unattack.pth')
-            
+            # 測試完大於0.8 表示沒受到攻擊 可以直接用剛聚合完的全局模型 
+            else:
+                After_FedAVG_model_unattack = After_FedAVG_model
         # 計算兩個模型的每層權重差距 將每層權重差距值相加（以距離(distance)計算）
         diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}.csv"
+        
         weight_diffs_dis, self.Current_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
                                                                                                     After_FedAVG_model,
                                                                                                     diff_dis_csv_file_path,
