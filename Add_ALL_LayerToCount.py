@@ -242,8 +242,8 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
     if isinstance(state_dict1, dict) and isinstance(state_dict2, dict):
         for key in state_dict1:
             if key in state_dict2:  # 確保 state_dict2 中也有相同的鍵
-                param1 = state_dict1[key].to(device)  # 將 param1 移動到指定設備
-                param2 = state_dict2[key].to(device)  # 將 param2 移動到指定設備
+                param1 = state_dict1[key].to(device)  # 將 param1 移動到指定設備 local
+                param2 = state_dict2[key].to(device)  # 將 param2 移動到指定設備 fedavg
                 if 'weight' in key:
                     # 確保兩個層的形狀一致，才能比較
                     if param1.shape == param2.shape:
