@@ -551,8 +551,8 @@ class FlowerClient(fl.client.NumPyClient):
             print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
             # 載入被JSMA攻擊的數據 theta=0.05
-            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
-            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.1
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
@@ -567,8 +567,8 @@ class FlowerClient(fl.client.NumPyClient):
             # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_theta_0.2_20240901.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.25
-            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_theta_0.25_20240901.npy", allow_pickle=True)
-            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_theta_0.25_20240901.npy", allow_pickle=True)
+            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_theta_0.25_20240901.npy", allow_pickle=True)
+            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_theta_0.25_20240901.npy", allow_pickle=True)
             
             # 載入被FGSM攻擊的數據
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoFGSM_train_half3_20240826.npy", allow_pickle=True)
@@ -695,6 +695,13 @@ class FlowerClient(fl.client.NumPyClient):
         # 在训练或测试结束后，保存模型
         torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/After_local_train_model.pth")
         accuracy = test(net, testloader, start_IDS, client_str,f"local_test",True)
+        with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-local_model_{client_str}.csv", "a+") as file:
+            # file.write(str(RecordAccuracy))
+            # file.writelines("\n")
+            # 添加标题行
+            # file.write(f"{client_str}_gobal_model_Accuracy\n")
+            # 写入Accuracy数据
+            file.write(f"{accuracy}\n")
         self.Local_train_accuracy = accuracy
         self.set_parameters(parameters)#更新現有的知識#step4 更新model
         print(f"Client {self.client_id} returning metrics: {{accuracy: {accuracy}, client_id: {self.client_id}}}")
