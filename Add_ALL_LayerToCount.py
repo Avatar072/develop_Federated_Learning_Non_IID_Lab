@@ -137,6 +137,20 @@ e.g
 # l2_diff = torch.norm(tensor1 - tensor2, p=2)
 # print(f"L2範數差距（歐幾里得距離）: {l2_diff}")
 
+# 假設我們有一個小型張量：
+# 計算過程將是：
+
+ 展平: [1, 2, 3, 4, 5, 6]
+# 平方: [1, 4, 9, 16, 25, 36]
+# 求和: 1 + 4 + 9 + 16 + 25 + 36 = 91
+# 平方根: √91 ≈ 9.539
+# param1 = torch.tensor([[1, 2, 3],[4, 5, 6]]).to(device)
+# torch.norm() 函數只能對浮點數（例如 float32 或 float64）或複數類型的張量進行計算
+# 將張量轉換成浮點數類型
+param1 = param1.float()
+distance_param1 = torch.norm(param1, p=2).item()
+print(f"{key}層的distance_param1\n",distance_param1)   
+
 # # L1範數（曼哈頓距離）
 # l1_diff = torch.norm(tensor1 - tensor2, p=1)
 # print(f"L1範數差距（曼哈頓距離）: {l1_diff}")
@@ -230,7 +244,9 @@ e.g
 
 def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_path, Str_abs_Or_dis):
     weight_diff_List = []
+    weight_diff_Norm_List = []
     total_weight_diff = 0  # 初始化總和變量
+    total_weight_diff_Norm = 0
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # 使用 GPU 或 CPU
     
     if state_dict1 is None:
@@ -244,15 +260,34 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
             if key in state_dict2:  # 確保 state_dict2 中也有相同的鍵
                 param1 = state_dict1[key].to(device)  # 將 param1 移動到指定設備 local
                 param2 = state_dict2[key].to(device)  # 將 param2 移動到指定設備 fedavg
+                # print(f"{key}層的param1\n",param1)
+                # distance_param1 = torch.norm(param1, p=2).item()
+                # print(f"{key}層的distance_param1\n",distance_param1)                
+                # print("param2\n",param2)
                 if 'weight' in key:
                     # 確保兩個層的形狀一致，才能比較
                     if param1.shape == param2.shape:
                         if Str_abs_Or_dis == "distance":
                             # 計算每層對應權重的 L2 範數(歐幾里得範數)差距
+                            # 這樣是先各每一層向量(64*64)陣列裡的差異再求距離
+                            # distance_param1 = torch.norm(param2, p=2).item()
+                            weight_diff_param1 = torch.norm(param1, p=2).item()
+                            weight_diff_param2 = torch.norm(param2, p=2).item()
+                            print(f'{key}層param1的歐幾里得範數', weight_diff_param1)
+                            print(f'{key}層param2的歐幾里得範數', weight_diff_param2)
+                            
                             weight_diff = torch.norm(param1 - param2, p=2).item()
-                            print(f'{key}層的距離權重差距', weight_diff)
+                            weight_diff_Norm= weight_diff_param1-weight_diff_param2
+                            
+                            print(f'{key}層的距離權重差距(以歐幾里得距離)', weight_diff)
+                            print(f'{key}層的距離權重差距(以歐幾里得範數)', weight_diff_Norm)
+                            
                             weight_diff_List.append((key, weight_diff))
+                            weight_diff_Norm_List.append((key, weight_diff_Norm))
+
                             total_weight_diff += weight_diff
+                            total_weight_diff_Norm += weight_diff_Norm
+
                         elif Str_abs_Or_dis == "absolute":
                             # 計算每層對應權重的絕對差值
                             abs_diff = torch.abs(param1 - param2)
