@@ -242,11 +242,9 @@ print(f"{key}層的distance_param1\n",distance_param1)
 #     return weight_diff_List, total_weight_diff
 
 
-def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_path, Str_abs_Or_dis):
+def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_path, Str_abs_Or_dis, bool_use_Norm):
     weight_diff_List = []
-    weight_diff_Norm_List = []
     total_weight_diff = 0  # 初始化總和變量
-    total_weight_diff_Norm = 0
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # 使用 GPU 或 CPU
     
     if state_dict1 is None:
@@ -275,18 +273,21 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
                             weight_diff_param2 = torch.norm(param2, p=2).item()
                             print(f'{key}層param1的歐幾里得範數', weight_diff_param1)
                             print(f'{key}層param2的歐幾里得範數', weight_diff_param2)
-                            
                             weight_diff = torch.norm(param1 - param2, p=2).item()
-                            weight_diff_Norm= weight_diff_param1-weight_diff_param2
-                            
+                            weight_diff_Norm= abs(weight_diff_param1-weight_diff_param2)
                             print(f'{key}層的距離權重差距(以歐幾里得距離)', weight_diff)
                             print(f'{key}層的距離權重差距(以歐幾里得範數)', weight_diff_Norm)
-                            
-                            weight_diff_List.append((key, weight_diff))
-                            weight_diff_Norm_List.append((key, weight_diff_Norm))
+                            # True表示記錄歐基里得範數
+                            if bool_use_Norm:
+                                weight_diff_List.append((key, 
+                                                          weight_diff_param1,
+                                                          weight_diff_param2,
+                                                          weight_diff_Norm))
+                                total_weight_diff += weight_diff_Norm
 
-                            total_weight_diff += weight_diff
-                            total_weight_diff_Norm += weight_diff_Norm
+                            else:
+                                weight_diff_List.append((key, weight_diff))
+                                total_weight_diff += weight_diff
 
                         elif Str_abs_Or_dis == "absolute":
                             # 計算每層對應權重的絕對差值
@@ -317,9 +318,14 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
     # 寫入文件
     with open(file_path, "a+") as file:
         if Str_abs_Or_dis == "distance":
-            file.write("layer,distance_difference,total_sum_diff\n")
-            for layer_name, diff in weight_diff_List:
-                file.write(f"{layer_name},{diff},{total_weight_diff}\n")
+            if bool_use_Norm:
+                file.write("'Layer','Weight_Diff_Param 1','Weight_Diff_Param 2','Weight_Diff_Norm'\n")
+                for layer_name, weight_diff_param1, weight_diff_param2, weight_diff_Norm in weight_diff_List:
+                    file.write(f"{layer_name},{weight_diff_param1},{weight_diff_param2},{weight_diff_Norm},{total_weight_diff}\n")
+            else:
+                file.write("layer,distance_difference,total_sum_diff\n")
+                for layer_name, diff in weight_diff_List:
+                    file.write(f"{layer_name},{diff},{total_weight_diff}\n")
         elif Str_abs_Or_dis == "absolute":
             file.write("layer,element_abs_difference,total_sum_diff,average_difference,max_difference,min_difference\n")
             for diff_info in weight_diff_List:

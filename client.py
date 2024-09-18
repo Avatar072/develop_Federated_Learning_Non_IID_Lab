@@ -458,6 +458,8 @@ class FlowerClient(fl.client.NumPyClient):
         self.Current_total_weight_diff_dis = 0 #當前每一回合全局模型與本地端模型間權重差異總和
         self.Previous_total_weight_diff_abs = 0 #用於保存上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以絕對值)
         self.Current_total_weight_diff_abs = 0 #當前每一回合全局模型與本地端模型間權重差異總和
+        self.Current_total_weight_diff_dis_Norm = 0#當前每一回合全局模型與本地端模型間權重差異總和
+        self.Previous_total_weight_diff_dis_Norm = 0 #用於保存上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以距離範數)
 
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
@@ -547,7 +549,7 @@ class FlowerClient(fl.client.NumPyClient):
         #     train_data_attacked = TensorDataset(x_train_attacked, y_train_attacked)
         #     trainloader = DataLoader(train_data_attacked, batch_size=512, shuffle=True)
         # el
-        if self.global_round >= 50  and self.client_id == "client3":
+        if self.global_round >= 15  and self.client_id == "client3":
             print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
             # 載入被JSMA攻擊的數據 theta=0.05
@@ -634,27 +636,44 @@ class FlowerClient(fl.client.NumPyClient):
         weight_diffs_dis, self.Current_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
                                                                                                     After_FedAVG_model,
                                                                                                     diff_dis_csv_file_path,
-                                                                                                    "distance")
+                                                                                                    "distance",
+                                                                                                    False)
         # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以距離)
         diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_unattack.csv"
         weight_diffs_dis, self.Previous_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
                                                                                                     After_FedAVG_model_unattack,
                                                                                                     diff_dis_csv_file_path,
-                                                                                                    "distance")
-
-        # 計算兩個模型的每層權重差距 將每層權重差距值相加（以絕對值(absolute)計算）
-        diff_abs_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_abs_{client_str}.csv"   
-        weight_diffs_abs,self.Current_total_weight_diff_abs = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
-                                                                                                    After_FedAVG_model,
-                                                                                                    diff_abs_csv_file_path,
-                                                                                                    "absolute")
+                                                                                                    "distance",
+                                                                                                    False)
+                # 計算兩個模型的每層權重差距 將每層權重差距值相加（以距離(distance)計算）
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_Norm.csv"
         
-        # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以絕對值)
-        diff_abs_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_abs_{client_str}_unattack.csv"   
-        weight_diffs_abs,self.Previous_total_weight_diff_abs = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
+        weight_diffs_dis, self.Current_total_weight_diff_dis_Norm = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
+                                                                                                    After_FedAVG_model,
+                                                                                                    diff_dis_csv_file_path,
+                                                                                                    "distance",
+                                                                                                    True)
+        # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以距離)
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_unattack_Norm.csv"
+        weight_diffs_dis, self.Previous_total_weight_diff_dis_Norm = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
                                                                                                     After_FedAVG_model_unattack,
-                                                                                                    diff_abs_csv_file_path,
-                                                                                                    "absolute")
+                                                                                                    diff_dis_csv_file_path,
+                                                                                                    "distance",
+                                                                                                    True)
+
+        # # 計算兩個模型的每層權重差距 將每層權重差距值相加（以絕對值(absolute)計算）
+        # diff_abs_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_abs_{client_str}.csv"   
+        # weight_diffs_abs,self.Current_total_weight_diff_abs = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
+        #                                                                                             After_FedAVG_model,
+        #                                                                                             diff_abs_csv_file_path,
+        #                                                                                             "absolute")
+        
+        # # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以絕對值)
+        # diff_abs_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_abs_{client_str}_unattack.csv"   
+        # weight_diffs_abs,self.Previous_total_weight_diff_abs = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
+        #                                                                                             After_FedAVG_model_unattack,
+        #                                                                                             diff_abs_csv_file_path,
+        #                                                                                             "absolute")
         ######################################################模型每層差異求總和################################################ 
 
 
@@ -716,7 +735,9 @@ class FlowerClient(fl.client.NumPyClient):
                             f"{self.Current_total_weight_diff_abs},"#模型每層差異求總和（以絕對值計算）  
                             f"{self.Previous_total_weight_diff_abs},"#上一回未受到攻擊的全局模型與本地端模型每層差異總和（以絕對值計算）
                             f"{self.Current_total_weight_diff_dis},"#模型每層差異求總和（以距離計算）
-                            f"{self.Previous_total_weight_diff_dis}\n")#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離計算）
+                            f"{self.Previous_total_weight_diff_dis},"#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離計算）
+                            f"{self.Current_total_weight_diff_dis_Norm},"#模型每層差異求總和（以距離範數計算）
+                            f"{self.Previous_total_weight_diff_dis_Norm}\n")#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離範數計算）
 
         percentage_five = self.Current_total_Local_weight_sum * 0.05
         # 保留小数点后两位
