@@ -1,6 +1,8 @@
 import torch
 import numpy as np
 import csv
+import os
+from mytoolfunction import CheckFileExists
 '''
 寫法優點
 函數加載了一個保存的模型狀態字典。這個字典包含了模型所有層的權重和偏置。
@@ -244,6 +246,7 @@ print(f"{key}層的distance_param1\n",distance_param1)
 
 def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_path, Str_abs_Or_dis, bool_use_Norm):
     weight_diff_List = []
+    weight_diff_Norm_List = []
     total_weight_diff = 0  # 初始化總和變量
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  # 使用 GPU 或 CPU
     
@@ -279,7 +282,7 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
                             print(f'{key}層的距離權重差距(以歐幾里得範數)', weight_diff_Norm)
                             # True表示記錄歐基里得範數
                             if bool_use_Norm:
-                                weight_diff_List.append((key, 
+                                weight_diff_Norm_List.append((key, 
                                                           weight_diff_param1,
                                                           weight_diff_param2,
                                                           weight_diff_Norm))
@@ -316,16 +319,35 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
     print(f"所有層的權重差距總和: {total_weight_diff}")
 
     # 寫入文件
+    # 檢查檔案是否存在
+    file_exists = os.path.exists(file_path)
+
+    # 如果檔案不存在，使用 'w' 模式寫入表頭，並寫入數據
+    if not file_exists:
+        with open(file_path, "w", newline='') as file:
+            if Str_abs_Or_dis == "distance":
+                file.write("layer1.weight,fc2.weight,fc3.weight,fc4.weight,layer5.weight,total_sum_diff\n")
+
+    #使用 'a+' 模式追加寫入各層權重差異數據
     with open(file_path, "a+") as file:
         if Str_abs_Or_dis == "distance":
             if bool_use_Norm:
-                file.write("'Layer','Weight_Diff_Param 1','Weight_Diff_Param 2','Weight_Diff_Norm'\n")
-                for layer_name, weight_diff_param1, weight_diff_param2, weight_diff_Norm in weight_diff_List:
-                    file.write(f"{layer_name},{weight_diff_param1},{weight_diff_param2},{weight_diff_Norm},{total_weight_diff}\n")
+                # 每個元素是 (key,weight_diff_param1,weight_diff_param2 weight_diff_Norm)
+                # 取得所有層的 weight_diff_Norm
+                layer_diffs = [weight_diff_Norm for _,_,_,weight_diff_Norm in weight_diff_Norm_List]  
+                # 寫入每一層的差異值和總和
+                file.write(",".join(map(str, layer_diffs)) + f",{total_weight_diff}\n")
             else:
-                file.write("layer,distance_difference,total_sum_diff\n")
-                for layer_name, diff in weight_diff_List:
-                    file.write(f"{layer_name},{diff},{total_weight_diff}\n")
+                # 每個元素是 (key, diff)
+                # 取得所有層的 weight_diff
+                layer_diffs = [diff for _, diff in weight_diff_List]  
+                # 寫入每一層的差異值和總和
+                file.write(f"{layer_diffs[0]},"
+                            f"{layer_diffs[1]},"
+                            f"{layer_diffs[2]},"
+                            f"{layer_diffs[3]},"
+                            f"{layer_diffs[4]},"
+                            f"{total_weight_diff}\n")
         elif Str_abs_Or_dis == "absolute":
             file.write("layer,element_abs_difference,total_sum_diff,average_difference,max_difference,min_difference\n")
             for diff_info in weight_diff_List:
@@ -337,6 +359,40 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
                            f"{diff_info['min_difference']}\n")
 
     print(f"weight_diffs 已經保存到 {file_path}")
+
+
+    #使用 'a+' 模式追加寫入L2範數
+    # # 檢查每個元素的長度
+    if Str_abs_Or_dis == "distance":
+        for i, item in enumerate(weight_diff_Norm_List):
+            print(f"Item {i} has {len(item)} values: {item}")
+        # remove_str_file_path = ""
+        remove_str_file_path = file_path.replace('.csv', '')
+        Param_Local_file_name = remove_str_file_path + "_Weight_Norm_Local.csv"
+        Param_fedavg_file_name = remove_str_file_path +"_Weight_Norm_fedavg.csv"
+        file_exists_Param_Local = os.path.exists(Param_Local_file_name)
+        file_exists_Param_fedavg = os.path.exists(Param_fedavg_file_name)
+        
+        if not file_exists_Param_Local or file_exists_Param_fedavg:
+            with open(Param_Local_file_name, "w", newline='') as file:
+                if Str_abs_Or_dis == "distance":
+                    file.write("layer1.weight,fc2.weight,fc3.weight,fc4.weight,layer5.weight\n")
+
+            with open(Param_fedavg_file_name, "w", newline='') as file:
+                if Str_abs_Or_dis == "distance":
+                    file.write("layer1.weight,fc2.weight,fc3.weight,fc4.weight,layer5.weight\n")
+
+        layer_diffs_Local = [diff_param_Local for _, diff_param_Local,_,_ in weight_diff_Norm_List] 
+        print("len(layer_diffs)",len(layer_diffs))
+        with open(Param_Local_file_name, "a+") as file:
+            # 使用 join 動態寫入所有層的數據
+            file.write(",".join(map(str, layer_diffs_Local)) + f"\n")
+
+        layer_diffs_fedavg = [diff_param_fedavg for _, _,diff_param_fedavg,_ in weight_diff_Norm_List] 
+        print("len(layer_diffs)",len(layer_diffs))
+        with open(Param_fedavg_file_name, "a+") as file:
+            # 使用 join 動態寫入所有層的數據
+            file.write(",".join(map(str, layer_diffs_fedavg)) + f"\n")
 
     return weight_diff_List, total_weight_diff
 
