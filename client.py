@@ -175,9 +175,9 @@ def train(net, trainloader, epochs):
     print("train")
     criterion = nn.CrossEntropyLoss()
     # optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001)
+    # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001)
     # 學長的參數
-    # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.001)
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.001)
 
     for epoch in range(epochs):
         print("epoch",epoch)
@@ -569,13 +569,17 @@ class FlowerClient(fl.client.NumPyClient):
             # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_theta_0.2_20240901.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.25
-            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_theta_0.25_20240901.npy", allow_pickle=True)
-            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_theta_0.25_20240901.npy", allow_pickle=True)
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_theta_0.25_20240901.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_theta_0.25_20240901.npy", allow_pickle=True)
             
             # 載入被FGSM攻擊的數據
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoFGSM_train_half3_20240826.npy", allow_pickle=True)
             # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoFGSM_train_half3_20240826.npy", allow_pickle=True)
             
+            # 載入正常的數據
+            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)
+            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)  
+
             x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
             y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
             
