@@ -324,12 +324,15 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         #                 13: 'ransomware', 
         #                 14: 'xss'
         #                 } 
-        df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
+        # df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
+        df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names.values())
         plt.figure(figsize = (9,6))
         sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn')
         plt.title(client_str +"_"+ Choose_method)
         plt.xlabel("prediction")
         plt.ylabel("label (ground truth)")
+        # Rotate the x-axis labels (prediction categories)
+        plt.xticks(rotation=30, ha='right',fontsize=12)
         plt.savefig(f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
         plt.show()
 
