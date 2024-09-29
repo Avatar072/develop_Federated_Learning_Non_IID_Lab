@@ -441,9 +441,10 @@ testloader = DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 # 定義Flower客戶端類
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self):
+        self.Record_List = [0] * 4  # 假設您需要至少 4 個元素 列表已經被初始化
         self.Current_total_Local_weight_sum = 0
-        self.Current_total_FedAVG_weight_sum = 0
-        self.Previous_total_FedAVG_weight_sum = 0 #用於保存上一回合聚合後的未受攻擊汙染的權重
+        self.Previous_total_FedAVG_weight_sum = 0
+        self.Previous_Unattack_round_total_FedAVG_weight_sum = 0 #用於保存上一回合聚合後的未受攻擊汙染的權重
         self.Record_Previous_total_FedAVG_weight_sum = 0 #用於紀錄上一回合聚合後的的權重，權重可能已遭受到汙染
         self.Previous_Temp = 0
         self.global_round =0
@@ -489,24 +490,23 @@ class FlowerClient(fl.client.NumPyClient):
         print(f"Current global round: {self.global_round}")
         
         # 需紀錄上一回合FedAVG後的權重總和，這邊權重可能已遭受到攻擊而汙染
-        self.Record_Previous_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
+        self.Record_Previous_total_FedAVG_weight_sum = self.Previous_total_FedAVG_weight_sum
         print("Last_round_After_FedAVG_may have been attacked", self.Record_Previous_total_FedAVG_weight_sum)
-        
-        #####################################################保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
-        if self.Reocrd_global_model_accuracy >= 0.8:
-                self.Previous_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
-                # 保存上一回合未受到攻擊FedAVG後的正常權重總和 進行後續權重每層總和求差異計算
-                self.Previous_Temp = self.Previous_total_FedAVG_weight_sum
-                print("Last_round_After_FedAVG", self.Previous_total_FedAVG_weight_sum)
+        #####################################################用accuracy保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
+        # if self.Reocrd_global_model_accuracy >= 0.8:
+        #         self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Previous_total_FedAVG_weight_sum
+        #         # 保存上一回合未受到攻擊FedAVG後的正常權重總和 進行後續權重每層總和求差異計算
+        #         self.Previous_Temp = self.Previous_Unattack_round_total_FedAVG_weight_sum
+        #         print("Last_round_After_FedAVG", self.Previous_Unattack_round_total_FedAVG_weight_sum)
 
-                # # 保存上一回合未受到攻擊剛聚合完的全局模型
-                torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth")        
-        else:
-                if self.global_round <=10:
-                     self.Previous_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
-                print("Previous_total_FedAVG_weight_sum", self.Previous_total_FedAVG_weight_sum)
-                print("Last_round_After_FedAVG_normal", self.Previous_total_FedAVG_weight_sum)
-        #####################################################保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
+        #         # 保存上一回合未受到攻擊剛聚合完的全局模型
+        #         torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth")        
+        # else:
+        #         if self.global_round <=10:
+        #              self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Previous_total_FedAVG_weight_sum
+        #         print("Previous_total_FedAVG_weight_sum", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+        #         print("Last_round_After_FedAVG_normal", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+        #####################################################用accuracy保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
 
         # 更新客戶端模型參數為新的全局模型參數
         self.set_parameters(parameters)# 剛聚合完的權重 # 置新參數之前保存權重
@@ -528,17 +528,49 @@ class FlowerClient(fl.client.NumPyClient):
         ######################################################Fedavg完的模型每層加總總和############################################# 
         weights_after_FedAVG = net.state_dict()
         # True 以絕對值加總 False 為直接加總
-        self.Current_total_FedAVG_weight_sum = DoCountModelWeightSum(weights_after_FedAVG,False,"After_FedAVG") 
+        self.Previous_total_FedAVG_weight_sum = DoCountModelWeightSum(weights_after_FedAVG,True,"After_FedAVG") 
         
-        # 初始回合直接給1當分亂數初值
-        if self.global_round == 1 :
-            self.Current_total_FedAVG_weight_sum = 1
-        print("After_FedAVG",self.Current_total_FedAVG_weight_sum)
+        #####################################################保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
+        if self.global_round <=10:
+                   # 初始回合直接給1當分亂數初值
+            if self.global_round == 1 :
+                self.Previous_total_FedAVG_weight_sum = 1
+            print("After_FedAVG",self.Previous_total_FedAVG_weight_sum)
+            self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Previous_total_FedAVG_weight_sum
+            print("Previous_total_FedAVG_weight_sum", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+        else:
+            weight_diff = float(self.Record_List[2])
+            print("**********************weight_diff**********************", weight_diff)
+            # 權重差異超過當前本地權重總和的5%就要過濾掉                 
+            threshold = float(self.Record_List[0]) * 0.05
+            print("**********************threshold**********************", threshold)
+            print("**********************self.Previous_Unattack_round_total_FedAVG_weight_sum**********************", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+            if  weight_diff <= threshold:
+                    self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Previous_total_FedAVG_weight_sum
+                    # 同時更新 Record_List 中的值
+                    self.Record_List[1] = self.Previous_Unattack_round_total_FedAVG_weight_sum
+                    print("**********************Updated Previous_Unattack_round_total_FedAVG_weight_sum:**********************", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+                    print("**********************Updated Record_List:**********************", self.Record_List)
+                    # 保存上一回合未受到攻擊FedAVG後的正常權重總和 進行後續權重每層總和求差異計算
+                    self.Previous_Temp = self.Previous_Unattack_round_total_FedAVG_weight_sum
+                    print("**********************Last_round_After_FedAVG**********************", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+                    # 保存上一回合未受到攻擊剛聚合完的全局模型
+                    torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth")
+                    print(f"Model saved to ./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth with updated weights.")
+            else:
+                    # 當條件不符合時，打印未更新的變數值並使用上一回合未受到攻擊的總和
+                    self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Previous_Temp
+                    print("**********************No update performed on Previous_Unattack_round_total_FedAVG_weight_sum.**********************")                
+        #####################################################保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
+
         #####################################################Fedavg完的模型每層加總總和############################################# 
-        
+
+        # 驗證 `Record_List` 中的更新情況
+        print("******************Record_List after update**********************", self.Record_List)
         #  寫入Accuracy文件
         with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-gobal_model_{client_str}.csv", "a+") as file:
             file.write(f"{accuracy}\n")
+        
         
         #####################################################對抗式攻擊設定#################################################   
         ### 訓練中途加入JSMA Attack or FGSM attack
@@ -561,8 +593,8 @@ class FlowerClient(fl.client.NumPyClient):
             print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
             # 載入被JSMA攻擊的數據 theta=0.05
-            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
-            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.1
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
@@ -585,8 +617,8 @@ class FlowerClient(fl.client.NumPyClient):
             # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoFGSM_train_half3_20240826.npy", allow_pickle=True)
             
             # 載入正常的數據
-            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)
-            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)  
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)  
 
             x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
             y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
@@ -597,6 +629,48 @@ class FlowerClient(fl.client.NumPyClient):
             print(f"*********************在第{self.global_round}回合結束攻擊*********************************************")
             trainloader = self.original_trainloader
         #####################################################對抗式攻擊設定#################################################  
+
+
+        ####################################################模型每層差異求總和#################################################  
+        # 檢查 state_dict1 和 state_dict2 是否為 None
+
+        if After_FedAVG_model is None:
+            print("After_FedAVG_model is None")
+        if After_FedAVG_model_unattack is None:
+            print("After_FedAVG_model_unattack is None")
+        # 上一回合未受到攻擊剛聚合完的全局模型 
+        # 前10回合當前的聚合後的模型
+        if self.global_round <=10: 
+            try:
+                After_FedAVG_model_unattack = After_FedAVG_model
+            except Exception as e:
+                print(f"Error loading After_FedAVG_model: {e}")
+                After_FedAVG_model = None
+        else:
+            # 測試完小於0.8 用上一回合未受到攻擊剛聚合完的全局模型 
+            # 權重差異超過當前本地權重總和的5%就要過濾掉 
+            threshold = self.Current_total_weight_diff_dis * 0.05
+            print("******************self.Current_total_weight_diff_dis**********************", self.Current_total_weight_diff_dis)
+            print("******************threshold weight_diff_dis**********************", threshold)
+            print("******************threshold weight_diff_disself.Previous_total_weight_diff_dis**********************", self.Previous_total_weight_diff_dis)
+            # threshold = self.Current_total_weight_diff_dis_Norm*0.05
+            # if self.Reocrd_global_model_accuracy < 0.8:
+            if self.Previous_total_weight_diff_dis <= threshold:
+            # if self.Previous_total_weight_diff_dis_Norm <= threshold:
+                try:
+                    torch.save(After_FedAVG_model_unattack, 
+                                f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth")
+                    After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth')
+                
+                except Exception as e:
+                    print(f"Error loading fedavg_unattack: {e}")
+                    After_FedAVG_model_unattack = None
+            
+            # 測試完大於0.8 表示沒受到攻擊 可以直接用剛聚合完的全局模型 
+            else:
+                After_FedAVG_model_unattack = After_FedAVG_model
+
+        ####################################################模型每層差異求總和#################################################  
 
 
         # 在本地訓練階段前保存模型
@@ -614,47 +688,21 @@ class FlowerClient(fl.client.NumPyClient):
         # if self.global_round >1: 
         # 載入本地訓練後的模型
         weights_after_Localtrain = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train.pth")
-
+        
+        # if weights_after_Localtrain is None:
+        #     print("weights_after_Localtrain is None")
         ######################################################Local train完的模型每層加總總和############################################# 
         print("Weights after local training:")
         # True 以絕對值加總 False 為直接加總
         self.Current_total_Local_weight_sum = DoCountModelWeightSum(weights_after_Localtrain,
-                                          False,
+                                          True,
                                         self.client_id)    
         # 打印模型每層加總後權重總重總和
         print("self.Current_total_Local_weight_sum",self.Current_total_Local_weight_sum)
-        print("self.Current_total_FedAVG_weight_sum",self.Current_total_FedAVG_weight_sum)
+        print("self.Previous_total_FedAVG_weight_sum",self.Previous_total_FedAVG_weight_sum)
+        self.Record_List[0] = self.Current_total_Local_weight_sum
         ######################################################Local train完的模型每層加總總和############################################# 
         
-        #####################################################模型每層差異求總和#################################################  
-        # 檢查 state_dict1 和 state_dict2 是否為 None
-        if weights_after_Localtrain is None:
-            print("weights_after_Localtrain is None")
-        if After_FedAVG_model is None:
-            print("After_FedAVG_model is None")
-        if After_FedAVG_model_unattack is None:
-            print("After_FedAVG_model_unattack is None")
-        # 上一回合未受到攻擊剛聚合完的全局模型 
-        # 前10回合當前的聚合後的模型
-        if self.global_round <=10: 
-            try:
-                After_FedAVG_model_unattack = After_FedAVG_model
-            except Exception as e:
-                print(f"Error loading After_FedAVG_model: {e}")
-                After_FedAVG_model = None
-        else:
-            # 測試完小於0.8 用上一回合未受到攻擊剛聚合完的全局模型 
-            # threshold = Local_weight_sum * 0.05
-            if self.Reocrd_global_model_accuracy < 0.8:
-                try:
-                    After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth')
-                except Exception as e:
-                    print(f"Error loading fedavg_unattack: {e}")
-                    After_FedAVG_model_unattack = None
-            
-            # 測試完大於0.8 表示沒受到攻擊 可以直接用剛聚合完的全局模型 
-            else:
-                After_FedAVG_model_unattack = After_FedAVG_model
         ##########################################計算兩個模型的每層權重差距 將每層權重差距值相加（以距離(distance)計算）##########################################
         # Calculate_Weight_Diffs_Distance_OR_Absolute True表示計算L2範數 False表示計算歐基里德距離
 
@@ -673,7 +721,7 @@ class FlowerClient(fl.client.NumPyClient):
                                                                                                     diff_dis_csv_file_path,
                                                                                                     "distance",
                                                                                                     False)
-                # 計算兩個模型的每層權重差距 將每層權重差距值相加（以距離(distance)計算）
+        # 計算兩個模型的每層權重差距 將每層權重差距值相加（以L2範數計算）
         diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_Norm.csv"
         
         weight_diffs_dis, self.Current_total_weight_diff_dis_Norm = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
@@ -681,7 +729,7 @@ class FlowerClient(fl.client.NumPyClient):
                                                                                                     diff_dis_csv_file_path,
                                                                                                     "distance",
                                                                                                     True)
-        # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以距離)
+        # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以以L2範數計算)
         diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_unattack_Norm.csv"
         weight_diffs_dis, self.Previous_total_weight_diff_dis_Norm = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
                                                                                                     After_FedAVG_model_unattack,
@@ -706,17 +754,25 @@ class FlowerClient(fl.client.NumPyClient):
 
 
         ######################################################模型每層加總後求差異##############################################        
-        # local train計算權重加總 - 當前FedAVG計算權重加總
+        # local train計算權重加總 - 實際上一回合FedAVG計算權重加總
         self.current_array[0],self.current_array[1],self.current_array[2],self.current_array[3] = evaluateWeightDifferences("Local-Current_FedAVG",
                                                                                                                              self.Current_total_Local_weight_sum, 
-                                                                                                                             self.Current_total_FedAVG_weight_sum)
+                                                                                                                             self.Previous_total_FedAVG_weight_sum)
         # local train計算權重加總 - 上一回合FedAVG計算權重加總(最後一次未受到攻擊的回合)
         self.previous_array[0],self.previous_array[1],self.previous_array[2],self.previous_array[3] = evaluateWeightDifferences("Local-Current_FedAVG",
                                                                                                                                  self.Current_total_Local_weight_sum,     
-                                                                                                                                 self.Previous_total_FedAVG_weight_sum)
+                                                                                                                                 self.Previous_Unattack_round_total_FedAVG_weight_sum)
 
+        
+
+        self.Record_List[2] =self.current_array[0]                                                                                                                          
         ######################################################模型每層加總後求差異##############################################    
         
+        self.Record_List.append(self.Current_total_Local_weight_sum)
+        self.Record_List.append(self.Previous_total_FedAVG_weight_sum)
+        self.Record_List.append(self.current_array[0])
+        print("******************Current_total_Local_weight_sum**********************", self.Record_List[0])
+        print("******************Previous_total_FedAVG_weight_sum**********************", self.Record_List[1])
         #step1上傳給權重，#step2在server做聚合，step3往下傳給server
         # return self.get_parameters(config={}), len(trainloader.dataset), {"accuracy": accuracy}
         return self.get_parameters(config={}), len(testloader.dataset), {"global_round": self.global_round,
@@ -724,8 +780,8 @@ class FlowerClient(fl.client.NumPyClient):
                                                                           "Local_train_accuracy": self.Local_train_accuracy,
                                                                           "client_id": self.client_id,
                                                                           "Local_train_weight_sum":self.Current_total_Local_weight_sum,
-                                                                          "Previous_round_FedAVG_weight_sum":self.Previous_total_FedAVG_weight_sum,
-                                                                          "Current_FedAVG_weight_sum":self.Current_total_FedAVG_weight_sum,
+                                                                          "Previous_round_FedAVG_weight_sum":self.Previous_Unattack_round_total_FedAVG_weight_sum,
+                                                                          "Current_FedAVG_weight_sum":self.Previous_total_FedAVG_weight_sum,
                                                                           "Local_train_weight_sum-Current_FedAVG weight_sum":float(self.current_array[0]),
                                                                           "Local_train_weight_sum-Previous_FedAVG weight_sum": float(self.previous_array[0]),
                                                                           "Current_total_weight_diff_abs": float(self.Current_total_weight_diff_abs),
@@ -752,8 +808,8 @@ class FlowerClient(fl.client.NumPyClient):
         
         with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_train_weight_sum-FedAVG weight_sum_{client_str}.csv", "a+") as file:
                 file.write(f"{self.Current_total_Local_weight_sum},"
-                            # f"{self.Current_total_FedAVG_weight_sum},"
-                            f"{self.Previous_total_FedAVG_weight_sum},"#上一回未受到攻擊FedAVG後的權重
+                            # f"{self.Previous_total_FedAVG_weight_sum},"
+                            f"{self.Previous_Unattack_round_total_FedAVG_weight_sum},"#上一回未受到攻擊FedAVG後的權重
                             f"{self.Record_Previous_total_FedAVG_weight_sum},"#實際上一回FedAVG後的權重
                             # f"{self.current_array[0]},"
                             f"{self.previous_array[0]},"#Local_train_weight_sum-Previous_FedAVG weight_sum
@@ -764,8 +820,11 @@ class FlowerClient(fl.client.NumPyClient):
                             f"{self.Current_total_weight_diff_dis_Norm},"#模型每層差異求總和（以距離範數計算）
                             f"{self.Previous_total_weight_diff_dis_Norm}\n")#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離範數計算）
 
+        
+        self.Current_total_Local_weight_sum = float(self.Current_total_Local_weight_sum)  # 將字符串轉換為浮點數
+        print("Local_weight_sum before multiplication:", self.Current_total_Local_weight_sum, "of type:", type(self.Current_total_Local_weight_sum))
         percentage_five = self.Current_total_Local_weight_sum * 0.05
-        # 保留小数点后两位
+        # # 保留小数点后两位
         percentage_five = round(percentage_five, 2)
         print("Local_train_weight_sum_percentage_five\n",percentage_five)
         return accuracy, len(testloader.dataset), {"global_round": self.global_round,
@@ -773,8 +832,8 @@ class FlowerClient(fl.client.NumPyClient):
                                                    "Local_train_accuracy": self.Local_train_accuracy,
                                                    "client_id": self.client_id,
                                                    "Local_train_weight_sum":self.Current_total_Local_weight_sum,
-                                                   "Previous_round_FedAVG_weight_sum":self.Previous_total_FedAVG_weight_sum,
-                                                   "Current_FedAVG_weight_sum":self.Current_total_FedAVG_weight_sum,
+                                                   "Previous_round_FedAVG_weight_sum":self.Previous_Unattack_round_total_FedAVG_weight_sum,
+                                                   "Current_FedAVG_weight_sum":self.Previous_total_FedAVG_weight_sum,
                                                    "Local_train_weight_sum-Current_FedAVG weight_sum":float(self.current_array[0]),
                                                     "Current_total_weight_diff_abs": float(self.Current_total_weight_diff_abs),
                                                     "Current_total_weight_diff_dis": float(self.Current_total_weight_diff_dis),
