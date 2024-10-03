@@ -75,7 +75,7 @@ def DoCountModelWeightSum(dict_file,bool_UseABS,str_client):
         # 將張量轉移到 CPU 並轉換為 Python 數字：
         total_weight_sum = f"{total_weight_sum:.6f}"
         print(f"{str_client}_Total weight sum of the model: {total_weight_sum}")
-        return float(total_weight_sum)
+        return abs(float(total_weight_sum))
 
 
 
@@ -111,7 +111,7 @@ def evaluateWeightDifferences(str_state,weights1, weights2):
     print(f"{str_state}平均差異:", average_difference)
     print(f"{str_state}最大差異:", max_difference)
     print(f"{str_state}最小差異:", min_difference)
-    return differences ,average_difference,max_difference,min_difference
+    return abs(differences) ,average_difference,max_difference,min_difference
 
 
 # 計算兩個 state_dict 之間每一層的權重差距 以距離來看

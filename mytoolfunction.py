@@ -1101,6 +1101,18 @@ def ResotreTrainAndTestToCSVandReSplit(Str_ChooseDataset,filepath):
     df_combined = DoReStoreNpFileToCsv(x_train, y_train,x_test,y_test,Str_ChooseDataset)
     df_combined = ReplaceMorethanTenthousandQuantity(df_combined)
     DoReSplit(Str_ChooseDataset,df_combined)
+
+def EvaluatePercent(Current_round_dis,Last_round_dis):
+
+    # 檢查 Last_round_dis 是否為零，避免除以零
+    if Last_round_dis == 0:
+    # 返回無限大或者一個預設值，根據你的需求
+        return float('inf')  # 這裡返回無限大，可以根據具體情況修改
+    Current_round_dis = float(Current_round_dis)
+    Last_round_dis = float(Last_round_dis)
+    percent_diff = abs(Current_round_dis-Last_round_dis)
+    percent_diff = (percent_diff/Last_round_dis)*100
+    return percent_diff
 ## 將結合weakLabel Label8 的train_half1轉成np array
 # gan_dataframe = pd.read_csv("D:\\Labtest20230911\\GAN_data_train_half1\\GAN_data_train_half1_ADD_weakLabel_8.csv")
 # SaveDataframeTonpArray(gan_dataframe, "train_half1","weakpoint_8")
