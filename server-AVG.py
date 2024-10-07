@@ -282,14 +282,27 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
             Local_train_accuracies_List.append(Local_train_accuracy)
             global_round = m.get("global_round", 0)
             Local_weight_sum = m.get("Local_train_weight_sum", 0)
+            #摸型整層加總後閥值
             weight_diff = m.get("Local_train_weight_sum-Previous_FedAVG weight_sum", 0)
             threshold = Local_weight_sum * 0.05
 
+            #歐基里德距離閥值
+            dis_weight_diff = m.get("dis_percent_diff", 0)
+            #距離閥值單位為百分比
+            # 算每一回合權重距離變化的百分比  
+            # 百分比變化=(當前距離−上一回合距離/上一回合距離 )×100%  
+            dis_threshold = 25
+
+
             #前面10round不看
             if global_round > 10:
-                #權重差異超過當前本地權重總和的5%就要過濾掉  或 Local_train_accuracy大於90%才能列入計算
-                if weight_diff <= threshold or Local_train_accuracy > 0.8:
-                    if "accuracy" in m and Local_train_accuracy > 0.8:  # Local_train_accuracy大於90%才能列入計算
+                #模型型加總後彼此權重差異超過當前本地權重總和的5%就要過濾掉  或 Local_train_accuracy大於90%才能列入計算
+                # if weight_diff <= threshold or Local_train_accuracy > 0.8:
+                #     if "accuracy" in m and Local_train_accuracy > 0.8:  # Local_train_accuracy大於90%才能列入計算
+
+                #歐基里德距離閥值設定 當兩模型間各層差異總和的距離 
+                #上一回合的距離跟這一回比距離突然大幅增大表遭受到攻擊就要過濾掉
+                if dis_weight_diff <= dis_threshold:
                         print(m["accuracy"])
                         weighted_sum += num_examples * m["accuracy"]
                         total_examples += num_examples  # 只在满足条件时累加
@@ -336,9 +349,9 @@ strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters,
 
 # Start Flower server
 fl.server.start_server(
-    server_address="127.0.0.1:53388",
+    # server_address="127.0.0.1:53388",
     # server_address="127.0.0.1:8080",
-    # server_address="192.168.1.137:53388",
+    server_address="192.168.1.137:53388",
 
     # config=fl.server.ServerConfig(num_rounds=20),
     config=fl.server.ServerConfig(num_rounds=150),
