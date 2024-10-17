@@ -67,8 +67,8 @@ getStartorEndtime("starttime", start_IDS, f"./single_AnalyseReportFolder/{today}
 # y_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.05_0.02/y_DoJSMA_test_20240721.npy")
 
 # 每層神經元64下所訓練出來的model
-x_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05_0.02/x_DoJSMA_test_20240729.npy")
-y_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05_0.02/y_DoJSMA_test_20240729.npy")
+# x_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05_0.02/x_DoJSMA_test_20240729.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05_0.02/y_DoJSMA_test_20240729.npy")
 
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分
@@ -78,6 +78,18 @@ y_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05
 # 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA attack for FL Client3
 # x_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/x_DoJSMA_test_20240722.npy")
 # y_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/y_DoJSMA_test_20240722.npy")
+
+# 20241007 TONIoT after do labelencode and minmax  75 25分 DO PGD attack for TON_IOT test
+x_test  = np.load(f"./Adversarial_Attack_Test/20241007_TONIOT_BaseLine_test_0.1_PGD/x_DoPGD_test_20241007.npy")
+y_test  = np.load(f"./Adversarial_Attack_Test/20241007_TONIOT_BaseLine_test_0.1_PGD/y_DoPGD_test_20241007.npy")
+
+# 20241013 TONIoT after do labelencode and minmax  75 25分 DO BIM attack for TON_IOT test
+# x_test  = np.load(f"./Adversarial_Attack_Test/20241013_TONIOT_BaseLine_test_0.1_BIM/x_DoBIM_test_20241013.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20241013_TONIOT_BaseLine_test_0.1_BIM/y_DoBIM_test_20241013.npy")
+
+# 20241015 TONIoT after do labelencode and minmax  75 25分 DO FGSM attack for TON_IOT test
+# x_test  = np.load(f"./Adversarial_Attack_Test/20241015_TONIOT_BaseLine_test_0.1_FGSM/x_DoFGSM_test_20241015.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20241015_TONIOT_BaseLine_test_0.1_FGSM/y_DoFGSM_test_20241015.npy")
 
 
 counter = Counter(y_test)
@@ -279,9 +291,23 @@ net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240719_TONIOT_神經元512\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
 
 # 每層神經元64下所訓練出來的model
-model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240729_TONIOT_神經元64\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240729_TONIOT_BaseLine_神經元64\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
+model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\BaseLine_After_local_train_model_1015_1st.pth'
 
-# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20240722\\client3\\1st\\normal\\After_local_train_model.pth'
+
+# 每層神經元64下所訓練出來的model
+# 測試正常_受到攻擊_每層神經元加總用絕對值_c1和c2lr=0.0001_c3_lr=0.001
+# 使用c3的fedavg_Last_unattack_distance-測試結果效能異常
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20241005\\fedavg_Last_unattack_distance.pth'
+# 使用c3的fedavg_unattack_distance-測試結果效能異常
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20241005\\fedavg_unattack_50.pth'
+# gobal_model_Before_local_train_model_round_49測試結果效能異常
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20241005\\Local_model_before_local_train_150.pth'
+# gobal_model_Before_local_train_model_round_50-測試結果效能異常
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20241005\\gobal_model_Before_local_train_model_round_50.pth'
+# gobal_model_Before_local_train_model_round_51
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20241005\\gobal_model_Before_local_train_model_round_51.pth'
+
 
 net.load_state_dict(torch.load(model_path))
 print("Loaded model from", model_path)

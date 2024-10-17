@@ -504,9 +504,9 @@ class FlowerClient(fl.client.NumPyClient):
        
         if(not self.bool_Unattack_Judage):
             # 需紀錄上一回合未操受攻擊FedAVG後與Local train的模型間權重差異總和，權重變化百分比
-            self.Record_dis_percent_diff = self.Unattck_dis_percent_diff
+            # self.Record_dis_percent_diff = self.Unattck_dis_percent_diff
             # 測試
-            # self.Record_dis_percent_diff = self.dis_percent_diff
+            self.Record_dis_percent_diff = self.dis_percent_diff
         else:
             # 需紀錄上一回合FedAVG後與Local train的模型間權重差異總和，權重變化百分比
             self.Record_dis_percent_diff = self.dis_percent_diff
@@ -613,8 +613,8 @@ class FlowerClient(fl.client.NumPyClient):
             print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
             # 載入被JSMA攻擊的數據 theta=0.05
-            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
-            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.1
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
@@ -696,7 +696,9 @@ class FlowerClient(fl.client.NumPyClient):
                 if self.bool_Unattack_Judage:
                     # 保存上一回合未受到攻擊FedAVG後的正常每層權重差異總和
                     self.Previous_diff_dis_Temp = self.Current_total_weight_diff_dis
-                    self.Previous_Unattack_round_total_weight_diff_dis = self.Previous_diff_dis_Temp                    
+                    # self.Previous_Unattack_round_total_weight_diff_dis = self.Previous_diff_dis_Temp   
+                    self.Previous_Unattack_round_total_weight_diff_dis = self.Current_total_weight_diff_dis                    
+                 
                     # 保存最後上一回合未受到攻擊剛聚合完的全局模型
                     After_FedAVG_model_unattack = net.state_dict()
                     torch.save(After_FedAVG_model_unattack,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth")                
@@ -774,8 +776,8 @@ class FlowerClient(fl.client.NumPyClient):
                                                                                                                            diff_dis_csv_file_path,
                                                                                                                           "distance",
                                                                                                                            False)
-            self.Unattck_dis_percent_diff = EvaluatePercent(self.Current_total_weight_diff_dis,
-                                                            self.Previous_Unattack_round_total_weight_diff_dis)
+            self.dis_percent_diff = EvaluatePercent(self.Current_total_weight_diff_dis,
+                                                    self.Previous_Unattack_round_total_weight_diff_dis)
         else:
             # 算每一回合權重距離變化的百分比  
             # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100%      
