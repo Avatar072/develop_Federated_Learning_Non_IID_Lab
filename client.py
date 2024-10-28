@@ -468,6 +468,8 @@ class FlowerClient(fl.client.NumPyClient):
         self.Unattck_dis_percent_diff = 0
         self.LastRound_UnattackCounter = 0 # 用來計數最後一次的正常FedAvg後的模型
         self.bool_Unattack_Judage = True
+        self.dis_threshold = 0
+        self.Unattck_dis_threshold = 0
         ####### dis
         self.Previous_total_weight_diff_abs = 0 #用於保存上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以絕對值)
         self.Current_total_weight_diff_abs = 0 #當前每一回合全局模型與本地端模型間權重差異總和
@@ -613,8 +615,8 @@ class FlowerClient(fl.client.NumPyClient):
             print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
             # 載入被JSMA攻擊的數據 theta=0.05
-            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
-            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.1
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
@@ -635,6 +637,10 @@ class FlowerClient(fl.client.NumPyClient):
             # 載入被FGSM攻擊的數據
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoFGSM_train_half3_20240826.npy", allow_pickle=True)
             # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoFGSM_train_half3_20240826.npy", allow_pickle=True)
+            
+            # 載入被PGD攻擊的數據
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoPGD_train_half3_20241017.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoPGD_train_half3_20241017.npy", allow_pickle=True)
             
             # 載入正常的數據
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)
@@ -673,11 +679,11 @@ class FlowerClient(fl.client.NumPyClient):
                 After_FedAVG_model = None
         else:
             # After_FedAVG_model_unattack = After_FedAVG_model
-            # 上一回合的距離跟這一回比距離突然大幅增大
+            # 上一回合的距離跟這一回比距離突然大幅增大表示受到攻擊
             percent_threshold = 100 
             threshold = self.Record_dis_percent_diff
             print("*********bbbbbb*********Record_Previous_total_weight_diff_dis**********************", self.Record_Previous_total_weight_diff_dis)
-            if threshold >= percent_threshold: #假設超過一百是為攻擊
+            if threshold >= percent_threshold: #假設超過一百視為攻擊
                 self.bool_Unattack_Judage = False #大於100那瞬間開始使用正常的模型
                 self.Previous_diff_dis_Temp  = self.Previous_Unattack_round_total_weight_diff_dis 
                 try:
@@ -706,6 +712,7 @@ class FlowerClient(fl.client.NumPyClient):
                 # 先不用 if else 方便除錯
                 # False表示受到攻擊
                 if self.bool_Unattack_Judage == False:
+                    # 要分析不加任何過濾機制時要加上註解
                     # 載入正常的global model
                     After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth')
                    
@@ -778,6 +785,8 @@ class FlowerClient(fl.client.NumPyClient):
                                                                                                                            False)
             self.dis_percent_diff = EvaluatePercent(self.Current_total_weight_diff_dis,
                                                     self.Previous_Unattack_round_total_weight_diff_dis)
+            # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
+            self.Unattck_dis_threshold = self.Current_total_weight_diff_dis*0.2 + self.Previous_Unattack_round_total_weight_diff_dis*0.8
         else:
             # 算每一回合權重距離變化的百分比  
             # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100%      
@@ -786,6 +795,8 @@ class FlowerClient(fl.client.NumPyClient):
 
             self.dis_percent_diff = EvaluatePercent(self.Current_total_weight_diff_dis,
                                                     self.Record_Previous_total_weight_diff_dis)
+            # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
+            self.dis_threshold = self.Current_total_weight_diff_dis*0.2 + self.Record_Previous_total_weight_diff_dis*0.8
 
         # 計算兩個模型的每層權重差距 將每層權重差距值相加（以L2範數計算）
         diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_Norm.csv"
@@ -906,6 +917,8 @@ class FlowerClient(fl.client.NumPyClient):
                             f"{self.dis_percent_diff},"#上一回的全局模型與本地端每層差異總和變化百分比（以距離計算）
                             f"{self.Previous_Unattack_round_total_weight_diff_dis},"#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離計算）
                             f"{self.Unattck_dis_percent_diff},"#上一回未受到攻擊的全局模型與本地端每層差異總和變化百分比（以距離計算）
+                            f"{self.dis_threshold},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
+                            f"{self.Unattck_dis_threshold},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
                             f"{self.Current_total_weight_diff_dis_Norm},"#模型每層差異求總和（以距離範數計算）
                             f"{self.Previous_total_weight_diff_dis_Norm}\n")#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離範數計算）
 

@@ -21,11 +21,11 @@ from collections import Counter
 ####################################################################################################
 
 #CICIIDS2017 or Edge 62個特徵
-# labelCount = 15
+labelCount = 15
 #CICIIDS2019
 # labelCount = 13
 #TONIoT
-labelCount = 10
+# labelCount = 10
 #Wustl 41個特徵
 # labelCount = 5
 #Kub 36個特徵
@@ -75,8 +75,8 @@ getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/{today}/{
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_20240502.npy", allow_pickle=True)   
 
 # # 20240502 CIC-IDS2017 after do labelencode and minmax chi_square45 75 25分
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)    
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)    
             
 # 20240422 CICIDS2019 after PCA do labelencode and minmax
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
@@ -99,8 +99,8 @@ getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/{today}/{
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)            
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA
 # x_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.5_0.5/x_DoJSMA_test_20240721.npy")
@@ -227,22 +227,22 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
         #CICIDS2017
-        # class_names = {
-        #                 0: '0_BENIGN', 
-        #                 1: '1_Bot', 
-        #                 2: '2_DDoS', 
-        #                 3: '3_DoS GoldenEye', 
-        #                 4: '4_DoS Hulk', 
-        #                 5: '5_DoS Slowhttptest', 
-        #                 6: '6_DoS slowloris', 
-        #                 7: '7_FTP-Patator', 
-        #                 8: '8_Heartbleed', 
-        #                 9: '9_Infiltration', 
-        #                 10: '10_PortScan', 
-        #                 11: '11_SSH-Patator', 
-        #                 12: '12_Web Attack Brute Force', 
-        #                 13: '13_Web Attack Sql Injection', 
-        #                 14: '14_Web Attack XSS'
+        class_names = {
+                        0: '0_BENIGN', 
+                        1: '1_Bot', 
+                        2: '2_DDoS', 
+                        3: '3_DoS GoldenEye', 
+                        4: '4_DoS Hulk', 
+                        5: '5_DoS Slowhttptest', 
+                        6: '6_DoS slowloris', 
+                        7: '7_FTP-Patator', 
+                        8: '8_Heartbleed', 
+                        9: '9_Infiltration', 
+                        10: '10_PortScan', 
+                        11: '11_SSH-Patator', 
+                        12: '12_Web Attack Brute Force', 
+                        13: '13_Web Attack Sql Injection', 
+                        14: '14_Web Attack XSS'
         #                 # 15: '15_backdoor',
         #                 # 16: '16_dos',
         #                 # 17: '17_injection',
@@ -251,21 +251,22 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         #                 # 20: '20_ransomware',
         #                 # 21: '21_scanning',
         #                 # 22: '22_xss'
-        #                 } 
+                        # } 
         #TONIoT
-        class_names = {
+        # class_names = {
                         # 0: 'BENIGN', 
                         # 1: 'DDoS', 
-                        0: 'normal', 
-                        1: 'ddoS',
-                        2: 'backdoor', 
-                        3: 'dos', 
-                        4: 'injection', 
-                        5: 'mitm', 
-                        6: 'password', 
-                        7: 'ransomware', 
-                        8: 'scanning', 
-                        9: 'xss', 
+                        ##############
+                        # 0: 'normal', 
+                        # 1: 'ddoS',
+                        # 2: 'backdoor', 
+                        # 3: 'dos', 
+                        # 4: 'injection', 
+                        # 5: 'mitm', 
+                        # 6: 'password', 
+                        # 7: 'ransomware', 
+                        # 8: 'scanning', 
+                        # 9: 'xss', 
                         # 10: '10_PortScan', 
                         # 11: '11_SSH-Patator', 
                         # 12: '12_Web Attack Brute Force', 
