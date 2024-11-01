@@ -123,9 +123,10 @@ def ParseCommandLineArgs(commands):
     parser = argparse.ArgumentParser(description='Federated Learning Client')
 
     # 添加一个参数来选择数据集
-    parser.add_argument('--dataset_split', type=str, choices=['total_train','train_half1', 'train_half2', 'train_half3'], default='total_train',
+    # parser.add_argument('--dataset_split', type=str, choices=['total_train','train_half1', 'train_half2', 'train_half3'], default='total_train',
+    #                     help='Choose the dataset for training (total_train or train_half1 or train_half2 or train_half3)')
+    parser.add_argument('--dataset_split', type=str, choices=['baseLine_train','client1_train', 'client2_train', 'client3_train'], default='total_train',
                         help='Choose the dataset for training (total_train or train_half1 or train_half2 or train_half3)')
-
     # 添加一个参数来设置训练的轮数
     parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs')
 
@@ -133,7 +134,7 @@ def ParseCommandLineArgs(commands):
     parser.add_argument('--weaklabel', type=int, default=8, help='encode of weak label')
 
     # add load method
-    parser.add_argument('--method', type=str, choices=['normal','SMOTE', 'GAN'], default='normal',
+    parser.add_argument('--method', type=str, choices=['normal','SMOTE', 'GAN','Evasion_Attack','Poisoning_Attack'], default='normal',
                         help='Choose the process method for training (normal or SMOTE or GAN)')
     
     # add choose dataset
@@ -205,10 +206,14 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
 
             if choose_datasets == "CICIDS2019":
-                # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
-                # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
-                x_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/x_CICIDS2019_train_augmented.npy", allow_pickle=True)
-                y_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/y_CICIDS2019_train_augmented.npy", allow_pickle=True)
+                # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
+                # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
+                # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
+                x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
+                y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+                # 20241030 CIC-IDS2019 after do labelencode and minmax 75 25分 do GDA 高斯資料增強
+                # x_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/x_CICIDS2019_train_augmented.npy", allow_pickle=True)
+                # y_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/y_CICIDS2019_train_augmented.npy", allow_pickle=True)
             # 20240519 EdgeIIoT after do labelencode and minmax  75 25分
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_20240519.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_20240519.npy", allow_pickle=True)    
@@ -216,10 +221,10 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # 20240520 EdgeIIoT after do labelencode and minmax chi_square45 75 25分
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
-
+            if choose_datasets == "TONIOT":
             # 20240523 TONIoT after do labelencode and minmax  75 25分
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
+                x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
+                y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
 
         elif (Choose_method == 'SMOTE'):
             # x_train = np.load(filepath + "x_total_train_SMOTE_ALL_Label.npy", allow_pickle=True)
