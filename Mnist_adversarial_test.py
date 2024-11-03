@@ -76,6 +76,18 @@ def test(model, device, test_loader):
     test_loss /= len(test_loader.dataset)
     accuracy = 100. * correct / len(test_loader.dataset)
     print(f'Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({accuracy:.2f}%)')
+
+    # Display some MNIST test images and their predictions
+    fig = plt.figure(figsize=(10, 10))
+    for i in range(9):
+        plt.subplot(3, 3, i + 1)
+        plt.tight_layout()
+        plt.imshow(data[i][0].cpu(), cmap='gray', interpolation='none')
+        plt.title(f"True: {target[i].item()} Pred: {pred[i].item()}")
+        plt.xticks([])
+        plt.yticks([])
+    plt.show()
+
     return accuracy, all_preds, all_labels
 
 def fgsm_attack(data, epsilon, data_grad):
@@ -84,7 +96,10 @@ def fgsm_attack(data, epsilon, data_grad):
     return perturbed_data
 
 def test_with_attack(model, device, test_loader, epsilon):
+    model.eval()
     correct = 0
+    all_preds = []
+    all_labels = []
     adv_examples = []
     for data, target in test_loader:
         data, target = data.to(device), target.to(device)
@@ -94,14 +109,12 @@ def test_with_attack(model, device, test_loader, epsilon):
             data_i = data[i:i+1]  # 單獨處理每張圖片
             target_i = target[i:i+1]
             data_i.requires_grad = True
-            
             output = model(data_i)
             init_pred = output.max(1, keepdim=True)[1]
             
             # 如果初始預測錯誤，跳過這張圖片
             if init_pred.item() != target_i.item():
                 continue
-
             loss = F.nll_loss(output, target_i)
             model.zero_grad()
             loss.backward()
@@ -113,6 +126,9 @@ def test_with_attack(model, device, test_loader, epsilon):
             # 重新預測對抗樣本
             output = model(perturbed_data)
             final_pred = output.max(1, keepdim=True)[1]
+
+            all_preds.append(final_pred.item())
+            all_labels.append(target_i.item())
 
             if final_pred.item() == target_i.item():
                 correct += 1
@@ -127,10 +143,17 @@ def test_with_attack(model, device, test_loader, epsilon):
                 
     final_acc = correct / float(len(test_loader.dataset))
     print(f"Epsilon: {epsilon}\tTest Accuracy = {correct} / {len(test_loader.dataset)} = {final_acc}")
+
+    # Plot confusion matrix for adversarial attack
+    cm = confusion_matrix(all_labels, all_preds)
+    plt.figure(figsize=(8, 8))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False)
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.title(f"Confusion Matrix for FGSM Attack (Epsilon: {epsilon})")
+    plt.show()
+
     return final_acc, adv_examples
-
-
-
 
 def plot_loss_curve(losses):
     plt.figure()
@@ -161,10 +184,7 @@ def plot_adversarial_examples(examples, epsilons):
             if j == 0:
                 plt.ylabel(f"Eps: {epsilon}", fontsize=14)
             plt.title(f"{orig} -> {adv}")
-            if ex.ndim == 2:
-                plt.imshow(ex, cmap="gray")
-            else:
-                plt.imshow(ex[i], cmap="gray")  # 顯示第一張圖片的第一個通道
+            plt.imshow(ex, cmap="gray")
     plt.tight_layout()
     plt.show()
 
@@ -202,7 +222,7 @@ def main():
     accuracy, all_preds, all_labels = test(model, device, test_loader)
     plot_confusion_matrix(all_labels, all_preds)
 
-    epsilons = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
+    epsilons = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
     accuracies_FGSM = []
     examples_FGSM = []
 
