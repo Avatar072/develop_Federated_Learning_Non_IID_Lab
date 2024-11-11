@@ -4,11 +4,15 @@ import numpy as np
 import argparse
 import time
 import datetime
+from colorama import Fore, Back, Style, init
 from sklearn import preprocessing
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import train_test_split
 import torch.nn as nn
 import torch.nn.functional as F
+
+# 初始化 colorama（Windows 系統中必須）
+init(autoreset=True)
 
 today = datetime.date.today()
 today = today.strftime("%Y%m%d")
@@ -58,13 +62,13 @@ def CheckFileExists (file):
 def SaveDataToCsvfile(df, folder_name, filename):
     # 抓取當前工作目錄名稱
     current_directory = os.getcwd()
-    print("當前工作目錄", current_directory)
+    print(Fore.GREEN +Back.WHITE+ Style.BRIGHT+"當前工作目錄", Fore.YELLOW+Style.BRIGHT+current_directory)
     # folder_name = filename + "_folder"
-    print("資料夾名稱", folder_name)
+    print(Fore.GREEN +Back.WHITE+ Style.BRIGHT+"資料夾名稱"+folder_name)
     folder_name = generatefolder(current_directory + "\\",folder_name)
     csv_filename = os.path.join(current_directory, 
                                 folder_name, filename + ".csv")
-    print("存檔位置跟檔名", csv_filename)
+    print(Fore.GREEN +Back.WHITE+ Style.BRIGHT+"存檔位置跟檔名"+csv_filename)
     df.to_csv(csv_filename, index=False)
 
 ### 建立一個資料夾
@@ -88,20 +92,22 @@ def generatefolder(fliepath, folder_name):
         
     return folder_name
 ### 合併DataFrame成csv
-def mergeDataFrameAndSaveToCsv(trainingtype, x_train,y_train, filename, weaklabel, epochs):
+def mergeDataFrameAndSaveToCsv(trainingtype,x_train,y_train, filename, weaklabel=0, epochs=500):
     # 创建两个DataFrame分别包含x_train和y_train
-    df_x_train = pd.DataFrame(x_train)
-    df_y_train = pd.DataFrame(y_train)
+    df_x_train = pd.DataFrame(x_train)                     # 特徵數據
+    df_y_train = pd.DataFrame(y_train, columns=['Label'])  # 標籤數據
 
-    # 使用concat函数将它们合并
+    # 使用concat函数将它们合并 axis=1 按列合併（水平合併）
     generateNewdata = pd.concat([df_x_train, df_y_train], axis=1)
 
     # 保存合并后的DataFrame为CSV文件
     if trainingtype == "GAN":
         generateNewdata.columns = column_names
         SaveDataToCsvfile(generateNewdata, f"{trainingtype}_data_{filename}", f"{trainingtype}_data_generate_weaklabel_{weaklabel}_epochs_{epochs}")
+    elif trainingtype == "SMOTE":
+        SaveDataToCsvfile(generateNewdata, f"{filename}_epochs_{epochs}", f"{trainingtype}_data_generate_weaklabel_{weaklabel}_epochs_{epochs}")
     else:
-        SaveDataToCsvfile(generateNewdata, f"{filename}_epochs_{epochs}")
+        SaveDataToCsvfile(generateNewdata, f"{trainingtype}",f"{filename}")
 
 def ParseCommandLineArgs(commands):
     
@@ -117,9 +123,10 @@ def ParseCommandLineArgs(commands):
     parser = argparse.ArgumentParser(description='Federated Learning Client')
 
     # 添加一个参数来选择数据集
-    parser.add_argument('--dataset', type=str, choices=['total_train','train_half1', 'train_half2', 'train_half3'], default='total_train',
+    # parser.add_argument('--dataset_split', type=str, choices=['total_train','train_half1', 'train_half2', 'train_half3'], default='total_train',
+    #                     help='Choose the dataset for training (total_train or train_half1 or train_half2 or train_half3)')
+    parser.add_argument('--dataset_split', type=str, choices=['baseLine_train','client1_train', 'client2_train', 'client3_train'], default='total_train',
                         help='Choose the dataset for training (total_train or train_half1 or train_half2 or train_half3)')
-
     # 添加一个参数来设置训练的轮数
     parser.add_argument('--epochs', type=int, default=100, help='Number of training epochs')
 
@@ -127,21 +134,29 @@ def ParseCommandLineArgs(commands):
     parser.add_argument('--weaklabel', type=int, default=8, help='encode of weak label')
 
     # add load method
-    parser.add_argument('--method', type=str, choices=['normal','SMOTE', 'GAN'], default='normal',
+    parser.add_argument('--method', type=str, choices=['normal','SMOTE', 'GAN','Evasion_Attack','Poisoning_Attack'], default='normal',
                         help='Choose the process method for training (normal or SMOTE or GAN)')
+    
+    # add choose dataset
+    parser.add_argument('--Load_dataset', type=str, choices=['CICIDS2017','CICIDS2018', 'CICIDS2019', 'TONIOT'], 
+                        default='CICIDS2017',
+                        help='Load Choose the dataset')
     # 解析命令行参数
     args = parser.parse_args()
 
     # 根据输入的命令列表来确定返回的参数
-    if 'dataset' in commands and 'epochs' in commands and 'method' in commands:
-        return args.dataset, args.epochs, args.method
-    elif 'dataset' in commands and 'epochs' in commands and 'weaklabel' in commands:
-        return args.dataset, args.epochs, args.weaklabel
-    elif 'dataset' in commands and 'epochs' in commands:
-        return args.dataset, args.epochs
-    elif 'dataset' in commands:
-        return args.dataset
-    elif 'epochs' in commands:
+    if 'Load_dataset' in commands and 'dataset_split' in commands and 'epochs' in commands and 'method' in commands:
+        return args.Load_dataset,args.dataset_split,args.epochs, args.method
+
+    if 'dataset_split' in commands and 'epochs' in commands and 'method' in commands:
+        return args.dataset_split, args.epochs, args.method
+    elif 'dataset_split' in commands and 'epochs' in commands and 'weaklabel' in commands:
+        return args.dataset_split, args.epochs, args.weaklabel
+    elif 'dataset_split' in commands and 'epochs' in commands:
+        return args.dataset_split, args.epochs
+    elif 'dataset_split' in commands:
+        return args.dataset_split
+    elif 'dataset_split' in commands:
         return args.epochs
 
 # 测试不同的命令
@@ -151,9 +166,9 @@ def ParseCommandLineArgs(commands):
 # print(ParseCommandLineArgs(['dataset', 'epochs', 'label']))
 
 ### Choose Load np array
-def ChooseLoadNpArray(filepath, file, Choose_method):
+def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
 
-    if file == 'total_train':
+    if split_file == 'total_train':
         print("Training with total_train")
         if (Choose_method == 'normal'):
             # x_train = np.load(filepath + "x_train_1.npy", allow_pickle=True)
@@ -189,7 +204,16 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # 20240422 CIC-IDS2019 after do labelencode and minmax chi-square 45
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
-        
+
+            if choose_datasets == "CICIDS2019":
+                # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
+                # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
+                # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
+                x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
+                y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+                # 20241030 CIC-IDS2019 after do labelencode and minmax 75 25分 do GDA 高斯資料增強
+                # x_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/x_CICIDS2019_train_augmented.npy", allow_pickle=True)
+                # y_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/y_CICIDS2019_train_augmented.npy", allow_pickle=True)
             # 20240519 EdgeIIoT after do labelencode and minmax  75 25分
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_20240519.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_20240519.npy", allow_pickle=True)    
@@ -197,10 +221,10 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
             # 20240520 EdgeIIoT after do labelencode and minmax chi_square45 75 25分
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
-
+            if choose_datasets == "TONIOT":
             # 20240523 TONIoT after do labelencode and minmax  75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
+                x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
+                y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
 
         elif (Choose_method == 'SMOTE'):
             # x_train = np.load(filepath + "x_total_train_SMOTE_ALL_Label.npy", allow_pickle=True)
@@ -250,7 +274,7 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
         client_str = "BaseLine"
         print(Choose_method)
 
-    elif file == 'train_half1':
+    elif split_file == 'train_half1':
         if (Choose_method == 'normal'):
             # # 20240110 non iid client1 use cicids2017 after chi-square
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\x_train_CICIDS2017_20240110.npy", allow_pickle=True)
@@ -367,7 +391,7 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
         print("train_half1 y_train 的形狀:", y_train.shape)
         client_str = "client1"
         print("使用 train_half1 進行訓練")
-    elif file == 'train_half2':
+    elif split_file == 'train_half2':
         if (Choose_method == 'normal'):
             # # 20240317 non iid client3 use TONIOT
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240317.npy", allow_pickle=True)
@@ -446,7 +470,7 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
         client_str = "client2"
         print("使用 train_half2 進行訓練")
 
-    elif file == 'train_half3':
+    elif split_file == 'train_half3':
         if (Choose_method == 'normal'):
             # # 20240110 non iid client2 use TONIOT
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240110.npy", allow_pickle=True)
@@ -525,7 +549,7 @@ def ChooseLoadNpArray(filepath, file, Choose_method):
         print("使用 train_half3 進行訓練")
 
 
-    print("use file", file)
+    print("use file", split_file)
     return x_train, y_train,client_str
 
 # for do one hot
@@ -779,12 +803,13 @@ def ChooseUseModel(model_type, input, ouput):
         class MLP(nn.Module):
             def __init__(self):
                 super(MLP, self).__init__()
+                 # 每層512神經元 for cicids2017
                 # self.layer1 = nn.Linear(input, 512)
                 # self.fc2 = nn.Linear(512, 512)
                 # self.fc3 = nn.Linear(512, 512)
                 # self.fc4 = nn.Linear(512, 512)
                 # self.layer5 = nn.Linear(512, ouput)
-                # 每層64神經元
+                # 每層64神經元 for Toniot
                 self.layer1 = nn.Linear(input, 64)
                 self.fc2 = nn.Linear(64, 64)
                 self.fc3 = nn.Linear(64, 64)
@@ -807,6 +832,51 @@ def ChooseUseModel(model_type, input, ouput):
                 x = self.layer5(x)
                 return x
         return MLP()  # 返回創建的model instance
+
+# 根據使用資料集載入使用的MLP模型
+def Load_Model_BasedOnDataset(str_datasets, model_type, input, output, bool_dofeatureSelect=False):
+    """
+    ChooseUseModel(model_type, input, output)
+    bool_dofeatureSelect=False 表示沒有特徵選擇
+
+    CICIDS2017: input=77, output=15
+    CICIDS2019: input=77, output=12
+    TONIOT: input=45, output=10
+    ########################################
+    CIC系列input輸入是77是特徵扣掉
+    'SourceIP', 'SourcePort', 
+    'SourceIP', 'SourcePort',DestinationIP', 
+    'DestinationPort', 'Timestamp', 'Label'
+    """
+    if not bool_dofeatureSelect:
+        if str_datasets == "CICIDS2017":
+            model = ChooseUseModel(model_type, input, output)
+        elif str_datasets == "CICIDS2019":
+            model = ChooseUseModel(model_type, input, output)
+        elif str_datasets == "TONIOT":
+            model = ChooseUseModel(model_type, input, output)
+
+        print(Fore.GREEN +Back.WHITE+ Style.BRIGHT+f"dofeatureSelect: {bool_dofeatureSelect}")
+        print(Fore.GREEN +Back.WHITE+ Style.BRIGHT+f"ChooseUseModel: {str_datasets}")
+        print(Fore.GREEN +Back.WHITE+ Style.BRIGHT+f"model_type: {model_type}")
+        print(Fore.GREEN +Back.WHITE+ Style.BRIGHT+f"input: {input}")
+        print(Fore.GREEN +Back.WHITE+ Style.BRIGHT+f"output: {output}")
+    else:
+        if str_datasets == "CICIDS2017":
+            model = ChooseUseModel(model_type, 45, 15)
+        elif str_datasets == "CICIDS2019":
+            model = ChooseUseModel(model_type, 45, 12)
+        elif str_datasets == "TONIOT":
+            model = ChooseUseModel(model_type, 45, 10)
+
+        print(Fore.RED +Back.WHITE+ Style.BRIGHT+f"dofeatureSelect: {bool_dofeatureSelect}")
+        print(Fore.RED +Back.WHITE+ Style.BRIGHT+f"ChooseUseModel: {str_datasets}")
+        print(Fore.RED +Back.WHITE+ Style.BRIGHT+f"model_type: {model_type}")
+        print(Fore.RED +Back.WHITE+ Style.BRIGHT+f"input: {45}")
+        print(Fore.RED +Back.WHITE+ Style.BRIGHT+f"output: {10}")
+
+    return model
+
 def ChooseDataSetNpFile(Str_ChooseDataset,filepath):
     if Str_ChooseDataset == "CICIDS2017":
         # 20240323 non iid client1 use cicids2017 ALLday  chi-square_45 change ip encode
@@ -1101,6 +1171,18 @@ def ResotreTrainAndTestToCSVandReSplit(Str_ChooseDataset,filepath):
     df_combined = DoReStoreNpFileToCsv(x_train, y_train,x_test,y_test,Str_ChooseDataset)
     df_combined = ReplaceMorethanTenthousandQuantity(df_combined)
     DoReSplit(Str_ChooseDataset,df_combined)
+
+def EvaluatePercent(Current_round_dis,Last_round_dis):
+
+    # 檢查 Last_round_dis 是否為零，避免除以零
+    if Last_round_dis == 0:
+    # 返回無限大或者一個預設值，根據你的需求
+        return float('inf')  # 這裡返回無限大，可以根據具體情況修改
+    Current_round_dis = float(Current_round_dis)
+    Last_round_dis = float(Last_round_dis)
+    percent_diff = abs(Current_round_dis-Last_round_dis)
+    percent_diff = (percent_diff/Last_round_dis)*100
+    return percent_diff
 ## 將結合weakLabel Label8 的train_half1轉成np array
 # gan_dataframe = pd.read_csv("D:\\Labtest20230911\\GAN_data_train_half1\\GAN_data_train_half1_ADD_weakLabel_8.csv")
 # SaveDataframeTonpArray(gan_dataframe, "train_half1","weakpoint_8")

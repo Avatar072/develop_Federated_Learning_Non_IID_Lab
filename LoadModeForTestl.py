@@ -24,7 +24,8 @@ from collections import Counter
 # python LoadModeForTestl.py --dataset train_half2 --epochs 100
 # python LoadModeForTestl.py --dataset total_train --epochs 500 --method normal
 
-labelCount = 10  # TONIoT
+labelCount = 15  # CICIDS2017
+# labelCount = 10  # TONIoT
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
@@ -47,17 +48,20 @@ generatefolder(f"./single_AnalyseReportFolder/", today)
 generatefolder(f"./single_AnalyseReportFolder/{today}/", client_str)
 generatefolder(f"./single_AnalyseReportFolder/{today}/{client_str}/", Choose_method)
 getStartorEndtime("starttime", start_IDS, f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}")
-
+# # 20240502 CIC-IDS2017 after do labelencode and minmax  75 25分
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_20240502.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_20240502.npy", allow_pickle=True)    
 # # 20240502 CIC-IDS2017 after do labelencode and minmax chi_square45 75 25分
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy", allow_pickle=True)    
 
-# # 20240502 CIC-IDS2017 after do labelencode and minmax chi_square45 75 25分 Do JSMA
-# x_test  = np.load(f"./Adversarial_Attack_Test/20240717/x_DoJSMA_test_20240718.npy")
-# y_test  = np.load(f"./Adversarial_Attack_Test/20240717/y_DoJSMA_test_20240718.npy")
-
 # x_test  = np.load(f"./Adversarial_Attack_Test/20240718/theta_0.05_gamma_0.02/x_DoJSMA_test_20240718.npy")
 # y_test  = np.load(f"./Adversarial_Attack_Test/20240718/theta_0.05_gamma_0.02/y_DoJSMA_test_20240718.npy")
+
+# # 20241022 CIC-IDS2017 after do labelencode and minmax chi_square45 75 25分 Do JSMA
+x_test  = np.load(f"./Adversarial_Attack_Test/20241022_CICIDS2017_BaseLine_chi_45_0.05_0.02/x_DoJSMA_test_theta_0.05_20241022.npy")
+y_test  = np.load(f"./Adversarial_Attack_Test/20241022_CICIDS2017_BaseLine_chi_45_0.05_0.02/y_DoJSMA_test_theta_0.05_20241022.npy")
+
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA attack
 # x_test  = np.load(f"./Adversarial_Attack_Test/20240721_bk_0.5_0.5/x_DoJSMA_test_20240721.npy")
@@ -67,8 +71,8 @@ getStartorEndtime("starttime", start_IDS, f"./single_AnalyseReportFolder/{today}
 # y_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.05_0.02/y_DoJSMA_test_20240721.npy")
 
 # 每層神經元64下所訓練出來的model
-x_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05_0.02/x_DoJSMA_test_20240729.npy")
-y_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05_0.02/y_DoJSMA_test_20240729.npy")
+# x_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05_0.02/x_DoJSMA_test_20240729.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05_0.02/y_DoJSMA_test_20240729.npy")
 
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分
@@ -78,6 +82,18 @@ y_test  = np.load(f"./Adversarial_Attack_Test/20240729_TONIOT_BaseLine_test_0.05
 # 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA attack for FL Client3
 # x_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/x_DoJSMA_test_20240722.npy")
 # y_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/y_DoJSMA_test_20240722.npy")
+
+# 20241007 TONIoT after do labelencode and minmax  75 25分 DO PGD attack for TON_IOT test
+# x_test  = np.load(f"./Adversarial_Attack_Test/20241007_TONIOT_BaseLine_test_0.1_PGD/x_DoPGD_test_20241007.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20241007_TONIOT_BaseLine_test_0.1_PGD/y_DoPGD_test_20241007.npy")
+
+# 20241013 TONIoT after do labelencode and minmax  75 25分 DO BIM attack for TON_IOT test
+# x_test  = np.load(f"./Adversarial_Attack_Test/20241013_TONIOT_BaseLine_test_0.1_BIM/x_DoBIM_test_20241013.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20241013_TONIOT_BaseLine_test_0.1_BIM/y_DoBIM_test_20241013.npy")
+
+# 20241015 TONIoT after do labelencode and minmax  75 25分 DO FGSM attack for TON_IOT test
+# x_test  = np.load(f"./Adversarial_Attack_Test/20241015_TONIOT_BaseLine_test_0.1_FGSM/x_DoFGSM_test_20241015.npy")
+# y_test  = np.load(f"./Adversarial_Attack_Test/20241015_TONIOT_BaseLine_test_0.1_FGSM/y_DoFGSM_test_20241015.npy")
 
 
 counter = Counter(y_test)
@@ -162,22 +178,22 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
         #CICIDS2017
-        # class_names = {
-        #                 0: '0_BENIGN', 
-        #                 1: '1_Bot', 
-        #                 2: '2_DDoS', 
-        #                 3: '3_DoS GoldenEye', 
-        #                 4: '4_DoS Hulk', 
-        #                 5: '5_DoS Slowhttptest', 
-        #                 6: '6_DoS slowloris', 
-        #                 7: '7_FTP-Patator', 
-        #                 8: '8_Heartbleed', 
-        #                 9: '9_Infiltration', 
-        #                 10: '10_PortScan', 
-        #                 11: '11_SSH-Patator', 
-        #                 12: '12_Web Attack Brute Force', 
-        #                 13: '13_Web Attack Sql Injection', 
-        #                 14: '14_Web Attack XSS'
+        class_names = {
+                        0: '0_BENIGN', 
+                        1: '1_Bot', 
+                        2: '2_DDoS', 
+                        3: '3_DoS GoldenEye', 
+                        4: '4_DoS Hulk', 
+                        5: '5_DoS Slowhttptest', 
+                        6: '6_DoS slowloris', 
+                        7: '7_FTP-Patator', 
+                        8: '8_Heartbleed', 
+                        9: '9_Infiltration', 
+                        10: '10_PortScan', 
+                        11: '11_SSH-Patator', 
+                        12: '12_Web Attack Brute Force', 
+                        13: '13_Web Attack Sql Injection', 
+                        14: '14_Web Attack XSS'
         #                 # 15: '15_backdoor',
         #                 # 16: '16_dos',
         #                 # 17: '17_injection',
@@ -188,17 +204,17 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         #                 # 22: '22_xss'
         #                 } 
         #TONIoT
-        class_names = {
-                        0: 'normal', 
-                        1: 'ddoS', 
-                        2: 'backdoor', 
-                        3: 'dos', 
-                        4: 'injection', 
-                        5: 'mitm', 
-                        6: 'password', 
-                        7: 'ransomware', 
-                        8: 'scanning', 
-                        9: 'xss', 
+        # class_names = {
+        #                 0: 'normal', 
+        #                 1: 'ddoS', 
+        #                 2: 'backdoor', 
+        #                 3: 'dos', 
+        #                 4: 'injection', 
+        #                 5: 'mitm', 
+        #                 6: 'password', 
+        #                 7: 'ransomware', 
+        #                 8: 'scanning', 
+        #                 9: 'xss', 
                         # 10: '10_PortScan', 
                         # 11: '11_SSH-Patator', 
                         # 12: '12_Web Attack Brute Force', 
@@ -271,17 +287,38 @@ test_data = TensorDataset(x_test, y_test)
 trainloader = DataLoader(train_data, batch_size=500, shuffle=True)
 testloader = DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 
+# CICIDS2017
 net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
+# tioniot
+# net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 
 # Load the saved model
+# 載入cicids2017  效能正常的模型 每層神經元512下所訓練出來的model
+# model_path = f"./single_AnalyseReportFolder/20240502/BaseLine/CICIDS2017/MLP/3/BaseLine_After_local_train_model_bk.pth"
+# 載入cicids2017 chi-square45 效能正常的模型 每層神經元512下所訓練出來的model
+model_path = f"./single_AnalyseReportFolder/20241022/BaseLine_After_local_train_model_bk.pth"
 # model_path = f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}/BaseLine_After_local_train_model.pth"
 # 每層神經元512下所訓練出來的model
 # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240719_TONIOT_神經元512\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
 
 # 每層神經元64下所訓練出來的model
-model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240729_TONIOT_神經元64\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\20240729_TONIOT_BaseLine_神經元64\\BaseLine\\normal\\BaseLine_After_local_train_model.pth'
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\BaseLine_After_local_train_model_1015_1st.pth'
 
-# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20240722\\client3\\1st\\normal\\After_local_train_model.pth'
+
+# 每層神經元64下所訓練出來的model
+# 測試正常_受到攻擊_每層神經元加總用絕對值_c1和c2lr=0.0001_c3_lr=0.001
+# 使用c3的fedavg_Last_unattack_distance-測試結果效能異常
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20241005\\fedavg_Last_unattack_distance.pth'
+# 使用c3的fedavg_unattack_distance-測試結果效能異常
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20241005\\fedavg_unattack_50.pth'
+# gobal_model_Before_local_train_model_round_49測試結果效能異常
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20241005\\Local_model_before_local_train_150.pth'
+# gobal_model_Before_local_train_model_round_50-測試結果效能異常
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20241005\\gobal_model_Before_local_train_model_round_50.pth'
+# gobal_model_Before_local_train_model_round_51
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20241005\\gobal_model_Before_local_train_model_round_51.pth'
+
 
 net.load_state_dict(torch.load(model_path))
 print("Loaded model from", model_path)
