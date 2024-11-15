@@ -21,6 +21,9 @@ from collections import Counter, defaultdict
 from sklearn.metrics import classification_report
 from mytoolfunction import ChooseUseModel, getStartorEndtime
 from colorama import Fore, Back, Style, init
+from pathlib import Path
+# 初始化 colorama（Windows 系統中必須）
+init(autoreset=True)
 labelCount = 13
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
@@ -460,10 +463,14 @@ def main():
             eps=epsilon
         )
         # 執行攻擊並評估
-        acc, successful_attacks = FGSM_attack_evaluation(
-            model, DEVICE, test_loader, classifier, attack, save_dir, epsilon
-        )
+        # acc, successful_attacks = FGSM_attack_evaluation(
+        #     model, DEVICE, test_loader, classifier, attack, save_dir, epsilon
+        # )
         
+        # train執行攻擊並評估
+        acc, successful_attacks = FGSM_attack_evaluation(
+            model, DEVICE, train_loader, classifier, attack, save_dir, epsilon
+        )
         # torch.save(model.state_dict(), os.path.join(save_dir, f"model_{epsilon}.pth"))
 
         #紀錄結束時間
@@ -471,5 +478,72 @@ def main():
         getStartorEndtime("endtime",end_IDS,f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/{today}/{current_time}/{client_str}/{Choose_method}")
 
 
-if __name__ == '__main__':
-    main()
+def Mixdata():
+    # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
+    x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
+    y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+    original_Label_count = Counter(y_train)
+    #在處理 Counter 或 dict 類型數據時，使用 .keys() 可以方便地獲取所有的鍵。
+    print(Fore.BLUE+Style.BRIGHT+"original Label enocode:\n"+str(original_Label_count.keys()))
+    print(Fore.BLUE+Style.BRIGHT+"original:\n"+str(original_Label_count))
+
+    # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分 生成的對抗樣本
+    x_adv_train = np.load("./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241113/x_test_CICIDS2019_adversarial_samples_eps0.05.npy", allow_pickle=True)
+    y_adv_train = np.load("./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241113/y_test_CICIDS2019_adversarial_labels_eps0.05.npy", allow_pickle=True)
+    print(Fore.GREEN+Style.BRIGHT+"Adversarial Label enocode:\n"+str(Counter(y_adv_train).keys()))
+    print(Fore.GREEN+Style.BRIGHT+"Adversarial:\n"+str(Counter(y_adv_train)))
+    # 確保對抗樣本和乾淨樣本的大小可對齊
+    # print(f"x_adv_train shape: {x_adv_train.shape}, y_adv_train shape: {y_adv_train.shape}")
+    # print(f"x_train shape: {x_train.shape}, y_train shape: {y_train.shape}")
+    # 初始化合併的樣本
+    mixed_x = []
+    mixed_y = []
+    # 確保隨機數生成的可重現性
+    np.random.seed(42)
+    # 遍歷所有標籤
+    for Label in original_Label_count.keys():
+        # 獲取該標籤的乾淨樣本和對抗樣本索引
+        #因為 np.where 返回的是一個元組，[0] 用於提取第一個元素（即索引列表）。
+        clean_indices = np.where(y_train == Label)[0]
+        adv_indices = np.where(y_adv_train == Label)[0]
+        # print(f"Label: {Label}, Count: {original_Label_count[Label]}")
+        # 算乾淨樣本各類別數量
+        num_clean_samples = len(clean_indices)
+        # 算乾淨樣本各類別數量的2/3
+        num_clean_samples = len(clean_indices)*2//3
+        # 算對抗樣本各類別數量的1/3
+        num_adv_samples = len(adv_indices)//3
+        selected_clean_samples = np.random.choice(clean_indices, size=num_clean_samples, replace=False)
+        selected_adv_samples = np.random.choice(adv_indices, size=num_adv_samples, replace=False)
+                                    # adv_indices 是對抗樣本中某一標籤的所有索引。
+                                    # np.random.choice 是一個隨機選取函數，用來從 adv_indices 中隨機選取樣本索引。
+                                    # size=num_clean_samples 表示選取的樣本數量應該與乾淨樣本的 1/3 數量相同。
+                                    # replace=False 確保不重複選取（即每個索引只能被選中一次）。
+
+        # 算各類別數量
+        print(f"Total clean samples:{len(clean_indices)},Selected clean samples (2/3): {num_clean_samples}")
+        print(f"Total adv   samples:{len(adv_indices)},Selected adv   samples (1/3): {num_adv_samples}")
+        # 檢查隨機選取對抗樣本的數量是否正確： 確保 selected_adv_samples 的長度等於
+        print(f"Total adversarial samples: {len(adv_indices)}, Selected adversarial samples: {len(selected_adv_samples)}")
+        # 檢查隨機選取是否重複： 確保 selected_adv_samples 沒有重複的值
+        print(Fore.GREEN+Style.BRIGHT+f"Are all selected adversarial samples unique?"+
+            f"{len(selected_adv_samples) == len(set(selected_adv_samples))}")
+
+        # 合併數據
+        mixed_x.extend(x_adv_train[selected_adv_samples])
+        mixed_x.extend(x_train[selected_clean_samples])
+        mixed_y.extend(y_adv_train[selected_adv_samples])
+        mixed_y.extend(y_train[selected_clean_samples])
+    # 將合併的數據轉換為 numpy 數組
+    mixed_x = np.array(mixed_x)
+    mixed_y = np.array(mixed_y)
+    print("合併後的樣本數量:", len(mixed_x))
+    print("合併後的樣本數量:", Counter(mixed_y))
+    # 保存合併數據
+    np.save(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/mixed_train_data.npy", mixed_x)
+    np.save(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/mixed_train_labels.npy", mixed_y)
+
+Mixdata()
+# if __name__ == '__main__':
+#     main()
+    
