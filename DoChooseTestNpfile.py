@@ -31,8 +31,33 @@ class CICIDS2019TestLoader:
             # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
 
             # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
-            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_20240502.npy", allow_pickle=True)
-            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_20240502.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
+            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 do Person相關係數選擇
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_CICIDS2019_AfterPearsonFeatureSelect52_20241102.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_CICIDS2019_AfterPearsonFeatureSelect52_20241102.npy", allow_pickle=True)
+            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 do PCA
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal AfterPCA")
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_AfterPCA77_20241102.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_AfterPCA77_20241102.npy", allow_pickle=True)
+            # 20241102 CIC-IDS2019 after do labelencode and minmax 58 42分 二元分類
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal Afterbinary")
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12__binary__test_20241102.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12__binary__test_20241102.npy", allow_pickle=True)
+            
+            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 DO CandW attack
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do CandW attack")
+            # x_test = np.load(f"./Adversarial_Attack_Test/20241102_CandW_C1/x_DoCandW_test_20241102.npy")
+            # y_test = np.load(f"./Adversarial_Attack_Test/20241102_CandW_C1/y_DoCandW_test_20241102.npy")
+
+            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 DO CandW attack 0.5
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do CandW attack")
+            # x_test = np.load(f"./Adversarial_Attack_Test/20241102_CandW_C0.5/x_DoC_0.5andW_test_20241102.npy")
+            # y_test = np.load(f"./Adversarial_Attack_Test/20241102_CandW_C0.5/y_DoC_0.5andW_test_20241102.npy")
+            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 DO CandW attack 0.5
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do feature squeezed")
+            x_test = np.load(f"./Adversarial_Attack_Denfense/Processed_Advlist_C&W/x_DoCandW_test_squeezed.npy")
+            y_test = np.load(f"./Adversarial_Attack_Denfense/Processed_Advlist_C&W/y_DoCandW_test_squeezed.npy")
             return x_test, y_test
         elif split_file == 'test' and Choose_Attacktype == 'Evasion_Attack':
             print("Using CICIDS2019 with Evasion_Attack")

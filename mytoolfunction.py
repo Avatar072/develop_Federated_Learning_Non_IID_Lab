@@ -739,7 +739,8 @@ def splitdatasetbalancehalf(train_dataframes, label):
     return df1,df2
 
 def spiltweakLabelbalance(weakLabel,original_dataset,size):
-    label_data = original_dataset[original_dataset['type'] == weakLabel]
+    # label_data = original_dataset[original_dataset['type'] == weakLabel]
+    label_data = original_dataset[original_dataset['Label'] == weakLabel]
     # 使用train_test_split分別劃分取Label相等8、9、13、14的數據
     train_label, test_label = train_test_split(label_data, test_size=size, random_state=42)
     return train_label, test_label
@@ -804,31 +805,38 @@ def ChooseUseModel(model_type, input, ouput):
             def __init__(self):
                 super(MLP, self).__init__()
                  # 每層512神經元 for cicids2017
-                # self.layer1 = nn.Linear(input, 512)
-                # self.fc2 = nn.Linear(512, 512)
-                # self.fc3 = nn.Linear(512, 512)
-                # self.fc4 = nn.Linear(512, 512)
-                # self.layer5 = nn.Linear(512, ouput)
-                # 每層64神經元 for Toniot
-                self.layer1 = nn.Linear(input, 64)
-                self.fc2 = nn.Linear(64, 64)
-                self.fc3 = nn.Linear(64, 64)
-                self.fc4 = nn.Linear(64, 64)
-                self.layer5 = nn.Linear(64, ouput)
+                self.layer1 = nn.Linear(input, 512)
+                self.fc2 = nn.Linear(512, 512)
+                self.fc3 = nn.Linear(512, 512)
+                self.fc4 = nn.Linear(512, 512)
+                self.layer5 = nn.Linear(512, ouput)
+                # # 每層64神經元 for Toniot
+                # self.layer1 = nn.Linear(input, 64)
+                # self.fc2 = nn.Linear(64, 64)
+                # self.fc3 = nn.Linear(64, 64)
+                # self.fc4 = nn.Linear(64, 64)
+                # self.layer5 = nn.Linear(64, ouput)
+                # # 隱藏層分別配置了 40 、 30 和 15 個神經元 for CICIDS2019
+                # self.layer1 = nn.Linear(input, 40)
+                # self.fc2 = nn.Linear(40, 30)
+                # self.fc3 = nn.Linear(30, 30)
+                # self.fc4 = nn.Linear(30, 15)
+                # self.layer5 = nn.Linear(15, ouput)
 
             def forward(self, x):
                 # relu激活函数
                 # 输出范围在 (0, max) 之间
-                # x = F.relu(self.layer1(x))
-                # x = F.relu(self.fc2(x))
-                # x = F.relu(self.fc3(x))
-                # x = F.relu(self.fc4(x))
-                # 修改后的代码使用Sigmoid激活函数
+                x = F.relu(self.layer1(x))
+                x = F.relu(self.fc2(x))
+                x = F.relu(self.fc3(x))
+                x = F.relu(self.fc4(x))
+                # 修改后的代码使用Sigmoid激活函数每層64神經元 for Toniot
                 # 输出范围在 (0, 1) 之间
-                x = F.sigmoid(self.layer1(x))
-                x = F.sigmoid(self.fc2(x))
-                x = F.sigmoid(self.fc3(x))
-                x = F.sigmoid(self.fc4(x))
+                # x = F.sigmoid(self.layer1(x))
+                # x = F.sigmoid(self.fc2(x))
+                # x = F.sigmoid(self.fc3(x))
+                # x = F.sigmoid(self.fc4(x))
+                # x = self.sigmoid(self.output(x))  # 使用 Sigmoid 作為輸出層激活函數
                 x = self.layer5(x)
                 return x
         return MLP()  # 返回創建的model instance

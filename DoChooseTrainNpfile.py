@@ -13,27 +13,39 @@ import torch.nn.functional as F
 # 初始化 colorama（Windows 系統中必須）
 init(autoreset=True)
 
-class CICIDS2019TrainLoader:
-    def __init__(self, filepath):
+class CICIDS2019BaseLine_TrainLoader:
+    client_str = 'BaseLine'
+    def __init__(self, filepath,Attack_method):
         self.filepath = filepath
+        self.Attack_method = Attack_method
 
-    def load_test_data(self, Choose_Attacktype, split_file, Attack_method=None):
-        if split_file == 'test' and Choose_Attacktype == 'normal':
+    def load_train_data(self, Choose_Attacktype, split_file):
+        if split_file=='baseLine_train' and Choose_Attacktype =='normal':
             # 使用不同日期或特徵選擇方式的檔案
-            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 test data with normal attack type")
-            # 20240422 CICIDS2019 after PCA do labelencode and minmax
-            # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
-            # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_test_20240422.npy", allow_pickle=True)
-
-            # 20240422 CICIDS2019 after PCA do labelencode and minmax chi-square 45
-            # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
-            # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
-
+            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal attack type")
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
             # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
-            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_20240502.npy", allow_pickle=True)
-            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
-            return x_test, y_test
-        elif split_file == 'test' and Choose_Attacktype == 'Evasion_Attack':
+            x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
+            y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+            # 20241030 CIC-IDS2019 after do labelencode and minmax 75 25分 do GDA 高斯資料增強
+            # x_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/x_CICIDS2019_train_augmented.npy", allow_pickle=True)
+            # y_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/y_CICIDS2019_train_augmented.npy", allow_pickle=True)
+            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 do Person相關係數選擇
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal AfterPearsonFeatureSelect52")
+            # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterPearsonFeatureSelect52_20241102.npy", allow_pickle=True)
+            # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterPearsonFeatureSelect52_20241102.npy", allow_pickle=True)
+            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 do PCA
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal AfterPCA")
+            # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_AfterPCA77_20241102.npy", allow_pickle=True)
+            # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_AfterPCA77_20241102.npy", allow_pickle=True)
+            
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal Afterbinary")
+            # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12__binary__train_20241102.npy", allow_pickle=True)
+            # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12__binary__train_20241102.npy", allow_pickle=True)
+            
+            return x_train, y_train,self.client_str
+        elif split_file == 'baseLine_train' and Choose_Attacktype == 'Evasion_Attack':
             print("Using CICIDS2019 with Evasion_Attack")
             # if (Attack_method == 'JSMA'):
             # if (Attack_method == 'FGSM'):
@@ -41,7 +53,7 @@ class CICIDS2019TrainLoader:
             # if (Attack_method == 'CandW'):
             # 可在此加載相關的檔案
             return None, None
-        elif split_file == 'test' and Choose_Attacktype == 'Poisoning_Attack':
+        elif split_file == 'baseLine_train' and Choose_Attacktype == 'Poisoning_Attack':
             print("Using CICIDS2019 with Ponsion_Attack")
             # 可在此加載相關的檔案
             return None, None
@@ -228,7 +240,7 @@ ChooseLoadTrainNpArray 函數根據 choose_datasets 選擇適當的類別來加�
 
 def ChooseLoadTrainNpArray(choose_datasets,split_file, filepath, Choose_Attacktype,Attack_method):
     if choose_datasets == "CICIDS2019":
-        loader = CICIDS2019TrainLoader(filepath,Attack_method)
+        loader = CICIDS2019BaseLine_TrainLoader(filepath,Attack_method)
     elif choose_datasets == "TONIOT":
         if split_file =="baseLine_train": 
             loader = TONIOTBaseLine_TrainLoader(filepath,Attack_method)
