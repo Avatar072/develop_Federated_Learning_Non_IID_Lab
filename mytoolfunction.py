@@ -8,6 +8,7 @@ from colorama import Fore, Back, Style, init
 from sklearn import preprocessing
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -1191,6 +1192,23 @@ def EvaluatePercent(Current_round_dis,Last_round_dis):
     percent_diff = abs(Current_round_dis-Last_round_dis)
     percent_diff = (percent_diff/Last_round_dis)*100
     return percent_diff
+
+#針對Strig type做完label ecnode後補做minmax
+def DominmaxforStringTypefeature(doScalerdataset):
+    # 開始minmax
+    X=doScalerdataset
+    X=X.values
+    # scaler = preprocessing.StandardScaler() #資料標準化
+    scaler = MinMaxScaler(feature_range=(0, 1)).fit(X)
+    scaler.fit(X)
+    X=scaler.transform(X)
+    # 将缩放后的值更新到 doScalerdataset 中
+    doScalerdataset.iloc[:, :] = X
+    # 将排除的列名和选中的特征和 Label 合并为新的 DataFrame
+    # afterminmax_dataset = pd.concat([undoScalerdataset,doScalerdataset,afterprocess_dataset['Label']], axis = 1)
+    return doScalerdataset
+
+
 ## 將結合weakLabel Label8 的train_half1轉成np array
 # gan_dataframe = pd.read_csv("D:\\Labtest20230911\\GAN_data_train_half1\\GAN_data_train_half1_ADD_weakLabel_8.csv")
 # SaveDataframeTonpArray(gan_dataframe, "train_half1","weakpoint_8")
