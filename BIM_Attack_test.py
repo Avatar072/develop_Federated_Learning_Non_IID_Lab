@@ -21,6 +21,7 @@ from collections import Counter, defaultdict
 from sklearn.metrics import classification_report
 from mytoolfunction import ChooseUseModel, getStartorEndtime
 from colorama import Fore, Back, Style, init
+import tqdm
 labelCount = 13
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
@@ -68,7 +69,7 @@ class MLP(nn.Module):
         return x
 
 # 畫混淆矩陣
-def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon = None):
+def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon = None,step_epsilon= None):
     #混淆矩陣
     if plot_confusion_matrix:
         # df_cm的PD.DataFrame 接受三個參數：
@@ -126,13 +127,15 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon 
         # Rotate the x-axis labels (prediction categories)
         plt.xticks(rotation=30, ha='right',fontsize=9)
         # plt.savefig(f"./Adversarial_Attack_Test/CICIDS2019/BIM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
-        if epsilon == None:
+        if epsilon == None and step_epsilon == None:
             plt.savefig(f"./Adversarial_Attack_Test/CICIDS2019/BIM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
+            plt.show()
         else:
             str_epsilon = f"epsilon_{epsilon}"
-            plt.savefig(f"./Adversarial_Attack_Test/CICIDS2019/BIM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
-
-        plt.show()
+            str_step_epsilon = f"step_epsilon_{step_epsilon}"
+            plt.savefig(f"./Adversarial_Attack_Test/CICIDS2019/BIM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/{str_step_epsilon}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
+            plt.close()
+        
 
 def save_to_csv(data, filepath):
     df = pd.DataFrame(data)
@@ -262,7 +265,7 @@ def plot_results(losses, accuracies, confusion_mtx, save_dir):
     plt.savefig(os.path.join(save_dir, 'confusion_matrix.png'))
     plt.close()
 
-def BIM_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_dir, epsilon):
+def BIM_Attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_dir, epsilon, step_epsilon):
     model.eval()  # 設置模型為評估模式
     successful_attacks = []  # 儲存成功的攻擊案例
     accuracies = []  # 儲存每個批次的準確率
@@ -278,6 +281,7 @@ def BIM_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
 
     # 逐批次處理資料
     for batch_idx, (data, target) in enumerate(test_loader):
+    # for batch_idx, (data, target) in tqdm.tqdm(enumerate(test_loader), desc=f'BIM - Batches:', total=len(test_loader)):
         data, target = data.to(DEVICE), target.to(DEVICE)
         data_np = data.cpu().numpy()
 
@@ -316,7 +320,7 @@ def BIM_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
 
     # 計算平均準確率並顯示結果
     avg_accuracy = correct / total
-    print(Fore.RED + Style.BRIGHT+f'Average accuracy under BIM attack (ε={epsilon}): {avg_accuracy:.4f}')
+    print(Fore.RED + Style.BRIGHT+f'Average accuracy under BIM attack (ε={epsilon})(eps_step{step_epsilon}): {avg_accuracy:.4f}')
     print(Fore.RED + Style.BRIGHT+f'loss: {ave_loss:.4f}')
 
     # 計算每個類別的召回率
@@ -336,16 +340,18 @@ def BIM_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
     RecordRecall = str(RecordRecall)[1:-1]
 
     str_epsilon = f"epsilon_{epsilon}"
+    str_step_epsilon = f"step_epsilon_{step_epsilon}"
     generatefolder(f"./Adversarial_Attack_Test/CICIDS2019/BIM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/", str_epsilon)
+    generatefolder(f"./Adversarial_Attack_Test/CICIDS2019/BIM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/", str_step_epsilon)
     # 標誌來跟踪是否已經添加了標題行
     header_written = False
-    with open(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/recall-baseline_epsilon_{epsilon}.csv", "a+") as file:
+    with open(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/{str_step_epsilon}/recall-baseline_epsilon_{epsilon}_{str_step_epsilon}.csv", "a+") as file:
         if not header_written:
             header_written = True
         file.write(str(RecordRecall) + "\n")
 
     # 將總體準確度和其他信息寫入 "accuracy-baseline.csv" 檔案
-    with open(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/accuracy-baseline_epsilon_{epsilon}.csv", "a+") as file:
+    with open(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/{str_step_epsilon}/accuracy-baseline_epsilon_{epsilon}_{str_step_epsilon}.csv", "a+") as file:
         if not header_written:
             header_written = True
         file.write(f"精確度,時間,loss\n")
@@ -353,14 +359,14 @@ def BIM_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
 
     # 生成分類報告
     report_df = pd.DataFrame(acc).transpose()
-    report_df.to_csv(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/baseline_report_epsilon_{epsilon}.csv", header=True)
+    report_df.to_csv(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/{str_step_epsilon}/baseline_report_epsilon_{epsilon}_{str_step_epsilon}.csv", header=True)
 
     # 畫出混淆矩陣
-    draw_confusion_matrix(y_true, y_pred, True, epsilon=epsilon)
+    draw_confusion_matrix(y_true, y_pred, True, epsilon,step_epsilon)
 
     # 保存成功攻擊的結果到 CSV
     attack_results = pd.DataFrame(successful_attacks)
-    attack_results.to_csv(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/", f'successful_attacks_eps_{epsilon}.csv'), index=False)
+    attack_results.to_csv(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/{str_step_epsilon}/", f'successful_attacks_eps_{epsilon}_{str_step_epsilon}.csv'), index=False)
 
     # 將對抗樣本和標籤保存為 CSV 和 npy 檔案
     x_adv_np = np.concatenate([attack.generate(x=data.cpu().numpy()) for data, _ in test_loader], axis=0)
@@ -368,10 +374,10 @@ def BIM_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
 
     x_adv_df = pd.DataFrame(x_adv_np.reshape(x_adv_np.shape[0], -1))  # 展平每個樣本
     x_adv_df['label'] = y_adv_np  # 添加標籤欄位
-    x_adv_df.to_csv(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}", f'CICIDS2019_adversarial_samples_eps{epsilon}.csv'), index=False)
+    x_adv_df.to_csv(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/{str_step_epsilon}", f'CICIDS2019_adversarial_samples_eps{epsilon}_{str_step_epsilon}.csv'), index=False)
 
-    np.save(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}", f'x_test_CICIDS2019_adversarial_samples_eps{epsilon}.npy'), x_adv_np)
-    np.save(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}", f'y_test_CICIDS2019_adversarial_labels_eps{epsilon}.npy'), y_adv_np)
+    np.save(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/{str_step_epsilon}", f'x_test_CICIDS2019_adversarial_samples_eps{epsilon}_{str_step_epsilon}.npy'), x_adv_np)
+    np.save(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/{str_step_epsilon}", f'y_test_CICIDS2019_adversarial_labels_eps{epsilon}_{str_step_epsilon}.npy'), y_adv_np)
 
     return avg_accuracy, successful_attacks
 
@@ -443,33 +449,32 @@ def main():
     )
 
     # 設定 BIM 攻擊
-    epsilons = [0.1, 0.2, 0.3]
-    # for epsilon in epsilons:
-    #     attack = ProjectedGradientDescent(
-    #         estimator=classifier,
-    #         eps=epsilon,
-    #         eps_step=0.5,
-    #         max_iter=10,
-    #         targeted=False,
-    #         num_random_init=0
-    #     )
-    # for epsilon in epsilons:
-    #     attack = FastGradientMethod(
-    #         estimator=classifier,
-    #         eps=epsilon
-    #     )
+    # epsilons = [0.1, 0.2, 0.3]
+    epsilons = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
+    step_epsilons_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
+    # epsilons = [0.05, 0.1]
+    # step_epsilons_list = [0.05, 0.1]
     for epsilon in epsilons:
-        attack = BasicIterativeMethod(
-            estimator=classifier,
-            eps=epsilon,
-            eps_step=0.01,  # 每步的步長，可以根據需求調整
-            max_iter=10     # BIM 的迭代次數
-        )
-        # 執行攻擊並評估
-        acc, successful_attacks = BIM_attack_evaluation(
-            model, DEVICE, test_loader, classifier, attack, save_dir, epsilon
-        )
+        for step_epsilons in step_epsilons_list:
+            if step_epsilons <= epsilon:  # 確保步長不超過 epsilon
+                attack = BasicIterativeMethod(
+                    estimator=classifier,
+                    eps=epsilon,
+                    # eps_step=0.5,
+                    eps_step=step_epsilons,# 每步的步長，可以根據需求調整
+                    # max_iter=100,
+                    max_iter=100,# BIM 的迭代次數
+                    targeted=False
+                )
+            
+                # 執行攻擊並評估
+                acc, successful_attacks = BIM_Attack_evaluation(
+                    model, DEVICE, test_loader, classifier, attack, save_dir, epsilon, step_epsilons
+                )
         
+        # 模型權重需經過訓練後才會發生變化
+        # 這邊經測試樣本只生成test的樣本未訓練
+        # 所以不用存模型
         # torch.save(model.state_dict(), os.path.join(save_dir, f"model_{epsilon}.pth"))
 
         #紀錄結束時間

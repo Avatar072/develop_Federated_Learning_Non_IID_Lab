@@ -37,7 +37,7 @@ print(Fore.GREEN +Back.WHITE+ Style.BRIGHT+f"Using device: {device}")
 # # 加载CICIDS2019 train after do labelencode and minmax chi_square45 75 25分
 afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\20240502\\01_12_train_dataframes_20240502.csv")
 # # 加载CICIDS2019 train after do labelencode and minmax chi_square45 75 25分
-afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\20240502\\01_12_test_dataframes_20240502.csv")
+# afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\20240502\\01_12_test_dataframes_20240502.csv")
 
 # # 加载TONIOT client3 train 均勻劃分
 # # afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half3_20240523.csv")
@@ -78,7 +78,10 @@ classifier = PyTorchClassifier(
 print(Fore.GREEN +Back.WHITE+ Style.BRIGHT+f"ART classifier created.")
 
 # 4. 定義 GDA（高斯資料增強）防禦策略
-gda = GaussianAugmentation(sigma=0.1, augmentation=True, ratio=1.0)
+# 設定高斯資料增強的參數
+gda = GaussianAugmentation(sigma=0.1,  # 標準差，用於控制擾動量
+                           augmentation=True,  # 是否啟用資料增強
+                           ratio=1.0)  # 新增擾動後資料的比例（1.0 表示全量使用擾動）
 
 # 5. 在訓練過程中應用 GDA 增強
 x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)

@@ -153,9 +153,15 @@ with tqdm(epsilons, desc='Generating Adversarial Examples', unit='step') as pbar
         # ))
 
         # 將對抗性樣本與乾淨樣本混合，達到 η = 1/3
+        # mixed_train_data = np.vstack((
+            # train_adv_data[:train_adv_data.shape[0]//3],  # 選取對抗性樣本的 1/3
+            # train_data[:train_data.shape[0] * 2//3]       # 選取乾淨樣本的 2/3
+        # ))
+
+        # 將對抗性樣本與乾淨樣本混合，達到 η = 2/3
         mixed_train_data = np.vstack((
-            train_adv_data[:train_adv_data.shape[0]//3],  # 選取對抗性樣本的 1/3
-            train_data[:train_data.shape[0] * 2//3]       # 選取乾淨樣本的 2/3
+            train_adv_data[:train_adv_data.shape[0]* 2//3],  # 選取對抗性樣本的 2/3
+            train_data[:train_data.shape[0]//3]       # 選取乾淨樣本的 1/3
         ))
         # # 使用混合數據進行 k-means 訓練
         kmeans = KMeans(n_clusters=856, init='k-means++', max_iter=300, random_state=42)
