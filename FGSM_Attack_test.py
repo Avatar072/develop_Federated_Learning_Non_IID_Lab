@@ -12,16 +12,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
 from art.attacks.evasion import ProjectedGradientDescent,FastGradientMethod
+from art.defences.trainer import AdversarialTrainer
+from art.defences.preprocessor import GaussianAugmentation
 from art.estimators.classification import PyTorchClassifier
 import os
 import random
 import time
 import datetime
+from tqdm import tqdm
 from collections import Counter, defaultdict
 from sklearn.metrics import classification_report
 from mytoolfunction import ChooseUseModel, getStartorEndtime
+from mytoolfunction import generatefolder, SaveDataToCsvfile, SaveDataframeTonpArray
 from colorama import Fore, Back, Style, init
 from pathlib import Path
+from sklearn.preprocessing import MinMaxScaler
 # 初始化 colorama（Windows 系統中必須）
 init(autoreset=True)
 labelCount = 13
@@ -446,8 +451,8 @@ def main():
     )
 
     # 設定 FGSM 攻擊
-    # epsilons = [0.1, 0.2, 0.3]
-    epsilons = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
+    # epsilons = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
+    epsilons = [1.0]
     # for epsilon in epsilons:
     #     attack = ProjectedGradientDescent(
     #         estimator=classifier,
@@ -462,17 +467,17 @@ def main():
             estimator=classifier,
             eps=epsilon
         )
-        # 執行攻擊並評估
-        # acc, successful_attacks = FGSM_attack_evaluation(
-        #     model, DEVICE, test_loader, classifier, attack, save_dir, epsilon
-        # )
+        # test執行攻擊並評估
+        acc, successful_attacks = FGSM_attack_evaluation(
+            model, DEVICE, test_loader, classifier, attack, save_dir, epsilon
+        )
         
         # train執行攻擊並評估
-        acc, successful_attacks = FGSM_attack_evaluation(
-            model, DEVICE, train_loader, classifier, attack, save_dir, epsilon
-        )
+        # acc, successful_attacks = FGSM_attack_evaluation(
+        #     model, DEVICE, train_loader, classifier, attack, save_dir, epsilon
+        # )
         # torch.save(model.state_dict(), os.path.join(save_dir, f"model_{epsilon}.pth"))
-
+                
         #紀錄結束時間
         end_IDS = time.time()
         getStartorEndtime("endtime",end_IDS,f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/{today}/{current_time}/{client_str}/{Choose_method}")
@@ -480,21 +485,33 @@ def main():
 
 def Mixdata():
     # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
-    x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
-    y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+    # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
+    # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+    
+    x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
+    y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
+
+    
     original_Label_count = Counter(y_train)
     #在處理 Counter 或 dict 類型數據時，使用 .keys() 可以方便地獲取所有的鍵。
     print(Fore.BLUE+Style.BRIGHT+"original Label enocode:\n"+str(original_Label_count.keys()))
     print(Fore.BLUE+Style.BRIGHT+"original:\n"+str(original_Label_count))
 
     # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分 生成的對抗樣本
-    x_adv_train = np.load("./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241113/x_test_CICIDS2019_adversarial_samples_eps0.05.npy", allow_pickle=True)
-    y_adv_train = np.load("./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241113/y_test_CICIDS2019_adversarial_labels_eps0.05.npy", allow_pickle=True)
+    # x_adv_train = np.load("./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241113/x_train_CICIDS2019_adversarial_samples_eps0.05.npy", allow_pickle=True)
+    # y_adv_train = np.load("./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241113/y_train_CICIDS2019_adversarial_labels_eps0.05.npy", allow_pickle=True)
+    # x_adv_train = np.load("./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241113/x_train_CICIDS2019_adversarial_samples_eps1.0.npy", allow_pickle=True)
+    # y_adv_train = np.load("./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241113/y_train_CICIDS2019_adversarial_labels_eps1.0.npy", allow_pickle=True)
+    
+    # 20241121 CIC-IDS2019 after do labelencode and all feature minmax 75 25分 GDA生成的樣本
+    x_adv_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.01_20241119.npy", allow_pickle=True)
+    y_adv_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
+
     print(Fore.GREEN+Style.BRIGHT+"Adversarial Label enocode:\n"+str(Counter(y_adv_train).keys()))
     print(Fore.GREEN+Style.BRIGHT+"Adversarial:\n"+str(Counter(y_adv_train)))
     # 確保對抗樣本和乾淨樣本的大小可對齊
-    # print(f"x_adv_train shape: {x_adv_train.shape}, y_adv_train shape: {y_adv_train.shape}")
-    # print(f"x_train shape: {x_train.shape}, y_train shape: {y_train.shape}")
+    print(f"x_adv_train shape: {x_adv_train.shape}, y_adv_train shape: {y_adv_train.shape}")
+    print(f"x_train shape: {x_train.shape}, y_train shape: {y_train.shape}")
     # 初始化合併的樣本
     mixed_x = []
     mixed_y = []
@@ -502,19 +519,34 @@ def Mixdata():
     np.random.seed(42)
     # 遍歷所有標籤
     for Label in original_Label_count.keys():
-        # 獲取該標籤的乾淨樣本和對抗樣本索引
+        #clean_indices獲取該標籤的乾淨樣本索引
+        #adv_indices獲取該標籤的對抗樣本索引
         #因為 np.where 返回的是一個元組，[0] 用於提取第一個元素（即索引列表）。
         clean_indices = np.where(y_train == Label)[0]
         adv_indices = np.where(y_adv_train == Label)[0]
-        # print(f"Label: {Label}, Count: {original_Label_count[Label]}")
-        # 算乾淨樣本各類別數量
-        num_clean_samples = len(clean_indices)
+        # print(f"clean_indices: {Label}, index: {clean_indices}")
+        # print(f"adv_indices: {Label}, index: {adv_indices}")
+        print(f"orginal_Label: {Label},     Count: {original_Label_count[Label]}")
+        print(f"adversarial_Label: {Label}, Count: {len(adv_indices)}")
+        # # 算乾淨樣本各類別數量
+        # num_clean_samples = len(clean_indices)
         # 算乾淨樣本各類別數量的2/3
-        num_clean_samples = len(clean_indices)*2//3
-        # 算對抗樣本各類別數量的1/3
-        num_adv_samples = len(adv_indices)//3
+        # num_clean_samples = len(clean_indices)*2//3
+        # # 算對抗樣本各類別數量的1/3
+        # num_adv_samples = len(adv_indices)//3
+
+        # # 算乾淨樣本各類別數量的1/2
+        num_clean_samples = len(clean_indices)*1//2
+        # # 算對抗樣本各類別數量的1/2
+        num_adv_samples = len(adv_indices)//2
+
+        # # 算乾淨樣本各類別數量的0
+        # num_clean_samples = len(clean_indices)*0
+        # # 算對抗樣本各類別數量的1
+        # num_adv_samples = len(adv_indices)
         selected_clean_samples = np.random.choice(clean_indices, size=num_clean_samples, replace=False)
         selected_adv_samples = np.random.choice(adv_indices, size=num_adv_samples, replace=False)
+                                    # 使用 numpy.random.choice 隨機抽取樣本
                                     # adv_indices 是對抗樣本中某一標籤的所有索引。
                                     # np.random.choice 是一個隨機選取函數，用來從 adv_indices 中隨機選取樣本索引。
                                     # size=num_clean_samples 表示選取的樣本數量應該與乾淨樣本的 1/3 數量相同。
@@ -543,7 +575,69 @@ def Mixdata():
     np.save(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/mixed_train_data.npy", mixed_x)
     np.save(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/mixed_train_labels.npy", mixed_y)
 
-Mixdata()
-# if __name__ == '__main__':
-#     main()
+def DoTrain_add_gaussian_noise(sigma_value):
+    # Load CICIDS2019 dataset
+    filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
+    # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
+    # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
+    # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+    # 20241119 CIC-IDS2019 after do labelencode and all featrue minmax 75 25分
+    x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
+    y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
     
+    print(f"原數據範圍: 最小值={x_train.min()}, 最大值={x_train.max()}")    
+    # 使用 ART 的 Gaussian Noise Augmentation
+    gaussian_augmentation = GaussianAugmentation(sigma=sigma_value, augmentation=False)
+    # 對feature進行增加
+    x_train_noisy, _ = gaussian_augmentation(x_train)
+    # 剪裁到非負範圍 [0, 1]
+    x_train_noisy = np.clip(x_train_noisy, 0.0, 1.0)
+    print("sigma:", sigma_value)
+    print("原始數據範例:", x_train[0])
+    print("高斯噪聲增強數據範例:", x_train_noisy[0])
+    
+    print(f"增強後的數據範圍: 最小值={x_train_noisy.min()}, 最大值={x_train_noisy.max()}")
+    # 保存增強後的數據
+    np.save(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/{today}/{current_time}/{client_str}/{Choose_method}/x_01_12_train_noisy{sigma_value}_20241119.npy", x_train_noisy)
+
+
+
+# 移除字符串类型特征
+# def RemoveStringTypeValueForCandW(afterprocess_dataset):
+
+ 
+
+
+
+if __name__ == '__main__':
+    # main()
+    # Mixdata()
+    # DoTrain_add_gaussian_noise(0.01)
+    # DoTrain_add_gaussian_noise(0.02)
+    # DoTrain_add_gaussian_noise(0.03)
+    # DoTrain_add_gaussian_noise(0.04)
+    # DoTrain_add_gaussian_noise(0.05)
+    # DoTrain_add_gaussian_noise(0.06)
+    # DoTrain_add_gaussian_noise(0.07)
+    # DoTrain_add_gaussian_noise(0.08)
+    # DoTrain_add_gaussian_noise(0.09)
+    # DoTrain_add_gaussian_noise(0.1)
+    # DoTrain_add_gaussian_noise(0.15)
+    # DoTrain_add_gaussian_noise(0.2)
+    # DoTrain_add_gaussian_noise(0.25)
+    # DoTrain_add_gaussian_noise(0.3)
+    # DoTrain_add_gaussian_noise(0.35)
+    # DoTrain_add_gaussian_noise(0.4)
+    # DoTrain_add_gaussian_noise(0.45)
+    # DoTrain_add_gaussian_noise(0.5)
+    # DoTrain_add_gaussian_noise(0.55)
+    # DoTrain_add_gaussian_noise(0.6)
+    # DoTrain_add_gaussian_noise(0.65)
+    # DoTrain_add_gaussian_noise(0.7)
+    # DoTrain_add_gaussian_noise(0.75)
+    # 加载CICIDS2019 train after do labelencode and minmax  75 25分
+    # afterprocess_dataset_train = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\20240502\\01_12_train_dataframes_20240502.csv")
+    # # 加载CICIDS2019 test after do labelencode and minmax  75 25分
+    # afterprocess_dataset_test = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\20240502\\01_12_test_dataframes_20240502.csv")
+    # print("Dataset loaded.")
+    # testdata_removestring, undoScalerdataset = RemoveStringTypeValueForCandW(afterprocess_dataset)
