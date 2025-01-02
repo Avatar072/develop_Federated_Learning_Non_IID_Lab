@@ -37,31 +37,6 @@ class CICIDS2019TestLoader:
             # 20241119 CIC-IDS2019 after do labelencode and all featrue minmax 75 25分
             x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
             y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
-            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 do Person相關係數選擇
-            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_CICIDS2019_AfterPearsonFeatureSelect52_20241102.npy", allow_pickle=True)
-            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_CICIDS2019_AfterPearsonFeatureSelect52_20241102.npy", allow_pickle=True)
-            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 do PCA
-            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal AfterPCA")
-            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_AfterPCA77_20241102.npy", allow_pickle=True)
-            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_AfterPCA77_20241102.npy", allow_pickle=True)
-            # 20241102 CIC-IDS2019 after do labelencode and minmax 58 42分 二元分類
-            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal Afterbinary")
-            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12__binary__test_20241102.npy", allow_pickle=True)
-            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12__binary__test_20241102.npy", allow_pickle=True)
-            
-            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 DO CandW attack 1
-            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do CandW attack")
-            # x_test = np.load(f"./Adversarial_Attack_Test/20241102_CandW/x_DoCandW_test_20241102.npy")
-            # y_test = np.load(f"./Adversarial_Attack_Test/20241102_CandW/y_DoCandW_test_20241102.npy")
-
-            # 20241102 CIC-IDS2019 after do labelencode and minmax 75 25分 DO CandW attack 0.5
-            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do CandW attack")
-            # x_test = np.load(f"./Adversarial_Attack_Test/20241102_CandW_C0.5/x_DoC_0.5andW_test_20241102.npy")
-            # y_test = np.load(f"./Adversarial_Attack_Test/20241102_CandW_C0.5/y_DoC_0.5andW_test_20241102.npy")
-            # 20241103 CIC-IDS2019 after do labelencode and minmax 75 25分 DO CandW attack 1
-            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do CandW attack")
-            # x_test = np.load(f"./Adversarial_Attack_Test/20241103/x_DoCandW_test_20241103.npy")
-            # y_test = np.load(f"./Adversarial_Attack_Test/20241103/y_DoCandW_test_20241103.npy")
             return x_test, y_test
         elif split_file == 'test' and Choose_Attacktype == 'Evasion_Attack':
             print("Using CICIDS2019 with Evasion_Attack")
@@ -69,8 +44,53 @@ class CICIDS2019TestLoader:
             if (self.Attack_method == 'FGSM'):
             # 20241116 CIC-IDS2019 after do labelencode and minmax 75 25分 DO FGSM
                 print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do FGSM attack")
-                x_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241113/x_test_CICIDS2019_adversarial_samples_eps1.0.npy")
-                y_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241113/y_test_CICIDS2019_adversarial_labels_eps1.0.npy")
+                
+                ################################# ALL feature minmax
+                # FGSM = 0.05
+                # x_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/x_test_CICIDS2019_adversarial_samples_eps0.05.npy")
+                # y_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/y_test_CICIDS2019_adversarial_labels_eps0.05.npy")
+                # FGSM = 0.1
+                # ALL feature minmax
+                # x_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/x_test_CICIDS2019_adversarial_samples_eps0.1.npy")
+                # y_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/y_test_CICIDS2019_adversarial_labels_eps0.1.npy")
+                # FGSM = 0.15
+                # ALL feature minmax
+                x_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/x_test_CICIDS2019_adversarial_samples_eps0.15.npy")
+                y_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/y_test_CICIDS2019_adversarial_labels_eps0.15.npy")
+                # FGSM = 0.2
+                # ALL feature minmax
+                # x_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/x_test_CICIDS2019_adversarial_samples_eps0.2.npy")
+                # y_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/y_test_CICIDS2019_adversarial_labels_eps0.2.npy")
+                # FGSM = 0.25
+                # ALL feature minmax
+                # x_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/x_test_CICIDS2019_adversarial_samples_eps0.25.npy")
+                # y_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/y_test_CICIDS2019_adversarial_labels_eps0.25.npy")
+                # FGSM = 0.3
+                # ALL feature minmax
+                # x_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/x_test_CICIDS2019_adversarial_samples_eps0.3.npy")
+                # y_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/y_test_CICIDS2019_adversarial_labels_eps0.3.npy")
+                # FGSM = 1.0
+                # ALL feature minmax
+                # x_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/x_test_CICIDS2019_adversarial_samples_eps1.0.npy")
+                # y_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/y_test_CICIDS2019_adversarial_labels_eps1.0.npy")
+                
+                # FGSM = 0.05-1.0 DO FS bit 8
+                # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do FGSM attack FGSM = 0.05-1.0 DO FS bit 8") 
+                # x_test = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/test_FGSM_eps0.05_1.0_FS_bit8/x_01_12_test_DoFS_adversarial_samples_eps0.05.npy")
+                # x_test = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/test_FGSM_eps0.05_1.0_FS_bit8/x_01_12_test_DoFS_adversarial_samples_eps0.1.npy")
+                # x_test = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/test_FGSM_eps0.05_1.0_FS_bit8/x_01_12_test_DoFS_adversarial_samples_eps0.15.npy")
+                # x_test = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/test_FGSM_eps0.05_1.0_FS_bit8/x_01_12_test_DoFS_adversarial_samples_eps0.2.npy")
+                # x_test = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/test_FGSM_eps0.05_1.0_FS_bit8/x_01_12_test_DoFS_adversarial_samples_eps0.25.npy")
+                # x_test = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/test_FGSM_eps0.05_1.0_FS_bit8/x_01_12_test_DoFS_adversarial_samples_eps0.3.npy")
+                # x_test = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/test_FGSM_eps0.05_1.0_FS_bit8/x_01_12_test_DoFS_adversarial_samples_eps1.0.npy")
+
+                # FGSM = 0.05 DO FS bit 6
+                # x_test = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/test_FGSM_eps0.05_FS_bit6/x_01_12_test_DoFS_adversarial_samples_eps0.05.npy")
+                # FGSM = 0.05 DO FS bit 4
+                # x_test = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/test_FGSM_eps0.05_FS_bit4/x_01_12_test_DoFS_adversarial_samples_eps0.05.npy")
+                
+                y_test = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/all_feature_minmax/y_test_CICIDS2019_adversarial_labels_eps0.05.npy")
+                
             # if (self.Attack_method == 'PGD'):
             # if (self.Attack_method == 'CandW'):
             # 可在此加載相關的檔案
@@ -90,13 +110,11 @@ class TONIOTTestLoader:
         if split_file=='test' and Choose_Attacktype =='normal':
             print(Fore.GREEN+Style.BRIGHT+"Loading TONIOT test data with normal attack type")
             # 20240523 TONIoT after do labelencode and minmax  75 25分
-            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
-            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
-
-            # 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA
-            # x_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.5_0.5/x_DoJSMA_test_20240721.npy")
-            # y_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.5_0.5/y_DoJSMA_test_20240721.npy")
-
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
+            # 20241229 TONIoT after do labelencode and ALLminmax  75 25分
+            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_ToN-IoT_test_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)
+            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_ToN-IoT_test_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)   
 
             return x_test, y_test
         elif split_file == 'test' and Choose_Attacktype == 'Evasion_Attack':

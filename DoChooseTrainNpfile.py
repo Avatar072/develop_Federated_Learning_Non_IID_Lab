@@ -48,6 +48,59 @@ class CICIDS2019BaseLine_TrainLoader:
             # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12__binary__train_20241102.npy", allow_pickle=True)
             
             return x_train, y_train,self.client_str
+        elif split_file == 'baseLine_train' and Choose_Attacktype == 'Defense':
+            print("Using CICIDS2019 with Defense")
+            if (self.Attack_method == 'GDA'):
+                # 202411119 CIC-IDS2019 after do labelencode and All fearuter minmax 75 25分 DO GDA
+                print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do  GaussianAugmentation denfense")
+                # sigma = 0.01
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.01_20241119.npy")
+                # sigma = 0.02
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.02_20241119.npy")
+                # # sigma = 0.03
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.03_20241119.npy")
+                # # sigma = 0.04
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.04_20241119.npy")
+                # # sigma = 0.05
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.05_20241119.npy")
+                # # sigma = 0.06
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.06_20241119.npy")
+                # # sigma = 0.07
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.07_20241119.npy")
+                # # sigma = 0.08
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.08_20241119.npy")
+                # # sigma = 0.09
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.09_20241119.npy")
+                # sigma = 0.1
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.1_20241119.npy")
+                # sigma = 0.1 ratio0.5 mixed orginal data half
+                x_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/GDA/20241127/mixed_train_data_all_feature_minmax_noisy0.1_20241127.npy")
+                y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241125/mixed_train_labels_all_feature_minmax.npy", allow_pickle=True)
+                # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
+            elif (self.Attack_method == 'FS'):
+                print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do  FS denfense")
+                x_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/x_01_12_train_median_smoothed_20241119.npy")
+                # x_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/FS/20241126/x_01_12_train_bit_depth8_20241119_median_smoothed_FS.npy")
+                y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
+                # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+                
+            elif (self.Attack_method == 'MIX'):
+                # 20241116 CIC-IDS2019 after do labelencode and minmax 75 25分 DO FS
+                print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do  MIX denfense")
+                # 20241125 CIC-IDS2019 after do labelencode and feature minmax 75 25分 FGSM生成的樣本 混合1/2 正常樣本
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241125/mixed_train_data_feature_minmax_without_stringtype.npy", allow_pickle=True)
+                # y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241125/mixed_train_labels_feature_minmax_without_stringtype.npy", allow_pickle=True)
+                # 20241126 CIC-IDS2019 after do labelencode and all feature minmax 75 25分 FGSM生成的樣本 混合1/2 正常樣本
+                x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241125/mixed_train_data_all_feature_minmax.npy", allow_pickle=True)
+                y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241125/mixed_train_labels_all_feature_minmax.npy", allow_pickle=True)
+            
+            elif (self.Attack_method == 'FSandGDA'):
+                # 20241116 CIC-IDS2019 after do labelencode and minmax 75 25分 DO FSandGDA
+                print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do  FSandGDA denfense")
+                x_train = np.load(f"./\Adversarial_Attack_Denfense/CICIDS2019/FSandGDA/20241125/x_01_12_FSandGDA_20241119.npy")
+                y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+            # 可在此加載相關的檔案
+            return x_train, y_train,self.client_str
         elif split_file == 'baseLine_train' and Choose_Attacktype == 'Evasion_Attack':
             print("Using CICIDS2019 with Evasion_Attack")
             # if (self.Attack_method == 'JSMA'):
@@ -84,53 +137,17 @@ class CICIDS2019BaseLine_TrainLoader:
                 # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.08_20241119.npy")
                 # # sigma = 0.09
                 # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.09_20241119.npy")
-                # sigma = 0.1
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.1_20241119.npy")
-                # GDA sigma = 0.01 mixed orginal data half
-                x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241121/half_GDA/mixed_train_data.npy")
-                y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241121/half_GDA/mixed_train_labels.npy")
+                sigma = 0.1
+                x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.1_20241119.npy")
                 
-                # sigma = 0.1 old
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.1_20240502.npy")
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241119/x_01_12_train_noisy0.1_20241119.npy")
-                # sigma = 0.15
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.15_20240502.npy")
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_DoGDA0.15_train_20241117.npy")
-                # y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/y_DoGDA0.15_train_20241117.npy")
-                # sigma = 0.2
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.2_20240502.npy")
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_DoGDA0.2_train_20241117.npy")
-                # y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/y_DoGDA0.2_train_20241117.npy")
-                # sigma = 0.25
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.25_20240502.npy")
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_DoGDA0.25_train_20241117.npy")
-                # y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/y_DoGDA0.25_train_20241117.npy")
-                # sigma = 0.3
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.3_20240502.npy")
-                # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_DoGDA0.3_train_20241117.npy")
-                # y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/y_DoGDA0.3_train_20241117.npy")
-                # sigma = 0.35
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.35_20240502.npy")
-                # sigma = 0.4
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.4_20240502.npy")
-                # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
-                # sigma = 0.45
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.45_20240502.npy")
-                # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
-                # sigma = 0.5
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.5_20240502.npy")
-                # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
-                # sigma = 0.55
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.55_20240502.npy")
-                # sigma = 0.6
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.6_20240502.npy")
-                # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
-                # sigma = 0.65
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.65_20240502.npy")
-                # sigma = 0.7
-                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241117/x_01_12_train_noisy0.7_20240502.npy")
-                y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+                # GDA sigma = 0.01 mixed orginal data half
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241121/half_GDA/mixed_train_data.npy")
+                # y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241121/half_GDA/mixed_train_labels.npy")
+                
+                # GDA sigma = 0.01 mixed 1/3 orginal data 2/3
+                # x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/one_third_GDA/mixed_train_data.npy")
+                # y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/FGSM_Attack/20241124/one_third_GDA/mixed_train_labels.npy")
+                y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
 
 
             # if (self.Attack_method == 'PGD'):
@@ -140,7 +157,11 @@ class CICIDS2019BaseLine_TrainLoader:
         elif split_file == 'baseLine_train' and Choose_Attacktype == 'Poisoning_Attack':
             print("Using CICIDS2019 with Ponsion_Attack")
             # 可在此加載相關的檔案
-            return None, None
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do Poisoning_Attack")
+            x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/PoisoningAttackBackdoor/20241202/x_train_Poisoning_CICIDS2019.npy", allow_pickle=True)
+            y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2019/PoisoningAttackBackdoor/20241202/y_train_Poisoning_CICIDS2019.npy", allow_pickle=True)
+
+            return x_train, y_train,self.client_str
         else:
             raise ValueError("Invalid Choose_Attacktype or split_file")
 # def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
@@ -186,8 +207,12 @@ class TONIOTBaseLine_TrainLoader(TONIOTTrainLoaderBase):
                 print(Fore.GREEN+Style.BRIGHT+"Loading TONIOT" +f"{split_file} with normal attack type")
                 # 20240523 TONIoT after do labelencode and minmax  75 25分
                 # 直接加載數據
-                x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
-                y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)
+                # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
+                # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)
+                
+                # 20241229 TONIoT after do labelencode and ALLminmax  75 25分
+                x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_ToN-IoT_train_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)
+                y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_ToN-IoT_train_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)   
                 print(Fore.GREEN+Style.BRIGHT+"Debug: x_train shape:", x_train.shape if x_train is not None else None)
                 print(Fore.GREEN+Style.BRIGHT+"Debug: y_train shape:", y_train.shape if y_train is not None else None)
                 print(Fore.GREEN+Style.BRIGHT+"Debug: client_str:", self.client_str)
@@ -198,8 +223,8 @@ class TONIOTBaseLine_TrainLoader(TONIOTTrainLoaderBase):
                 print(Fore.GREEN+Style.BRIGHT+"Using TONIOT with Evasion_Attack")
                 # 可在此加載相關的檔案
                 if (self.Attack_method == 'JSMA'):
-                    x_train = self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_baseLine_20240801.npy"
-                    y_train = self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_baseLine_20240801.npy"
+                    x_train =  np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_baseLine_20240801.npy", allow_pickle=True)
+                    y_train =  np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_baseLine_20240801.npy", allow_pickle=True)
                     # x_train, y_train = self.load_jsma_attack_data(x_path, y_path)
                     return x_train, y_train,self.client_str
                 else:
@@ -212,7 +237,12 @@ class TONIOTBaseLine_TrainLoader(TONIOTTrainLoaderBase):
         elif split_file == 'baseLine_train' and Choose_Attacktype == 'Poisoning_Attack':
                 print(Fore.GREEN+Style.BRIGHT+"Using TONIOT with Poisoning_Attack")
                 # 可在此加載相關的檔案
-                return None, None
+                if (self.Attack_method == 'Backdoor'):
+                    x_train =  np.load("./Adversarial_Attack_Test/TONIOT/PoisoningAttackBackdoor/x_train_Poisoning_TONIOT.npy", allow_pickle=True)
+                    y_train =  np.load("./Adversarial_Attack_Test/TONIOT/PoisoningAttackBackdoor/y_train_Poisoning_TONIOT.npy", allow_pickle=True)
+                    print(Fore.GREEN+Style.BRIGHT+"Debug: x_train shape:", x_train.shape if x_train is not None else None)
+
+                return x_train, y_train,self.client_str
         else:
             raise ValueError("Invalid Choose_Attacktype or split_file")
 
