@@ -25,10 +25,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 # 加载TONIOT test
-# afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\test_ToN-IoT_dataframes_20240523.csv")
+afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\test_ToN-IoT_dataframes_20240523.csv")
 
-# 加载TONIOT client3 train 隨機劃分
-afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half2_random_20240523.csv")
+# 加载TONIOT client2 train 隨機劃分
+# afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half2_random_20240523.csv")
 
 # 加载TONIOT client3 train 均勻劃分
 # afterprocess_dataset = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_train_half3_20240523.csv")
@@ -249,8 +249,8 @@ def compare_samples(save_dir):
     # 保存补充后的对抗样本数据为 CSV 文件
     finalDf.to_csv(os.path.join(save_dir, "final_adver_examples_with_missing.csv"), index=False)
 
-    # SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_test", today)
-    SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_train_half2", today)
+    SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_test", today)
+    # SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_train_half2", today)
     # SaveDataframeTonpArray(finalDf, save_dir, f"DoFGSM_train_half3", today)
 
 
