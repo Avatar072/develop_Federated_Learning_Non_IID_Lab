@@ -18,8 +18,10 @@ from sklearn.metrics import confusion_matrix
 from mytoolfunction import generatefolder, ChooseLoadNpArray,ChooseTrainDatastes, ParseCommandLineArgs,ChooseTestDataSet
 from mytoolfunction import ChooseUseModel, getStartorEndtime
 from collections import Counter
+from colorama import Fore, Back, Style, init
 ####################################################################################################
-
+# 初始化 colorama（Windows 系統中必須）
+init(autoreset=True)
 #CICIIDS2017 or Edge 62個特徵
 # labelCount = 15
 #CICIIDS2019
@@ -34,6 +36,8 @@ labelCount = 10
 # labelCount = 35
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
+current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
+print(Fore.YELLOW+Style.BRIGHT+f"當前時間: {current_time}")
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(torch.cuda.is_available())
 print(torch.__version__)
@@ -58,8 +62,8 @@ today = today.strftime("%Y%m%d")
 # 在single_AnalyseReportFolder產生天日期的資料夾
 # generatefolder(filepath, "\\single_AnalyseReportFolder")
 generatefolder(f"./single_AnalyseReportFolder/", today)
-generatefolder(f"./single_AnalyseReportFolder/{today}/", client_str)
-generatefolder(f"./single_AnalyseReportFolder/{today}/{client_str}/", Choose_method)
+generatefolder(f"./single_AnalyseReportFolder/{today}/{current_time}/", client_str)
+generatefolder(f"./single_AnalyseReportFolder/{today}/{current_time}/{client_str}/", Choose_method)
 getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}")
 
 # 20240324 after do chi-square
@@ -99,15 +103,17 @@ getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/{today}/{
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy", allow_pickle=True)            
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA
 # x_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.5_0.5/x_DoJSMA_test_20240721.npy")
 # y_test  = np.load(f"./Adversarial_Attack_Test/20240721_0.5_0.5/y_DoJSMA_test_20240721.npy")
 
-# x_test  = np.load(f"./Adversarial_Attack_Test/20240722_0.1_1.0/x_DoJSMA_test_20240722.npy")
-# y_test  = np.load(f"./Adversarial_Attack_Test/20240722_0.1_1.0/y_DoJSMA_test_20240722.npy")
+# 20241030 TONIoT after do labelencode and minmax  75 25分 JSMA
+x_test = np.load("D:\\develop_Federated_Learning_Non_IID_Lab\\Adversarial_Attack_Test\\20241030\\x_DoJSMA_test_theta_0.05_20241030.npy", allow_pickle=True)
+y_test = np.load("D:\\develop_Federated_Learning_Non_IID_Lab\\Adversarial_Attack_Test\\20241030\\y_DoJSMA_test_theta_0.05_20241030.npy", allow_pickle=True)   
+
 
 
 counter = Counter(y_test)

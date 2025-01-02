@@ -9,7 +9,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import OneHotEncoder
-from mytoolfunction import generatefolder,SaveDataToCsvfile,SaveDataframeTonpArray,CheckFileExists,spiltweakLabelbalance,printFeatureCountAndLabelCountInfo
+from mytoolfunction import generatefolder,SaveDataToCsvfile,SaveDataframeTonpArray,CheckFileExists,spiltweakLabelbalance,DominmaxforStringTypefeature
 
 # filepath = "D:\\ToN-IoT-Network\\TON_IoT Datasets\\UNSW-ToN-IoT"
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
@@ -648,4 +648,36 @@ def forBaseLineUseData(bool_Noniid):
 # forBaseLineUseData(False)
 # forBaseLineUseData(True)
 # DoSplitthrildClientForiid()
-DoRandomSplitthrildClientForiid()
+# DoRandomSplitthrildClientForiid()
+
+# 針對string type 做minmax
+def RedoTONIOTstringtypeMinMaxfortrainORtest(afterprocess_dataset,bool_tain_OR_test):
+    #除了Label外的特徵
+    crop_dataset=afterprocess_dataset.iloc[:,:-1]
+    columns_to_exclude = ['ts', 'src_ip', 'src_port', 'dst_ip', 'dst_port', 'proto']
+    testdata_removestring = crop_dataset[[col for col in crop_dataset.columns if col not in columns_to_exclude]]
+    undoScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col in columns_to_exclude]]
+    doScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col not in columns_to_exclude]]
+    # 補string type 做minmax
+    undoScalerdataset = DominmaxforStringTypefeature(undoScalerdataset)
+    
+    # 将排除的列名和选中的特征和 Label 合并为新的 DataFrame
+    afterminmax_dataset = pd.concat([undoScalerdataset,doScalerdataset,afterprocess_dataset['type']], axis = 1)
+
+    if bool_tain_OR_test:
+        afterminmax_dataset.to_csv(f"./data/dataset_AfterProcessed/TONIOT/20240523/train_ToN-IoT_AfterProcessed_DoLabelencode_ALLMinmax_train.csv", index=False)
+        SaveDataframeTonpArray(afterminmax_dataset, f"./data/dataset_AfterProcessed/TONIOT/{today}", f"ToN-IoT_train_dataframes_ALLMinmax", today)
+    else:
+        afterminmax_dataset.to_csv(f"./data/dataset_AfterProcessed/TONIOT/20240523//test_ToN-IoT_AfterProcessed_DoLabelencode_ALLMinmax_test.csv", index=False)
+        SaveDataframeTonpArray(afterminmax_dataset, f"./data/dataset_AfterProcessed/TONIOT/{today}", f"ToN-IoT_test_dataframes_ALLMinmax", today)
+
+    return afterprocess_dataset
+
+# 對已劃分好的tain和test的Strig type做完label ecnode後補做minmax
+# # 加载TONIOT test after do labelencode and minmax  75 25分
+afterprocess_dataset_train = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\train_ToN-IoT_dataframes_20240523.csv")
+afterprocess_dataset_test = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\20240523\\test_ToN-IoT_dataframes_20240523.csv")
+print("Dataset loaded.")    
+afterprocess_dataset_train = RedoTONIOTstringtypeMinMaxfortrainORtest(afterprocess_dataset_train,True)
+afterprocess_dataset_test = RedoTONIOTstringtypeMinMaxfortrainORtest(afterprocess_dataset_test,False)
+
