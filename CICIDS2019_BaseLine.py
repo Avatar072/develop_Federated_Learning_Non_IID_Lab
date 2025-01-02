@@ -55,24 +55,32 @@ print(Fore.YELLOW+Style.BRIGHT+f"Choose_method: {Choose_method}")
 # 載入train
 # 正常
 # Choose_Attacktype = "normal"
-# Choose_Attacktype = Choose_method
 # Attack_method = None
+
+
+# 防禦
+Choose_Attacktype = "Defense"
+# Attack_method = "FS"
+Attack_method = "MIX"
+# Attack_method = "FSandGDA"
+
 # Evasion_Attack
-Choose_Attacktype = "Evasion_Attack"
+# Choose_Attacktype = "Evasion_Attack"
 # Choose_Attacktype = Choose_method
 # Attack_method = "JSMA"
-Attack_method = "FGSM"
+# Attack_method = "FGSM"
 x_train, y_train, client_str =ChooseLoadTrainNpArray(Load_dataset, split_file, filepath, Choose_Attacktype, Attack_method)
 
 # 載入test
 # 正常
 # Evasion_Attack
-test_Choose_Attacktype = "normal"
-test_Attack_method = None
+# test_Choose_Attacktype = "normal"
+# test_Attack_method = None
+
 # Evasion_Attack
-# test_Choose_Attacktype = "Evasion_Attack"
+test_Choose_Attacktype = "Evasion_Attack"
 # test_Attack_method = "JSMA"
-# test_Attack_method = "FGSM"
+test_Attack_method = "FGSM"
 # test_Attack_method = "PGD"
 # test_Attack_method = "CandW"
 x_test,y_test = ChooseLoadTestNpArray('CICIDS2019','test', filepath, test_Choose_Attacktype, test_Attack_method)
