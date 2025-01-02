@@ -238,8 +238,11 @@ class TONIOTBaseLine_TrainLoader(TONIOTTrainLoaderBase):
                 print(Fore.GREEN+Style.BRIGHT+"Using TONIOT with Poisoning_Attack")
                 # 可在此加載相關的檔案
                 if (self.Attack_method == 'Backdoor'):
-                    x_train =  np.load("./Adversarial_Attack_Test/TONIOT/PoisoningAttackBackdoor/x_train_Poisoning_TONIOT.npy", allow_pickle=True)
-                    y_train =  np.load("./Adversarial_Attack_Test/TONIOT/PoisoningAttackBackdoor/y_train_Poisoning_TONIOT.npy", allow_pickle=True)
+                    # x_train =  np.load("./Adversarial_Attack_Test/TONIOT/PoisoningAttackBackdoor/x_train_Poisoning_TONIOT.npy", allow_pickle=True)
+                    # y_train =  np.load("./Adversarial_Attack_Test/TONIOT/PoisoningAttackBackdoor/y_train_Poisoning_TONIOT.npy", allow_pickle=True)
+                    # print(Fore.GREEN+Style.BRIGHT+"Debug: x_train shape:", x_train.shape if x_train is not None else None)
+                    x_train =  np.load("./Adversarial_Attack_Test/TONIOT/FGSM_Attack/20241229/tainFGSM/x_train_TONIOT_adversarial_samples_eps0.05.npy", allow_pickle=True)
+                    y_train =  np.load("./Adversarial_Attack_Test/TONIOT/FGSM_Attack/20241229/tainFGSM/y_train_TONIOT_adversarial_labels_eps0.05.npy", allow_pickle=True)
                     print(Fore.GREEN+Style.BRIGHT+"Debug: x_train shape:", x_train.shape if x_train is not None else None)
 
                 return x_train, y_train,self.client_str
