@@ -492,7 +492,10 @@ def main():
     # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2019\\20241119\\all_feature_minmax_baseline\\BaseLine\\BaseLine_After_local_train_model_bk.pth'
     
     # TON_IOT load model
-    model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\TONIOT\\20241229\\BaseLine_After_local_train_model_bk_20241229.pth'
+    # string feature 未做minmax
+    # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\TONIOT\\20241229\\BaseLine_After_local_train_model_StringNoMinmax_20241229.pth'
+    # all_feature_minmax
+    model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\TONIOT\\20241229\\BaseLine_After_local_train_model_ALLMinmax_20241229.pth'
 
     model.load_state_dict(torch.load(model_path))
 
@@ -515,22 +518,22 @@ def main():
     )
 
     # 設定 FGSM 攻擊
-    # epsilons = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
-    epsilons = [0.3]
+    epsilons = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
+    # epsilons = [0.3]
     for epsilon in epsilons:
         attack = FastGradientMethod(
             estimator=classifier,
             eps=epsilon
         )
         # test執行攻擊並評估
-        acc, successful_attacks = FGSM_attack_evaluation(
-            model, DEVICE, test_loader, classifier, attack, save_dir, epsilon
-        )
+        # acc, successful_attacks = FGSM_attack_evaluation(
+        #     model, DEVICE, test_loader, classifier, attack, save_dir, epsilon
+        # )
         
         # # train執行攻擊並評估
-        # acc, successful_attacks = FGSM_attack_evaluation(
-        #     model, DEVICE, train_loader, classifier, attack, save_dir, epsilon
-        # )
+        acc, successful_attacks = FGSM_attack_evaluation(
+            model, DEVICE, train_loader, classifier, attack, save_dir, epsilon
+        )
         # torch.save(model.state_dict(), os.path.join(save_dir, f"model_{epsilon}.pth"))
                 
         #紀錄結束時間

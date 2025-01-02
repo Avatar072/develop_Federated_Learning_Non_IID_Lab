@@ -29,8 +29,8 @@ init(autoreset=True)
 labelCount = 10
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
-# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-DEVICE = torch.device("cpu")
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# DEVICE = torch.device("cpu")
 print(torch.cuda.is_available())
 print(torch.__version__)
 torch.cuda.empty_cache()  # 清除 CUDA 快取
@@ -54,13 +54,17 @@ print(Fore.YELLOW+Style.BRIGHT+f"Choose_method: {Choose_method}")
 
 # 載入train
 # 正常
-Choose_Attacktype = "normal"
+# Choose_Attacktype = "normal"
 # Choose_Attacktype = Choose_method
-Attack_method = None
+# Attack_method = None
+
 # Evasion_Attack
 # Choose_Attacktype = "Evasion_Attack"
 # Choose_Attacktype = Choose_method
 # Attack_method = "JSMA"
+
+Choose_Attacktype = "Poisoning_Attack"
+Attack_method = "Backdoor"
 x_train, y_train, client_str  =ChooseLoadTrainNpArray(Load_dataset, split_file, filepath, Choose_Attacktype, Attack_method)
 
 # 載入test
@@ -80,7 +84,7 @@ x_test,y_test = ChooseLoadTestNpArray('TONIOT','test', filepath, test_Choose_Att
 # x_train, y_train, client_str = ChooseTrainDatastes(filepath, file, Choose_method)   
 print("特徵數",x_train.shape[1])
 print(y_train)
-# print(client_str)
+print(client_str)
 counter = Counter(y_train)
 print("train筆數",counter)
 today = datetime.date.today()
@@ -294,6 +298,7 @@ getStartorEndtime("endtime",end_IDS,f"./single_AnalyseReportFolder/TONIOT/{today
 
 # 評估模型
 test_accuracy = test(net, testloader, start_IDS, client_str,True)
+
 # 在训练或测试结束后，保存模型
 torch.save(net.state_dict(), f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/{Choose_method}/BaseLine_After_local_train_model.pth")
 
