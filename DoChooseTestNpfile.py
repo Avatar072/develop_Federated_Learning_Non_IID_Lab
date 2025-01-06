@@ -136,7 +136,43 @@ class TONIOTTestLoader:
         else:
             raise ValueError("Invalid Choose_Attacktype or split_file")
 
+class CICIDS2018TestLoader:
+    def __init__(self, filepath,Attack_method):
+        self.filepath = filepath
+        self.Attack_method = Attack_method
 
+    def load_test_data(self, Choose_Attacktype, split_file):
+        if split_file == 'test' and Choose_Attacktype == 'normal':
+            # 使用不同日期或特徵選擇方式的檔案
+            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2018 test data with normal attack type")
+            # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do labelencode and minmax")
+            # 20250106 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分
+            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_20250106.npy", allow_pickle=True)
+            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_20250106.npy", allow_pickle=True)
+            # 20250106 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do PCA
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do labelencode and minmax and PCA")
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_AfterPCA79_20250106.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_AfterPCA79_20250106.npy", allow_pickle=True)
+            return x_test, y_test
+        elif split_file == 'test' and Choose_Attacktype == 'Evasion_Attack':
+            print("Using CICIDS2018 with Evasion_Attack")
+            # if (self.Attack_method == 'JSMA'):
+            if (self.Attack_method == 'FGSM'):
+            # 20241116 CIC-IDS2019 after do labelencode and minmax 75 25分 DO FGSM
+                print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do FGSM attack")
+                
+            ################################# ALL feature minmax
+            # if (self.Attack_method == 'PGD'):
+            # if (self.Attack_method == 'CandW'):
+            # 可在此加載相關的檔案
+            return x_test, y_test
+        elif split_file == 'test' and Choose_Attacktype == 'Poisoning_Attack':
+            print("Using CICIDS2018 with Ponsion_Attack")
+            # 可在此加載相關的檔案
+            return None, None
+        else:
+            raise ValueError("Invalid Choose_Attacktype or split_file")
 '''
 ChooseLoadTestNpArray 函數根據 choose_datasets 選擇適當的類別來加載測試數據。
 每個類別的 load_test_data 方法包含不同的檔案選項和攻擊類型 (normal、Evasion_Attack、Poisoning_Attack)。
@@ -145,6 +181,8 @@ ChooseLoadTestNpArray 函數根據 choose_datasets 選擇適當的類別來加�
 def ChooseLoadTestNpArray(choose_datasets,split_file, filepath, Choose_Attacktype,Attack_method):
     if choose_datasets == "CICIDS2019":
         loader = CICIDS2019TestLoader(filepath,Attack_method)
+    elif choose_datasets == "CICIDS2018":
+        loader = CICIDS2018TestLoader(filepath,Attack_method)
     elif choose_datasets == "TONIOT":
         loader = TONIOTTestLoader(filepath,Attack_method)
     else:
