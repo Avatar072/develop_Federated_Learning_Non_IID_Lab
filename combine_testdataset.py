@@ -11,6 +11,9 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import OneHotEncoder
 from collections import Counter
 from mytoolfunction import generatefolder,SaveDataToCsvfile,SaveDataframeTonpArray,CheckFileExists,splitdatasetbalancehalf,printFeatureCountAndLabelCountInfo
+from colorama import Fore, Back, Style, init
+# 初始化 colorama（Windows 系統中必須）
+init(autoreset=True)
 
 # filepath = "D:\\ToN-IoT-Network\\TON_IoT Datasets\\UNSW-ToN-IoT"
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
@@ -19,9 +22,12 @@ today = today.strftime("%Y%m%d")
 # 在D:\\Labtest20230911\\data\\dataset_original產生天日期的資料夾
 # generatefolder(filepath + "\\", "data")
 generatefolder(filepath + "\\", "dataset_AfterProcessed")
-generatefolder(filepath + "\\dataset_AfterProcessed\\", "TONIOT_test_and_CICIDS2017_test_combine")
-generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\", today)
-generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\", today)
+# generatefolder(filepath + "\\dataset_AfterProcessed\\", "TONIOT_test_and_CICIDS2017_test_combine")
+# generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\", today)
+# generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\", today)
+
+generatefolder(filepath + "\\dataset_AfterProcessed\\", "CICIDS2017_and_CICIDS2018_CICIDS2019_test")
+generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\", today)
 
 def clearDirtyData(df):
     # 将每个列中的 "-" 替换为 NaN
@@ -88,9 +94,29 @@ def ReplaceMorethanTenthousandQuantity(df):
 # cicids2017_ALLDay_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/x_Resplit_test_20240506.npy")
 # cicids2017_ALLDay_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/y_Resplit_test_20240506.npy")
 
+# # # 20240502 non iid us BaseLine npfile CIC-IDS2017 after do labelencode and minmax chi_square45 75 25分
+# cicids2017_ALLDay_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/x_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy")
+# cicids2017_ALLDay_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/y_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy")
+
 # # 20240502 non iid us BaseLine npfile CIC-IDS2017 after do labelencode and minmax chi_square45 75 25分
-cicids2017_ALLDay_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/x_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy")
-cicids2017_ALLDay_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/y_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy")
+# cicids2017_ALLDay_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/x_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy")
+# cicids2017_ALLDay_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/y_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy")
+
+# 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Non-iid Do PCA
+print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"test with normal After Do labelencode and minmax")
+cicids2017_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_AfterPCA79_20250113.npy", allow_pickle=True)
+cicids2017_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
+
+# 20250113 CIC-IDS2018 after do labelencode all featrue minmax 75 25分 Non-iid Do PCA
+print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"test with normal After Do labelencode and minmax")
+cicids2018_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_AfterPCA79_20250113.npy", allow_pickle=True)
+cicids2018_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
+
+# 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Non-iid Do PCA
+print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"test with normal After Do labelencode and minmax")
+cicids2019_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\x_01_12_test_AfterPCA79_20250113.npy", allow_pickle=True)
+cicids2019_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\y_01_12_test_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
+                      
 
 # # 载入Monday_and_Firday test chi-square
 # cicids2017_Monday_and_Firday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/x_Monday_and_Firday_test_AfterPCA77_20240317.npy")
@@ -106,8 +132,8 @@ cicids2017_ALLDay_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/AL
 
 # 20240523 non iid us BaseLine npfile TONIoT after do labelencode and minmax  75 25分
 #因non iid所以 y_test要使用ChangeLabelEncode
-TONIOT_x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_test_ToN-IoT_20240523.npy")
-TONIOT_y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_TONIOT_test_After_ChangeLabelEncode_for_Noniid.npy")
+# TONIOT_x_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/x_test_ToN-IoT_20240523.npy")
+# TONIOT_y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_TONIOT_test_After_ChangeLabelEncode_for_Noniid.npy")
 
 
 # 载入cicids2019 test minmax normal
@@ -118,8 +144,8 @@ TONIOT_y_test = np.load(f"./data/dataset_AfterProcessed/TONIOT/y_TONIOT_test_Aft
 
 # 20240520  non iid client3 use EdgeIIoT after do labelencode and minmax chi_square45 75 25分
  #因non iid所以 y_test要使用ChangeLabelEncode
-EdgeIIOT_x_test = np.load(f"./data/dataset_AfterProcessed/EdgeIIoT/x_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy")
-EdgeIIOT_y_test = np.load(f"./data/dataset_AfterProcessed/EdgeIIoT/y_EdgeIIoT_test_After_ChangeLabelEncode_for_Noniid.npy")
+# EdgeIIOT_x_test = np.load(f"./data/dataset_AfterProcessed/EdgeIIoT/x_EdgeIIoT_test_AfterFeatureSelect44_20240520.npy")
+# EdgeIIOT_y_test = np.load(f"./data/dataset_AfterProcessed/EdgeIIoT/y_EdgeIIoT_test_After_ChangeLabelEncode_for_Noniid.npy")
 
 # 加载 .npy 文件
 # 载入Monday_and_Firday test PCA
@@ -165,15 +191,24 @@ EdgeIIOT_y_test = np.load(f"./data/dataset_AfterProcessed/EdgeIIoT/y_EdgeIIoT_te
 #                            TONIOT_y_test), axis=0)
 
 
+# merged_x = np.concatenate((cicids2017_ALLDay_x_test,
+#                            TONIOT_x_test,
+#                            EdgeIIOT_x_test), axis=0)
+
+# # 合并 y_test 和 y1_test
+# merged_y = np.concatenate((cicids2017_ALLDay_y_test,
+#                            TONIOT_y_test,
+#                            EdgeIIOT_y_test), axis=0)
+
+
 merged_x = np.concatenate((cicids2017_ALLDay_x_test,
-                           TONIOT_x_test,
-                           EdgeIIOT_x_test), axis=0)
+                           cicids2018_ALLDay_x_test,
+                           cicids2019_ALLDay_x_test), axis=0)
 
 # 合并 y_test 和 y1_test
 merged_y = np.concatenate((cicids2017_ALLDay_y_test,
-                           TONIOT_y_test,
-                           EdgeIIOT_y_test), axis=0)
-
+                           cicids2018_ALLDay_y_test,
+                           cicids2019_ALLDay_y_test), axis=0)
 # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\TONIOT_test_and_CICIDS2017_test_combine\20240110
 # 保存合并后的数组
 # np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_x_add_toniot.npy", merged_x)
@@ -190,8 +225,8 @@ merged_y = np.concatenate((cicids2017_ALLDay_y_test,
 # np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_x_cicids2017_toniot_Chi_square_45_change_ts.npy", merged_x)
 # np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_y_cicids2017_toniot_Chi_square_45_change_ts.npy", merged_y)
 
-np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine/{today}/merged_x_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", merged_x)
-np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine/{today}/merged_y_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", merged_y)
+np.save(f"./data/dataset_AfterProcessed/CICIDS2017_and_CICIDS2018_CICIDS2019_test/{today}/merged_x_Non_IID_ALL_test.npy", merged_x)
+np.save(f"./data/dataset_AfterProcessed/CICIDS2017_and_CICIDS2018_CICIDS2019_test/{today}/merged_y_Non_IID_ALL_test.npy", merged_y)
 
 print("按行合并 x 的结果：")
 print(merged_x)
@@ -208,7 +243,7 @@ merged_df = pd.DataFrame(data=np.column_stack((merged_x, merged_y)), columns=[f'
 # merged_df.to_csv(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/TONIOT_test_and_CICIDS2017_test_merged_change_ip.csv", index=False)
 # merged_df.to_csv(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/TONIOT_test_and_CICIDS2017_and_CICIDS2019_test_merged.csv", index=False)
 
-merged_df.to_csv(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine/{today}/TONIOT_test_and_CICIDS2017_and_EdgeIIoT_test_merged.csv", index=False)
+merged_df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017_and_CICIDS2018_CICIDS2019_test/{today}/CICIDS2017_and_CICIDS2018_CICIDS2019_test_merged.csv", index=False)
 
 # # 将 NumPy 数组转换为 Pandas DataFrame
 # merged_df = pd.DataFrame(data=np.column_stack((merged_x, merged_y)), columns=[f'feature_{i}' for i in range(merged_x.shape[1])] + ['Label'])

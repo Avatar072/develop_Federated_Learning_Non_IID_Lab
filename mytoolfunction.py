@@ -167,7 +167,7 @@ def ParseCommandLineArgs(commands):
 # print(ParseCommandLineArgs(['dataset', 'epochs', 'label']))
 
 ### Choose Load np array
-def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
+def ChooseLoadNpArray(filepath,split_file, Choose_method):
 
     if split_file == 'total_train':
         print("Training with total_train")
@@ -206,12 +206,12 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
 
-            if choose_datasets == "CICIDS2019":
+            # if choose_datasets == "CICIDS2019":
                 # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
                 # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
                 # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
-                x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
-                y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+                # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
+                # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
                 # 20241030 CIC-IDS2019 after do labelencode and minmax 75 25分 do GDA 高斯資料增強
                 # x_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/x_CICIDS2019_train_augmented.npy", allow_pickle=True)
                 # y_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/y_CICIDS2019_train_augmented.npy", allow_pickle=True)
@@ -220,12 +220,12 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_20240519.npy", allow_pickle=True)    
             
             # 20240520 EdgeIIoT after do labelencode and minmax chi_square45 75 25分
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
-            if choose_datasets == "TONIOT":
-            # 20240523 TONIoT after do labelencode and minmax  75 25分
-                x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
-                y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
+            # if choose_datasets == "TONIOT":
+            # # 20240523 TONIoT after do labelencode and minmax  75 25分
+            #     x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
+            #     y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
 
         elif (Choose_method == 'SMOTE'):
             # x_train = np.load(filepath + "x_total_train_SMOTE_ALL_Label.npy", allow_pickle=True)
@@ -275,7 +275,7 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
         client_str = "BaseLine"
         print(Choose_method)
 
-    elif split_file == 'train_half1':
+    elif split_file == 'client1_train':
         if (Choose_method == 'normal'):
             # # 20240110 non iid client1 use cicids2017 after chi-square
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\x_train_CICIDS2017_20240110.npy", allow_pickle=True)
@@ -346,9 +346,13 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half1_20240523.npy", allow_pickle=True)  
 
             # 20240523 client1 use TONIoT after do labelencode and minmax  隨機劃分75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half1_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half1_20240523.npy", allow_pickle=True)  
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half1_20240523.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half1_20240523.npy", allow_pickle=True)  
 
+            # 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 do PCA Non-iid 
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            
 
         elif (Choose_method == 'SMOTE'):
             # # # # 20240317 Chi-square 45 SMOTE  K=5         
@@ -392,7 +396,7 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
         print("train_half1 y_train 的形狀:", y_train.shape)
         client_str = "client1"
         print("使用 train_half1 進行訓練")
-    elif split_file == 'train_half2':
+    elif split_file == 'client2_train':
         if (Choose_method == 'normal'):
             # # 20240317 non iid client3 use TONIOT
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240317.npy", allow_pickle=True)
@@ -437,10 +441,13 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half2_20240523.npy", allow_pickle=True)  
 
             # 20240523 client2 use TONIoT after do labelencode and minmax  隨機劃分75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half2_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half2_20240523.npy", allow_pickle=True)  
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half2_20240523.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half2_20240523.npy", allow_pickle=True)  
 
-
+            # 20250113 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do PCA Non-iid
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            
         elif (Choose_method == 'SMOTE'):
             # # # 20240317 Chi-square 45 SMOTE  K=5          
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_train_half2_SMOTE_Tuesday_and_Wednesday_and_Thursday_ALL_Label_20240317.npy", allow_pickle=True)
@@ -471,7 +478,7 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
         client_str = "client2"
         print("使用 train_half2 進行訓練")
 
-    elif split_file == 'train_half3':
+    elif split_file == 'client3_train':
         if (Choose_method == 'normal'):
             # # 20240110 non iid client2 use TONIOT
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240110.npy", allow_pickle=True)
@@ -521,13 +528,18 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240725.npy", allow_pickle=True)  
 
             # 20240523 client3 use TONIoT after do labelencode and minmax  隨機劃分75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)  
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)  
 
             # # 20240523 client3 use TONIoT after do labelencode and minmax  隨機劃分75 25分 DoJSMA 0.0.5 0.02
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)  
-
+            
+            # 20250113 CIC-IDS2019 after do labelencode  and all featrue minmax 75 25分 DoPCA Non-iid
+            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do pca" +f"{split_file} with normal attack type")
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            
 
         elif (Choose_method == 'SMOTE'):
             # # 20240324 Chi-square 45 SMOTE  K=5          

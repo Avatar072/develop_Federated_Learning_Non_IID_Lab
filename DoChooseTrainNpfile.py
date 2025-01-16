@@ -29,8 +29,14 @@ class CICIDS2019BaseLine_TrainLoader:
             # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
             # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
             # 20241119 CIC-IDS2019 after do labelencode and all featrue minmax 75 25分
-            x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
-            y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
+            # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
+            # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_dataframes_ALLMinmax_20241119.npy", allow_pickle=True)
+            
+            # 20250113 CIC-IDS2019 after do labelencode do pca and all featrue minmax 75 25分
+            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do pca" +f"{split_file} with normal attack type")
+            x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\x_01_12_train_AfterPCA79_20250113.npy", allow_pickle=True)
+            y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\y_01_12_train_AfterPCA79_20250113.npy", allow_pickle=True)
+            
             # 20241030 CIC-IDS2019 after do labelencode and minmax 75 25分 do GDA 高斯資料增強
             # x_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/x_CICIDS2019_train_augmented.npy", allow_pickle=True)
             # y_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/y_CICIDS2019_train_augmented.npy", allow_pickle=True)
@@ -175,12 +181,12 @@ class CICIDS2018BaseLine_TrainLoader:
             # 使用不同日期或特徵選擇方式的檔案
             print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal attack type")
             # 20250106 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分
-            x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_20250106.npy", allow_pickle=True)
-            y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_20250106.npy", allow_pickle=True)
-            # 20250106 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do PCA
-            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do labelencode and minmax and PCA")
-            # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_AfterPCA79_20250106.npy", allow_pickle=True)
-            # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_AfterPCA79_20250106.npy", allow_pickle=True)
+            # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_20250106.npy", allow_pickle=True)
+            # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_20250106.npy", allow_pickle=True)
+            # 20250113 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do PCA
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do labelencode and minmax and PCA")
+            x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_AfterPCA79_20250113.npy", allow_pickle=True)
+            y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_AfterPCA79_20250113.npy", allow_pickle=True)
             
             return x_train, y_train,self.client_str
         elif split_file == 'baseLine_train' and Choose_Attacktype == 'Defense':
@@ -209,13 +215,57 @@ class CICIDS2018BaseLine_TrainLoader:
             print("Using CICIDS2018 with Ponsion_Attack")
             # 可在此加載相關的檔案
             print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do Poisoning_Attack")
-            x_train = np.load(f"./Adversarial_Attack_Test/CICIDS2018/PoisoningAttackBackdoor/20241202/x_train_Poisoning_CICIDS2018.npy", allow_pickle=True)
-            y_train = np.load(f"./Adversarial_Attack_Test/CICIDS2018/PoisoningAttackBackdoor/20241202/y_train_Poisoning_CICIDS2018.npy", allow_pickle=True)
-
             return x_train, y_train,self.client_str
         else:
             raise ValueError("Invalid Choose_Attacktype or split_file")
 
+class CICIDS2017BaseLine_TrainLoader:
+    client_str = 'BaseLine'
+    def __init__(self, filepath,Attack_method):
+        self.filepath = filepath
+        self.Attack_method = Attack_method
+
+    def load_train_data(self, Choose_Attacktype, split_file):
+        if split_file=='baseLine_train' and Choose_Attacktype =='normal':
+            # 使用不同日期或特徵選擇方式的檔案
+            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal attack type")
+            # 20250107 CIC-IDS2017 after do labelencode and all featrue minmax 75 25分
+            # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_train_20250107.npy", allow_pickle=True)
+            # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_train_20250107.npy", allow_pickle=True)
+            # 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Do PCA
+            x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_train_AfterPCA79_20250113.npy", allow_pickle=True)
+            y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_train_AfterPCA79_20250113.npy", allow_pickle=True)
+            return x_train, y_train,self.client_str
+        elif split_file == 'baseLine_train' and Choose_Attacktype == 'Defense':
+            print("Using CICIDS2017 with Defense")
+            if (self.Attack_method == 'GDA'):
+                print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do  GaussianAugmentation denfense")
+            elif (self.Attack_method == 'FS'):
+                print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do  FS denfense")
+            elif (self.Attack_method == 'MIX'):
+                print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do  MIX denfense")
+            elif (self.Attack_method == 'FSandGDA'):
+                print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do  FSandGDA denfense")
+            # 可在此加載相關的檔案
+            return x_train, y_train,self.client_str
+        elif split_file == 'baseLine_train' and Choose_Attacktype == 'Evasion_Attack':
+            print("Using CICIDS2017 with Evasion_Attack")
+            # if (self.Attack_method == 'JSMA'):
+            if (self.Attack_method == 'FGSM'):
+                print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do  GaussianAugmentation denfense")
+
+            # if (self.Attack_method == 'PGD'):
+            # if (self.Attack_method == 'CandW'):
+            # 可在此加載相關的檔案
+            return x_train, y_train,self.client_str
+        elif split_file == 'baseLine_train' and Choose_Attacktype == 'Poisoning_Attack':
+            print("Using CICIDS2017 with Ponsion_Attack")
+            # 可在此加載相關的檔案
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do Poisoning_Attack")
+            return x_train, y_train,self.client_str
+        else:
+            raise ValueError("Invalid Choose_Attacktype or split_file")
+        
 class TONIOTTrainLoaderBase:
     def __init__(self, filepath,Attack_method):
         self.filepath = filepath
@@ -410,6 +460,8 @@ def ChooseLoadTrainNpArray(choose_datasets,split_file, filepath, Choose_Attackty
         loader = CICIDS2019BaseLine_TrainLoader(filepath,Attack_method)
     elif choose_datasets == "CICIDS2018":
         loader = CICIDS2018BaseLine_TrainLoader(filepath,Attack_method)
+    elif choose_datasets == "CICIDS2017":
+        loader = CICIDS2017BaseLine_TrainLoader(filepath,Attack_method)
     elif choose_datasets == "TONIOT":
         if split_file =="baseLine_train": 
             loader = TONIOTBaseLine_TrainLoader(filepath,Attack_method)
