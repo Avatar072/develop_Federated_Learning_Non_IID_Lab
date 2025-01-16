@@ -54,8 +54,8 @@ print(Fore.YELLOW+Style.BRIGHT+f"Choose_method: {Choose_method}")
 
 # 載入train
 # 正常
-# Choose_Attacktype = "normal"
-# Attack_method = None
+Choose_Attacktype = "normal"
+Attack_method = None
 
 
 # 防禦
@@ -72,8 +72,8 @@ print(Fore.YELLOW+Style.BRIGHT+f"Choose_method: {Choose_method}")
 # Attack_method = "FGSM"
 
 # Poisoning_Attack
-Choose_Attacktype = "Poisoning_Attack"
-Attack_method = None
+# Choose_Attacktype = "Poisoning_Attack"
+# Attack_method = None
 x_train, y_train, client_str =ChooseLoadTrainNpArray(Load_dataset, split_file, filepath, Choose_Attacktype, Attack_method)
 
 # 載入test
