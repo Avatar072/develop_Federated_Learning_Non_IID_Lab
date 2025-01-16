@@ -329,19 +329,18 @@ def DoMinMaxALLFeature_OR_excpetStringType(df, bool_excpet_Strtype):
         doScalerdataset.iloc[:, :] = X
         # 將排除的列名和選中的特徵和 Label 合併為新的 DataFrame
         df = pd.concat([undoScalerdataset,doScalerdataset,df['Label']], axis = 1)
-    
     else:
         # 全特徵都做minmax
-        X = df
+        X = crop_dataset
         X=X.values
         # scaler = preprocessing.StandardScaler() #資料標準化
         scaler = MinMaxScaler(feature_range=(0, 1)).fit(X)
         scaler.fit(X)
         X=scaler.transform(X)
         # 將縮放後的值更新到 doScalerdataset 中
-        df.iloc[:, :] = X
+        crop_dataset.iloc[:, :] = X
         # 將排除的列名和選中的特徵和 Label 合併為新的 DataFrame
-        df = pd.concat([df,df['Label']], axis = 1)
+        df = pd.concat([crop_dataset,df['Label']], axis = 1)
     return df
 
 def DoMinMaxAndLabelEncoding(afterprocess_dataset,choose_merge_days,bool_doencode):
@@ -647,7 +646,7 @@ def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noni
 
 
 
-
+# do PCA to all feature or excpetStringType
 def DoPCA_ALLFeature_OR_excpetStringType(df,number_of_components ,bool_excpet_Strtype):
 
     # number_of_components=20
@@ -681,7 +680,7 @@ def DoPCA_ALLFeature_OR_excpetStringType(df,number_of_components ,bool_excpet_St
     else:
         str_filename = "ALLMINMAX" 
         # 全特徵都做minmax
-        X = df
+        X = crop_dataset
         pca = PCA(n_components=number_of_components)
         columns_array=[]
         for i in range (number_of_components):
@@ -705,7 +704,7 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
     # False為全特徵都做PCA
     df = DoPCA_ALLFeature_OR_excpetStringType(df,number_of_components ,False)
     # df = DoPCA_ALLFeature_OR_excpetStringType(df,number_of_components ,True)
-    train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示將數據集分成測試集的比例為20%
     # printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
     if bool_Noniid !=True:
         if choose_merge_days =="csv_data":

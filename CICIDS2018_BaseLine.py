@@ -258,8 +258,8 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         
         # 固定子圖參數
         plt.subplots_adjust(
-            left=0.19,    # 左邊界
-            bottom=0.167,  # 下邊界
+            left=0.267,    # 左邊界
+            bottom=0.24,  # 下邊界
             right=1.0,     # 右邊界
             top=0.88,      # 上邊界
             wspace=0.207,  # 子圖間的寬度間隔
