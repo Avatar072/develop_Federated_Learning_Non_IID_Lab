@@ -47,7 +47,6 @@ init(autoreset=True)
 
 # CICIDS2017、CICIDS2018、CICIDS2019 聯集
 labelCount = 27
-
 # CICIIDS2017、TONIOT、EdgwIIOT 聯集
 # labelCount = 31
 
@@ -67,9 +66,9 @@ torch.cuda.get_device_name(0)
 # 返回当前设备索引；
 torch.cuda.current_device()
 print(f"DEVICE: {DEVICE}")
-#python client.py --dataset_split client1_train --epochs 50 --method normal
-#python client.py --dataset_split client2_train --epochs 50 --method normal
-#python client.py --dataset_split client3_train --epochs 50 --method normal
+#python client_Noniid.py --dataset_split client1_train --epochs 50 --method normal
+#python client_Noniid.py --dataset_split client2_train --epochs 50 --method normal
+#python client_Noniid.py --dataset_split client3_train --epochs 50 --method normal
 file, num_epochs,Choose_method = ParseCommandLineArgs(["dataset_split", "epochs", "method"])
 print(f"Dataset: {file}")
 print(f"Number of epochs: {num_epochs}")
@@ -87,80 +86,36 @@ generatefolder(f"./FL_AnalyseReportfolder/{today}/", client_str)
 generatefolder(f"./FL_AnalyseReportfolder/{today}/{client_str}/", Choose_method)
 getStartorEndtime("starttime",start_IDS,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}")
 
+if client_str == "client1":
+    labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14]
+    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_AfterPCA79_20250113.npy", allow_pickle=True)
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
+    # labelCount = 15
+    counter = Counter(y_test)
+    print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)
 
-# # 20240316 after do labelencode and minmax
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y.npy", allow_pickle=True)
-# # 20240317 after do labelencode and minmax add toniot
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_add_toniot.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_add_toniot.npy", allow_pickle=True)
-# 20240317 after do labelencode and minmax add toniot remove all ip port
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_remove_ip_port.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_remove_ip_port.npy", allow_pickle=True)
-# 20240317 after do labelencode and minmax tonniot add cicids2017 39 feature then PCA 
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_PCA.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_PCA.npy", allow_pickle=True)
-# # 20240317 after do labelencode and minmax cicids2017 PCA 38 
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_PCA_38.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_PCA_38.npy", allow_pickle=True)
-# 20240323 after do labelencode and minmax cicids2017 ALLDay and toniot  Chi_square_45
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_Chi_square_45.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_Chi_square_45.npy", allow_pickle=True)
-# 20240319 after do labelencode and minmax cicids2017 ALLDay and toniot  Chi_square_45
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_Chi_square_45_change_ip_encode.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_Chi_square_45_change_ip_encode.npy", allow_pickle=True)
-# 20240323 after do labelencode and minmax cicids2017 ALLDay and toniot  Chi_square_45 change ts change ip
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_Chi_square_45_change_ip.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_Chi_square_45_change_ip.npy", allow_pickle=True)
+if client_str == "client2":
+    labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 13]
+    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_AfterPCA79_20250113.npy", allow_pickle=True)
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
+    # labelCount = 15
+    counter = Counter(y_test)
+    print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)
+if client_str == "client3":
+    labels_to_calculate = [0, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+    print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"test with normal After Do labelencode and minmax")
+    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\x_01_12_test_AfterPCA79_20250113.npy", allow_pickle=True)
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\y_01_12_test_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
+    # labelCount = 12
+    counter = Counter(y_test)
+    print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)                    
 
-# 20240428 after do labelencode and minmax cicids2017 ALLDay and toniot  Chi_square_45
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_cicids2019_Chi_square_45.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_cicids2019_Chi_square_45.npy", allow_pickle=True)
+# 20240523 CICIDS2017 和 CICIDS2018 和CICIDS2019 after do labelencode and minmax  75 25分
+global_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\merged_x_Non_IID_ALL_test.npy", allow_pickle=True)
+global_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\merged_y_Non_IID_ALL_test.npy", allow_pickle=True)   
 
-
-# 20240502 after do labelencode and minmax cicids2017 ALLDay  iid
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\x_ALLDay_test_20240502.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\\CICIDS2017\\ALLday\\y_ALLDay_test_20240502.npy", allow_pickle=True)
-
-# 20240502 CIC-IDS2019 after do labelencode and minmax iid
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_20240502.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
-
-# 20240506 after do labelencode and minmax cicids2017 ALLDay and toniot  cicids2019 Chi_square_45
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_x_cicids2017_toniot_cicids2019_Chi_square_45_change_ip.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\merged_y_cicids2017_toniot_cicids2019_Chi_square_45_change_ip.npy", allow_pickle=True)
-
-# 20240507 after do labelencode and minmax Edge iid
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\x_Resplit_test_20240507.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\Edge\\y_Resplit_test_20240507.npy", allow_pickle=True)
-
-# 20240507 after do labelencode and minmax Kub iid
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\x_Resplit_test_20240507.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\Kub\\y_Resplit_test_20240507.npy", allow_pickle=True)
-
-# # 20240507 after do labelencode and minmax Wustl iid
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\x_Resplit_test_20240507.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\Wustl\\y_Resplit_test_20240507.npy", allow_pickle=True)
-
-# 20240523 after do labelencode and minmax cicids2017 ALLDay and toniot EdgwIIoT Chi_square_45
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\merged_x_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\merged_y_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", allow_pickle=True)
-
-# 20240523 TONIoT after do labelencode and minmax  75 25分
-# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
-
-
-# 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA attack for FL Client3
-# x_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/x_DoJSMA_test_20240722.npy")
-# y_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/y_DoJSMA_test_20240722.npy")
-
-# 20240523 TONIoT after do labelencode and minmax  75 25分
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\merged_x_Non_IID_ALL_test.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\merged_y_Non_IID_ALL_test.npy", allow_pickle=True)   
-
-counter = Counter(y_test)
-print("test",counter)
+counter = Counter(global_y_test)
+print(Fore.GREEN+Style.BRIGHT+client_str+"\tglobal test筆數",counter)
 
 x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
 y_train = torch.from_numpy(y_train).type(torch.LongTensor)
@@ -168,11 +123,17 @@ y_train = torch.from_numpy(y_train).type(torch.LongTensor)
 x_test = torch.from_numpy(x_test).type(torch.FloatTensor)
 y_test = torch.from_numpy(y_test).type(torch.LongTensor)
 
+global_x_test = torch.from_numpy(global_x_test).type(torch.FloatTensor)
+global_y_test = torch.from_numpy(global_y_test).type(torch.LongTensor)
+
 # 将测试数据移动到GPU上
 x_train = x_train.to(DEVICE)
 y_train = y_train.to(DEVICE)
 x_test = x_test.to(DEVICE)
 y_test = y_test.to(DEVICE)
+
+global_x_test = global_x_test.to(DEVICE)
+global_y_test = global_y_test.to(DEVICE)
 
 print("Minimum label value:", min(y_train))
 print("Maximum label value:", max(y_train))
@@ -198,23 +159,17 @@ def train(net, trainloader, epochs):
             loss.backward()
             optimizer.step()
             ###訓練的過程    
-        test_accuracy = test(net, testloader, start_IDS, client_str, "local_test",False)
+        test_accuracy = test(net, local_testloader, start_IDS, client_str, "local_test",False)
         print(f"訓練週期 [{epoch+1}/{epochs}] - 測試準確度: {test_accuracy:.4f}")
         
     return test_accuracy
 
 def test(net, testloader, start_time, client_str, str_globalOrlocal,bool_plot_confusion_matrix):
-    print("test")
+    print(Fore.GREEN+Style.BRIGHT+"進入test function")
     correct = 0
     total = 0
     loss = 0  # 初始化损失值为0
     ave_loss = 0
-    # with torch.no_grad():
-    #     for images, labels in tqdm(testloader):
-    #         output = net(images)
-    #         _, predicted = torch.max(output.data, 1)
-    #         total += labels.size(0)
-    #         correct += (predicted == labels).sum().item()
     # 迭代测试数据集
     with torch.no_grad():
         criterion = nn.CrossEntropyLoss()
@@ -227,7 +182,7 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal,bool_plot_co
             # 计算损失
             loss += criterion(outputs, labels).item()
         
-         # 计算预测的类别
+            # 计算预测的类别
             _, predicted = torch.max(outputs.data, 1)
         
             # 统计总样本数和正确分类的样本数
@@ -245,7 +200,6 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal,bool_plot_co
             acc = classification_report(y_true, y_pred, digits=4, output_dict=True)
             # print("correct:\n",correct)
             # print("total:\n",total)
-            accuracy = correct / total
             #print("acc:\n",acc)
             # 将每个类别的召回率写入 "recall-baseline.csv" 文件
             # RecordRecall是用来存储每个类别的召回率（recall）值的元组
@@ -253,35 +207,32 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal,bool_plot_co
             #RecordRecall = []
             RecordRecall = ()
             RecordAccuracy = ()
-            # labelCount = len(np.unique(y_train))# label數量要記得改
-            print("labelCount:\n",labelCount)
 
-            for i in range(labelCount):
-                RecordRecall = RecordRecall + (acc[str(i)]['recall'],)
-                #RecordRecall.append(acc[str(i)]['recall'])    
-            RecordAccuracy = RecordAccuracy + (accuracy, time.time() - start_time,)
-          
+            # local test只算各client各自持有的label的recall or 
+            # global model用各client各自持有的local test測試的recall
 
+            if str_globalOrlocal =="local_test" or str_globalOrlocal =="global_model_local_test":
+                for label in labels_to_calculate:
+                    label_str = str(label)  # 將標籤轉為字串
+                    if label_str in acc:  # 檢查標籤是否存在於分類報告中
+                        RecordRecall = RecordRecall + (acc[label_str]['recall'],)
+
+            # global testn算所有的Label
+            elif str_globalOrlocal =="global_test":
+                for i in range(labelCount):
+                    RecordRecall = RecordRecall + (acc[str(i)]['recall'],)
+            
+            
+            RecordAccuracy = RecordAccuracy + (correct / total, time.time() - start_time,)
             RecordRecall = str(RecordRecall)[1:-1]
 
             # 标志来跟踪是否已经添加了标题行
             header_written = False
             with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/recall-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
-                # file.write(str(RecordRecall))
-                # file.writelines("\n")
-                # 添加标题行
-                #file.write("Label," + ",".join([str(i) for i in range(labelCount)]) + "\n")
-                # 写入Recall数据
-                # file.write(f"{client_str}_Recall," + str(RecordRecall) + "\n")
                 file.write(f"{RecordRecall}\n")
         
             # 将总体准确率和其他信息写入 "accuracy-baseline.csv" 文件
             with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
-                # file.write(str(RecordAccuracy))
-                # file.writelines("\n")
-                # 添加标题行
-                # file.write(f"{client_str}_Accuracy,Time\n")
-                # 写入Accuracy数据
                 file.write(f"{RecordAccuracy}\n")
 
             # 生成分类报告
@@ -299,146 +250,120 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal,bool_plot_co
 def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion_matrix = False):
     #混淆矩陣
     if bool_plot_confusion_matrix:
-        # df_cm的PD.DataFrame 接受三個參數：
+
         # arr：混淆矩陣的數據，這是一個二維陣列，其中包含了模型的預測和實際標籤之間的關係，以及它們在混淆矩陣中的計數。
-        # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，以標識混淆矩陣中每個類別的位置。
-        # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
-        arr = confusion_matrix(y_true, y_pred)
-        # class_names = [str(i) for i in range(labelCount)]
-        #TONIoT
-        # class_names = {
-                        # 0: 'BENIGN', 
-                        # 1: 'DDoS', 
-                        # 0: 'normal', 
-                        # 1: 'ddos',
-                        # 2: 'backdoor', 
-                        # 3: 'dos', 
-                        # 4: 'injection', 
-                        # 5: 'mitm', 
-                        # 6: 'password', 
-                        # 7: 'ransomware', 
-                        # 8: 'scanning', 
-                        # 9: 'xss', 
-                        # 10: '10_PortScan', 
-                        # 11: '11_SSH-Patator', 
-                        # 12: '12_Web Attack Brute Force', 
-                        # 13: '13_Web Attack Sql Injection', 
-                        # 14: '14_Web Attack XSS'
-                        # 15: '15_backdoor',
-                        # 16: '16_dos',
-                        # 17: '17_injection',
-                        # 18: '18_mitm',
-                        # 19: '19_password',
-                        # 20: '20_ransomware',
-                        # 21: '21_scanning',
-                        # 22: '22_xss'
-                        # } 
-        # CICIDS2017 TONIOT CICIDS2019
-        # class_names = {
-        #                 0: '0_BENIGN', 
-        #                 1: '1_Bot', 
-        #                 2: '2_DDoS', 
-        #                 3: '3_DoS GoldenEye', 
-        #                 4: '4_DoS Hulk', 
-        #                 5: '5_DoS Slowhttptest', 
-        #                 6: '6_DoS slowloris', 
-        #                 7: '7_FTP-Patator', 
-        #                 8: '8_Heartbleed', 
-        #                 9: '9_Infiltration', 
-        #                 10: '10_PortScan', 
-        #                 11: '11_SSH-Patator', 
-        #                 12: '12_Web Attack Brute Force', 
-        #                 13: '13_Web Attack Sql Injection', 
-        #                 14: '14_Web Attack XSS',
-        #                 15: '15_backdoor',
-        #                 16: '16_dos',
-        #                 17: '17_injection',
-        #                 18: '18_mitm',
-        #                 19: '19_password',
-        #                 20: '20_ransomware',
-        #                 21: '21_scanning',
-        #                 22: '22_xss',
-        #                 23: '23_DrDoS_DNS',
-        #                 24: '24_DrDoS_LDAP',
-        #                 25: '25_DrDoS_MSSQL',
-        #                 26: '26_DrDoS_NTP', 
-        #                 27: '27_DrDoS_NetBIOS',
-        #                 28: '28_DrDoS_SNMP' ,
-        #                 29: '29_DrDoS_SSDP',
-        #                 30: '30_DrDoS_UDP',
-        #                 31: '31_Syn',
-        #                 32: '32_TFTP',
-        #                 33: '33_UDPlag',
-        #                 34: '34_WebDDoS' 
-        #                 }
-        # CICIDS2017 TONIOT EdgeIIOT 
-        # class_names = {
-        #                 0: '0_BENIGN', 
-        #                 1: '1_Bot', 
-        #                 2: '2_DDoS', 
-        #                 3: '3_DoS GoldenEye', 
-        #                 4: '4_DoS Hulk', 
-        #                 5: '5_DoS Slowhttptest', 
-        #                 6: '6_DoS slowloris', 
-        #                 7: '7_FTP-Patator', 
-        #                 8: '8_Heartbleed', 
-        #                 9: '9_Infiltration', 
-        #                 10: '10_PortScan', 
-        #                 11: '11_SSH-Patator', 
-        #                 12: '12_Web Attack Brute Force', 
-        #                 13: '13_Web Attack Sql Injection', 
-        #                 14: '14_Web Attack XSS',
-        #                 15: '15_backdoor',
-        #                 16: '16_dos',
-        #                 17: '17_injection',
-        #                 18: '18_mitm',
-        #                 19: '19_password',
-        #                 20: '20_ransomware',
-        #                 21: '21_scanning',
-        #                 22: '22_xss',
-        #                 23: '23_DDoS_UDP',
-        #                 24: '24_DDoS_ICMP',
-        #                 25: '25_SQL_injection',
-        #                 26: '26_Vulnerability_scanner', 
-        #                 27: '27_DDoS_TCP',
-        #                 28: '28_DDoS_HTTP' ,
-        #                 29: '29_Uploading',
-        #                 30: '30_Fingerprinting'
-        #                 }      
-        # CICIDS2017 CICIDS2018 CICIDS2019
-        class_names = {
-                        0: '0_BENIGN', 
-                        1: '1_Bot', 
-                        2: '2_DDoS', 
-                        3: '3_DoS GoldenEye', 
-                        4: '4_DoS Hulk', 
-                        5: '5_DoS Slowhttptest', 
-                        6: '6_DoS slowloris', 
-                        7: '7_Infilteration', 
-                        8: '8_Web Attack', 
-                        9: '9_Heartbleed', 
-                        10: '10_PortScan', 
-                        11: '11_FTP-BruteForce', 
-                        12: '12_FTP-Patator', 
-                        13: '13_SSH-Bruteforce', 
-                        14: '14_SSH-Patator',
-                        15: '15_DrDoS_DNS',
-                        16: '16_DrDoS_LDAP',
-                        17: '17_DrDoS_MSSQL',
-                        18: '18_DrDoS_NTP',
-                        19: '19_DrDoS_NetBIOS',
-                        20: '20_DrDoS_SNMP',
-                        21: '21_DrDoS_SSDP',
-                        22: '22_DrDoS_UDP',
-                        23: '23_Syn',
-                        24: '24_TFTP',
-                        25: '25_UDPlag',
-                        26: '26_WebDDoS'
-                        }     
-        # class_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11','12','13','14','15','16','17','18','20','21']
-        # class_names = ['0', '1', '2', '3']
-        df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
-        
+        # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，
+        # 以標識混淆矩陣中每個類別的位置。  同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，
+        # 如果不提供這個參數，將使用行索引的標籤作為列索引
+
+        # 使用指定的標籤計算混淆矩陣
+        if str_globalOrlocal == "local_test" or str_globalOrlocal == "global_model_local_test":
+            arr = confusion_matrix(y_true, y_pred, labels=labels_to_calculate)
+        elif str_globalOrlocal == "global_test":
+            arr = confusion_matrix(y_true, y_pred)
+        # 預設初始化 class_names
+        class_names_local = None
+        class_names_global = None
+
+        # 如果 class_names 未提供，根據 labels_to_calculate 動態生成
+        if class_names_local is None:
+            class_names_local = {label: f"Class_{label}" for label in labels_to_calculate}
+            if client_str == "client1"or (client_str == "client1"and str_globalOrlocal == "global_model_local_test"):    
+                class_names_local = {
+                                0: '0_BENIGN', 
+                                1: '1_Bot', 
+                                2: '2_DDoS', 
+                                3: '3_DoS GoldenEye', 
+                                4: '4_DoS Hulk', 
+                                5: '5_DoS Slowhttptest', 
+                                6: '6_DoS slowloris', 
+                                7: '7_Infilteration', 
+                                8: '8_Web Attack', 
+                                9: '9_Heartbleed', 
+                                10: '10_PortScan',  
+                                12: '12_FTP-Patator',  
+                                14: '14_SSH-Patator'
+                            }  
+            # CICIDS2018 Union
+            elif client_str == "client2"or (client_str == "client2"and str_globalOrlocal == "global_model_local_test"):    
+                class_names_local = {
+                                0: '0_BENIGN', 
+                                1: '1_Bot', 
+                                2: '2_DDoS', 
+                                3: '3_DoS GoldenEye', 
+                                4: '4_DoS Hulk', 
+                                5: '5_DoS Slowhttptest', 
+                                6: '6_DoS slowloris', 
+                                7: '7_Infilteration', 
+                                8: '8_Web Attack',
+                                11: '11_FTP-BruteForce', 
+                                13: '13_SSH-Bruteforce'
+                            }  
+            # # CICIDS2019 Union
+            elif client_str == "client3" or (client_str == "client3"and str_globalOrlocal == "global_model_local_test"):    
+                class_names_local = {
+                                0: '0_BENIGN', 
+                                15: '15_DrDoS_DNS',
+                                16: '16_DrDoS_LDAP',
+                                17: '17_DrDoS_MSSQL',
+                                18: '18_DrDoS_NTP',
+                                19: '19_DrDoS_NetBIOS',
+                                20: '20_DrDoS_SNMP',
+                                21: '21_DrDoS_SSDP',
+                                22: '22_DrDoS_UDP',
+                                23: '23_Syn',
+                                24: '24_TFTP',
+                                25: '25_UDPlag',
+                                26: '26_WebDDoS'
+                            }   
+            #  # CICIDS2017 CICIDS2018 CICIDS2019 Union
+            if str_globalOrlocal == "global_test":
+                class_names_global = {
+                                0: '0_BENIGN', 
+                                1: '1_Bot', 
+                                2: '2_DDoS', 
+                                3: '3_DoS GoldenEye', 
+                                4: '4_DoS Hulk', 
+                                5: '5_DoS Slowhttptest', 
+                                6: '6_DoS slowloris', 
+                                7: '7_Infilteration', 
+                                8: '8_Web Attack', 
+                                9: '9_Heartbleed', 
+                                10: '10_PortScan', 
+                                11: '11_FTP-BruteForce', 
+                                12: '12_FTP-Patator', 
+                                13: '13_SSH-Bruteforce', 
+                                14: '14_SSH-Patator',
+                                15: '15_DrDoS_DNS',
+                                16: '16_DrDoS_LDAP',
+                                17: '17_DrDoS_MSSQL',
+                                18: '18_DrDoS_NTP',
+                                19: '19_DrDoS_NetBIOS',
+                                20: '20_DrDoS_SNMP',
+                                21: '21_DrDoS_SSDP',
+                                22: '22_DrDoS_UDP',
+                                23: '23_Syn',
+                                24: '24_TFTP',
+                                25: '25_UDPlag',
+                                26: '26_WebDDoS'
+                                }     
+        else:
+            # 寫法
+            # {key: value for key in iterable if condition}
+            # 字典推導式，用於根據可迭代對象創建新的字典。
+            # key：新字典中的鍵。
+            # value：新字典中對應 key 的值。
+            # iterable：可迭代對象（例如列表、集合等）。
+            # if condition（可選）：條件過濾，只有滿足條件的條目才會包含在新字典中。
+            # 過濾 class_names 僅保留 labels_to_calculate
+            class_names = {label: class_names[label] for label in labels_to_calculate if label in class_names}
+            # CICIDS2017 Union
+            
+        # df_cm的PD.DataFrame 接受三個參數：
+        if str_globalOrlocal == "local_test" or str_globalOrlocal == "global_model_local_test":
+            df_cm = pd.DataFrame(arr, index=class_names_local.values(), columns=class_names_local.values())
+        elif str_globalOrlocal == "global_test":
+            df_cm = pd.DataFrame(arr, index=class_names_global.values(), columns=class_names_global.values())
         # 設置字體比例
         sns.set(font_scale=1.2)
         
@@ -452,28 +377,44 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         # annot_kws={"size": 13} 設置單元格內數值的字體大小
         sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn', annot_kws={"size": 15})
         
+        # 固定子圖參數
+        plt.subplots_adjust(
+            left=0.19,    # 左邊界
+            bottom=0.167,  # 下邊界
+            right=1.0,     # 右邊界
+            top=0.88,      # 上邊界
+            wspace=0.207,  # 子圖間的寬度間隔
+            hspace=0.195   # 子圖間的高度間隔
+        )
+
         # 設置標題和標籤
         plt.title(client_str +"_"+ Choose_method) # 圖片標題
         plt.xlabel("prediction",fontsize=15) # x 軸標籤
         plt.ylabel("Label (ground truth)", fontsize=18) # y 軸標籤
        
         # 設置 x 軸和 y 軸的字體大小和旋轉角度
-        plt.xticks(rotation=0, fontsize=15) # x 軸刻度標籤不旋轉，字體大小為 15
-        plt.yticks(rotation=0, fontsize=15) # y 軸刻度標籤不旋轉，字體大小為 15
+        # Rotate the x-axis labels (prediction categories)
+        plt.xticks(rotation=30, ha='right',fontsize=12) 
+        plt.yticks(rotation=0, fontsize=12) # y 軸刻度標籤不旋轉，字體大小為 15
         
         # 調整圖像間距
         # left, right, top, bottom 控制圖像在畫布上的邊距
         plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.2)
         # 保存圖像到指定路徑
+        
         plt.savefig(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_{str_globalOrlocal}_confusion_matrix.png")
         # plt.show()
 
 # 創建用於訓練和測試的DataLoader
 train_data = TensorDataset(x_train, y_train)
-test_data = TensorDataset(x_test, y_test)
+local_test_data = TensorDataset(x_test, y_test)
+global_test_data = TensorDataset(global_x_test, global_y_test)
 trainloader = DataLoader(train_data, batch_size=512, shuffle=True)  # 设置 shuffle 为 True
 # test_data 的batch_size要設跟test_data(y_test)的筆數一樣 重要!!!
-testloader = DataLoader(test_data, batch_size=len(test_data), shuffle=False)
+local_testloader = DataLoader(local_test_data, batch_size=len(local_test_data), shuffle=False)
+global_testloader = DataLoader(global_test_data, batch_size=len(global_test_data), shuffle=False)
+print(Fore.GREEN+Style.BRIGHT+"batch_size",len(local_test_data))
+print(Fore.GREEN+Style.BRIGHT+"batch_size",len(global_test_data))
 # #############################################################################
 # 2. 使用 Flower 集成的code
 # #############################################################################
@@ -581,11 +522,14 @@ class FlowerClient(fl.client.NumPyClient):
         # 保存模型剛聚合完的全局模型
         torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/gobal_model_Before_local_train_model_round_{self.global_round}.pth")
         After_FedAVG_model = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/gobal_model_Before_local_train_model_round_{self.global_round}.pth')
-        # 測試剛聚合完的全局模型
-        accuracy = test(net, testloader, start_IDS, client_str,f"global_test",True)
+        # global test測試剛聚合完的全局模型
+        accuracy = test(net, global_testloader, start_IDS, client_str,f"global_test",True)
+        # local test測試剛聚合完的全局模型
+        test_global_inLocaltest_accuracy = test(net, local_testloader, start_IDS, client_str,f"global_model_local_test",True)
         self.Reocrd_global_model_accuracy = accuracy
-        print("accuracy",accuracy)
-        print("Reocrd_global_model_accuracy",self.Reocrd_global_model_accuracy)
+        print(Fore.RED+Style.BRIGHT+"global_model_accuracy:"+str(accuracy))
+        print(Fore.RED+Style.BRIGHT+"Reocrd_global_model_accuracy:"+str(self.Reocrd_global_model_accuracy))
+        print(Fore.RED+Style.BRIGHT+"test_global_in_Local_test_accuracy:"+str(test_global_inLocaltest_accuracy))
 
         # 算聚合完的全局模型每層權重加總總和
         ######################################################Fedavg完的模型每層加總總和############################################# 
@@ -726,7 +670,7 @@ class FlowerClient(fl.client.NumPyClient):
             # 上一回合的距離跟這一回比距離突然大幅增大表示受到攻擊
             percent_threshold = 100 
             threshold = self.Record_dis_percent_diff
-            print("*********bbbbbb*********Record_Previous_total_weight_diff_dis**********************", self.Record_Previous_total_weight_diff_dis)
+            print(Fore.RED+Style.BRIGHT+"*****************Record_Previous_total_weight_diff_dis**********************", self.Record_Previous_total_weight_diff_dis)
             if threshold >= percent_threshold: #假設超過一百視為攻擊
                 self.bool_Unattack_Judage = False #大於100那瞬間開始使用正常的模型
                 self.Previous_diff_dis_Temp  = self.Previous_Unattack_round_total_weight_diff_dis 
@@ -938,7 +882,7 @@ class FlowerClient(fl.client.NumPyClient):
         # 這邊的測試結果會受到local train的影響
         # 保存模型
         torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train_model.pth")
-        accuracy = test(net, testloader, start_IDS, client_str,f"local_test",True)
+        accuracy = test(net, local_testloader, start_IDS, client_str,f"local_test",True)
         # 寫入Accuracyg
         with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-local_model_{client_str}.csv", "a+") as file:
             file.write(f"{accuracy}\n")
@@ -973,7 +917,7 @@ class FlowerClient(fl.client.NumPyClient):
         # # 保留小数点后两位
         percentage_five = round(percentage_five, 2)
         print("Local_train_weight_sum_percentage_five\n",percentage_five)
-        return accuracy, len(testloader.dataset), {"global_round": self.global_round,
+        return accuracy, len(local_testloader.dataset), {"global_round": self.global_round,
                                                    "accuracy": accuracy,
                                                    "Local_train_accuracy": self.Local_train_accuracy,
                                                    "client_id": self.client_id,
