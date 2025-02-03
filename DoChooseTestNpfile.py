@@ -40,9 +40,15 @@ class CICIDS2019TestLoader:
             
             # 20250113 CIC-IDS2019 after do labelencode do PCA and all featrue minmax 75 25分
             print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do pca" +f"{split_file} with normal attack type")
-            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\x_01_12_test_AfterPCA79_20250113.npy", allow_pickle=True)
-            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\y_01_12_test_AfterPCA79_20250113.npy", allow_pickle=True)
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\x_01_12_test_AfterPCA79_20250113.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\y_01_12_test_AfterPCA79_20250113.npy", allow_pickle=True)
             
+            # 20250120 CIC-IDS2019 after do labelencode do drop feature and all featrue minmax 75 25分
+            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do drop feature" +f"{split_file} with normal attack type")
+            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\x_ALLDay_test_Deleted79features_20250120.npy", allow_pickle=True)
+            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\y_ALLDay_test_Deleted79features_20250120.npy", allow_pickle=True)
+            
+
             return x_test, y_test
         elif split_file == 'test' and Choose_Attacktype == 'Evasion_Attack':
             print("Using CICIDS2019 with Evasion_Attack")
@@ -194,8 +200,14 @@ class CICIDS2017TestLoader:
             # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_20250107.npy", allow_pickle=True)
             # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_20250107.npy", allow_pickle=True)
             # 20250113 CIC-IDS2017 after do labelencode and except str and PCA all featrue minmax 75 25分
-            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_AfterPCA79_20250113.npy", allow_pickle=True)
-            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterPCA79_20250113.npy", allow_pickle=True)
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_AfterPCA79_20250113.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterPCA79_20250113.npy", allow_pickle=True)
+            
+           # 20250121 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do labelencode and minmax and drop feature to 79 feature")
+            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+
             return x_test, y_test
         elif split_file == 'test' and Choose_Attacktype == 'Evasion_Attack':
             print("Using CICIDS2017 with Evasion_Attack")
