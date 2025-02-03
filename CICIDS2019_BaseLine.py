@@ -237,32 +237,39 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         arr = confusion_matrix(y_true, y_pred)
         # # CICIDS2019
         class_names = {
-                        #二元分類
+                        #01_12 Label
                         # 0: '0_BENIGN', 
-                        # 1: 'Attack', 
-                        0: '0_BENIGN', 
-                        1: '1_DrDoS_DNS', 
-                        2: '2_DrDoS_LDAP', 
-                        3: '3_DrDoS_MSSQL',
-                        4: '4_DrDoS_NTP', 
-                        5: '5_DrDoS_NetBIOS', 
-                        6: '6_DrDoS_SNMP', 
-                        7: '7_DrDoS_SSDP', 
-                        8: '8_DrDoS_UDP', 
-                        9: '9_Syn', 
-                        10: '10_TFTP', 
-                        11: '11_UDPlag', 
-                        12: '12_WebDDoS'
-                        # 13: '13_Web Attack Sql Injection', 
-                        # 14: '14_Web Attack XSS'
-                        # 15: '15_backdoor',
-                        # 16: '16_dos',
-                        # 17: '17_injection',
-                        # 18: '18_mitm',
-                        # 19: '19_password',
-                        # 20: '20_ransomware',
-                        # 21: '21_scanning',
-                        # 22: '22_xss'
+                        # 1: '1_DrDoS_DNS', 
+                        # 2: '2_DrDoS_LDAP', 
+                        # 3: '3_DrDoS_MSSQL',
+                        # 4: '4_DrDoS_NTP', 
+                        # 5: '5_DrDoS_NetBIOS', 
+                        # 6: '6_DrDoS_SNMP', 
+                        # 7: '7_DrDoS_SSDP', 
+                        # 8: '8_DrDoS_UDP', 
+                        # 9: '9_Syn', 
+                        # 10: '10_TFTP', 
+                        # 11: '11_UDPlag', 
+                        # 12: '12_WebDDoS'
+                        #01_12 merge 03_11  Label
+                        0:	'0_BENIGN',
+                        1:	'1_DrDoS_DNS',
+                        2:	'2_DrDoS_LDAP',
+                        3:	'3_DrDoS_MSSQL',
+                        4:	'4_DrDoS_NTP',
+                        5:	'5_DrDoS_NetBIOS',
+                        6:	'6_DrDoS_SNMP',
+                        7:	'7_DrDoS_SSDP',
+                        8:	'8_DrDoS_UDP',
+                        9:	'9_LDAP',
+                        10:	'10_MSSQL',
+                        11:	'11_NetBIOS',
+                        12:	'12_Portmap',
+                        13:	'13_Syn',
+                        14:	'14_TFTP',
+                        15:	'15_UDP',
+                        16:	'16_UDPLag',
+                        17:	'17_WebDDoS'
                         } 
         # df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names.values())

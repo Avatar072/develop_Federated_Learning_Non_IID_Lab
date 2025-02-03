@@ -12,8 +12,8 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from mytoolfunction import SaveDataToCsvfile,CheckFileExists
-from mytoolfunction import clearDirtyData,label_Encoding,splitdatasetbalancehalf,spiltweakLabelbalance,SaveDataframeTonpArray,generatefolder
-from mytoolfunction import spiltweakLabelbalance_afterOnehot,DominmaxforStringTypefeature
+from mytoolfunction import clearDirtyData,label_Encoding,splitdatasetbalancehalf,splitweakLabelbalance,SaveDataframeTonpArray,generatefolder
+from mytoolfunction import splitweakLabelbalance_afterOnehot,DominmaxforStringTypefeature
 from colorama import Fore, Back, Style, init
 # 初始化 colorama（Windows 系統中必須）
 init(autoreset=True)
@@ -412,7 +412,7 @@ def DoBaselinesplit(df,train_dataframes,test_dataframes):
     for i in range(15):
         if i == 13:
             continue
-        train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+        train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
         List_train_Label.append(train_label_split)
         List_test_Label.append(test_label_split)         
 
@@ -421,7 +421,7 @@ def DoBaselinesplit(df,train_dataframes,test_dataframes):
     # encode後對照如下
     # SQL_Injection :15
     # Label encode mode  分別取出Label等於12的數據 對6633分
-    train_label_SQL_Injection, test_label_SQL_Injection = spiltweakLabelbalance(13,df,0.33)
+    train_label_SQL_Injection, test_label_SQL_Injection = splitweakLabelbalance(13,df,0.33)
     # # 刪除Label相當於15的行
     test_dataframes = test_dataframes[~test_dataframes['Label'].isin([13])]
     train_dataframes = train_dataframes[~train_dataframes['Label'].isin([13])]
@@ -431,7 +431,7 @@ def DoBaselinesplit(df,train_dataframes,test_dataframes):
     return train_dataframes,test_dataframes
 
 # do Labelencode and minmax 
-def DoSpiltAllfeatureAfterMinMax(df,choose_merge_days,bool_Noniid):  
+def DoSplitAllfeatureAfterMinMax(df,choose_merge_days,bool_Noniid):  
     train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
     # printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
     
@@ -449,7 +449,7 @@ def DoSpiltAllfeatureAfterMinMax(df,choose_merge_days,bool_Noniid):
         #     for i in range(15):
         #         if i == 13:
         #             continue
-        #         train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+        #         train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
         #         List_train_Label.append(train_label_split)
         #         List_test_Label.append(test_label_split)         
             
@@ -458,7 +458,7 @@ def DoSpiltAllfeatureAfterMinMax(df,choose_merge_days,bool_Noniid):
         #     # encode後對照如下
         #     # SQL_Injection :13
         #     # Label encode mode  分別取出Label等於12的數據 對6633分
-        #     train_label_SQL_Injection, test_label_SQL_Injection = spiltweakLabelbalance(13,df,0.33)
+        #     train_label_SQL_Injection, test_label_SQL_Injection = splitweakLabelbalance(13,df,0.33)
         #     # # 刪除Label相當於13的行
         #     test_dataframes = test_dataframes[~test_dataframes['Label'].isin([13])]
         #     train_dataframes = train_dataframes[~train_dataframes['Label'].isin([13])]
@@ -582,7 +582,7 @@ def dofeatureSelect(df, slecet_label_counts,choose_merge_days):
     return selected_data
 
 # do chi-square and Labelencode and minmax 
-def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noniid):
+def DoSplitAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noniid):
     df = dofeatureSelect(df,slecet_label_counts,choose_merge_days)
     # 自動切
     train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%    
@@ -591,7 +591,7 @@ def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noni
             # Noniid時
             # encode後對照如下
             # WebDDoS:34
-            train_label_WebDDoS, test_label_WebDDoS = spiltweakLabelbalance(34,df,0.33)
+            train_label_WebDDoS, test_label_WebDDoS = splitweakLabelbalance(34,df,0.33)
             # # 刪除Label相當於34的行
             test_dataframes = test_dataframes[~test_dataframes['Label'].isin([34])]
             train_dataframes = train_dataframes[~train_dataframes['Label'].isin([34])]
@@ -610,7 +610,7 @@ def DoSpiltAfterFeatureSelect(df,slecet_label_counts,choose_merge_days,bool_Noni
         if choose_merge_days =="csv_data":
             # encode後對照如下
             # WebDDoS:12
-            train_label_WebDDoS, test_label_WebDDoS = spiltweakLabelbalance(12,df,0.33)
+            train_label_WebDDoS, test_label_WebDDoS = splitweakLabelbalance(12,df,0.33)
             # # 刪除Label相當於12的行
             test_dataframes = test_dataframes[~test_dataframes['Label'].isin([12])]
             train_dataframes = train_dataframes[~train_dataframes['Label'].isin([12])]
@@ -699,7 +699,7 @@ def DoPCA_ALLFeature_OR_excpetStringType(df,number_of_components ,bool_excpet_St
 
     return df
 # do PCA and Labelencode and minmax 
-def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
+def DoSplitAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
     # True為除string type以外特徵都做PCA
     # False為全特徵都做PCA
     df = DoPCA_ALLFeature_OR_excpetStringType(df,number_of_components ,False)
@@ -720,7 +720,7 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
             # for i in range(15):
             #     if i == 13:
             #         continue
-            #     train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+            #     train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
             #     List_train_Label.append(train_label_split)
             #     List_test_Label.append(test_label_split)         
             
@@ -729,7 +729,7 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
             # # encode後對照如下
             # # SQL_Injection :13
             # # Label encode mode  分別取出Label等於13的數據 對6633分
-            # train_label_SQL_Injection, test_label_SQL_Injection = spiltweakLabelbalance(13,df,0.33)
+            # train_label_SQL_Injection, test_label_SQL_Injection = splitweakLabelbalance(13,df,0.33)
             # # # 刪除Label相當於12的行
             # test_dataframes = test_dataframes[~test_dataframes['Label'].isin([13])]
             # train_dataframes = train_dataframes[~train_dataframes['Label'].isin([13])]
@@ -764,14 +764,14 @@ def DoSpiltAfterDoPCA(df,number_of_components,choose_merge_days,bool_Noniid):
                            f"{choose_merge_days}_train_AfterPCA{number_of_components}",today)
 
 # do split train to half for iid and Labelencode and minmax 
-def DoSpilthalfForiid(choose_merge_days):
+def DoSplithalfForiid(choose_merge_days):
     if choose_merge_days == "csv_data":
         df_ALLtrain = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\20240502\\csv_data_train_dataframes_20240502.csv")
                     # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
         List_train_half1_Label = []
         List_train_half2_Label = []
         for i in range(13):
-            train_half1_label_split, train_half2_label_split = spiltweakLabelbalance(i,df_ALLtrain,0.5)
+            train_half1_label_split, train_half2_label_split = splitweakLabelbalance(i,df_ALLtrain,0.5)
             List_train_half1_Label.append(train_half1_label_split)
             List_train_half2_Label.append(train_half2_label_split)         
             
@@ -800,46 +800,46 @@ def DoSpilthalfForiid(choose_merge_days):
 def SelectfeatureUseChiSquareOrPCA(df,choose_merge_days,bool_doChiSquare,bool_doPCA,bool_Noniid):
     if bool_doChiSquare!=False:
         # 選ALL特徵
-        # DoSpiltAfterFeatureSelect(df,None)
+        # DoSplitAfterFeatureSelect(df,None)
         #ChiSquare選80個特徵
-        # DoSpiltAfterFeatureSelect(df,80,choose_merge_days,bool_Noniid)
+        # DoSplitAfterFeatureSelect(df,80,choose_merge_days,bool_Noniid)
         # #ChiSquare選70個特徵
-        # DoSpiltAfterFeatureSelect(df,70,choose_merge_days,bool_Noniid)
+        # DoSplitAfterFeatureSelect(df,70,choose_merge_days,bool_Noniid)
         # # #ChiSquare選65個特徵
-        # DoSpiltAfterFeatureSelect(df,60,choose_merge_days,bool_Noniid)
+        # DoSplitAfterFeatureSelect(df,60,choose_merge_days,bool_Noniid)
         # # #ChiSquare選60個特徵
-        # DoSpiltAfterFeatureSelect(df,60,choose_merge_days,bool_Noniid)
+        # DoSplitAfterFeatureSelect(df,60,choose_merge_days,bool_Noniid)
         # # #ChiSquare選55個特徵
-        # DoSpiltAfterFeatureSelect(df,55,choose_merge_days,bool_Noniid)
+        # DoSplitAfterFeatureSelect(df,55,choose_merge_days,bool_Noniid)
         # # #ChiSquare選50個特徵
-        # DoSpiltAfterFeatureSelect(df,50,choose_merge_days,bool_Noniid)
+        # DoSplitAfterFeatureSelect(df,50,choose_merge_days,bool_Noniid)
         # # #ChiSquare選46個特徵
-        # DoSpiltAfterFeatureSelect(df,46,choose_merge_days,bool_Noniid)
+        # DoSplitAfterFeatureSelect(df,46,choose_merge_days,bool_Noniid)
         # # #ChiSquare選45個特徵
-        # DoSpiltAfterFeatureSelect(df,45,choose_merge_days,bool_Noniid)
+        # DoSplitAfterFeatureSelect(df,45,choose_merge_days,bool_Noniid)
         # #ChiSquare選44個特徵
-        DoSpiltAfterFeatureSelect(df,44,choose_merge_days,bool_Noniid)
+        DoSplitAfterFeatureSelect(df,44,choose_merge_days,bool_Noniid)
         # #ChiSquare選40個特徵
-        # DoSpiltAfterFeatureSelect(df,40,choose_merge_days,bool_Noniid)
+        # DoSplitAfterFeatureSelect(df,40,choose_merge_days,bool_Noniid)
         # #ChiSquare選38個特徵
-        # DoSpiltAfterFeatureSelect(df,38,choose_merge_days,bool_Noniid)
+        # DoSplitAfterFeatureSelect(df,38,choose_merge_days,bool_Noniid)
     elif bool_doPCA!=False:
         ##PCA選79個特徵 總80特徵=79+扣掉'Label'
-        DoSpiltAfterDoPCA(df,79,choose_merge_days,bool_Noniid)
+        DoSplitAfterDoPCA(df,79,choose_merge_days,bool_Noniid)
         #  #PCA選77個特徵 總84特徵=77+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        # DoSpiltAfterDoPCA(df,77,choose_merge_days,bool_Noniid)
+        # DoSplitAfterDoPCA(df,77,choose_merge_days,bool_Noniid)
         # #PCA選73個特徵 總80特徵=73+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        # DoSpiltAfterDoPCA(df,73,choose_merge_days,bool_Noniid)
+        # DoSplitAfterDoPCA(df,73,choose_merge_days,bool_Noniid)
         # #PCA選63個特徵 總70特徵=73+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        # DoSpiltAfterDoPCA(df,63,choose_merge_days,bool_Noniid)
+        # DoSplitAfterDoPCA(df,63,choose_merge_days,bool_Noniid)
         # #PCA選53個特徵 總60特徵=53+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        # DoSpiltAfterDoPCA(df,53,choose_merge_days,bool_Noniid)
+        # DoSplitAfterDoPCA(df,53,choose_merge_days,bool_Noniid)
         #PCA選43個特徵 總50特徵=43+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        # DoSpiltAfterDoPCA(df,43,choose_merge_days,bool_Noniid)
+        # DoSplitAfterDoPCA(df,43,choose_merge_days,bool_Noniid)
         # #PCA選38個特徵 總45特徵=38+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        # DoSpiltAfterDoPCA(df,38,choose_merge_days,bool_Noniid)
+        # DoSplitAfterDoPCA(df,38,choose_merge_days,bool_Noniid)
         # #PCA選33個特徵 總40特徵=33+扣掉'SourceIP', 'SourcePort', 'DestinationIP', 'DestinationPort', 'Protocol', 'Timestamp' 'Label'
-        # DoSpiltAfterDoPCA(df,33,choose_merge_days,bool_Noniid) 
+        # DoSplitAfterDoPCA(df,33,choose_merge_days,bool_Noniid) 
 
 # 針對string type 做minmax
 def RedoCICIDS2018stringtypeMinMaxfortrainORtest(afterprocess_dataset,bool_tain_OR_test):
@@ -883,11 +883,11 @@ def forBaseLineUseData(choose_merge_days,bool_Noniid):
         # False for Noniid
         # df_csv_data=DoMinMaxAndLabelEncoding(df_csv_data,choose_merge_days,bool_Noniid)
         # for iid 實驗將ALL train分一半
-        # DoSpilthalfForiid(choose_merge_days)
+        # DoSplithalfForiid(choose_merge_days)
         # 一般全部特徵
         # 只接用昱陞預處理好的去做劃分
         df_csv_data = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\sampled_data_max_10000_per_label.csv")
-        # DoSpiltAllfeatureAfterMinMax(df_csv_data,choose_merge_days,bool_Noniid)
+        # DoSplitAllfeatureAfterMinMax(df_csv_data,choose_merge_days,bool_Noniid)
         # 做ChiSquare
         # SelectfeatureUseChiSquareOrPCA(df_csv_data,choose_merge_days,True,False,bool_Noniid)
         # 做PCA

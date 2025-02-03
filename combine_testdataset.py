@@ -103,19 +103,31 @@ def ReplaceMorethanTenthousandQuantity(df):
 # cicids2017_ALLDay_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/ALLday/y_ALLday_test_cicids2017_AfterFeatureSelect44_20240502.npy")
 
 # 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Non-iid Do PCA
+# 20250121 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Non-iid Do feature to 79
 print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"test with normal After Do labelencode and minmax")
-cicids2017_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_AfterPCA79_20250113.npy", allow_pickle=True)
-cicids2017_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
+# cicids2017_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_AfterPCA79_20250113.npy", allow_pickle=True)
+# cicids2017_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
+
+cicids2017_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+cicids2017_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
 
 # 20250113 CIC-IDS2018 after do labelencode all featrue minmax 75 25分 Non-iid Do PCA
+# 20250121 CIC-IDS2018 after do labelencode all featrue minmax 75 25分 Non-iid Do feature to 79
 print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"test with normal After Do labelencode and minmax")
-cicids2018_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_AfterPCA79_20250113.npy", allow_pickle=True)
-cicids2018_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
+# cicids2018_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_AfterPCA79_20250113.npy", allow_pickle=True)
+# cicids2018_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
+
+cicids2018_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_20250106.npy", allow_pickle=True)
+cicids2018_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_After_20250121_ChangeLabelencode.npy", allow_pickle=True)
 
 # 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Non-iid Do PCA
+# 20250121 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Non-iid Do feature to 79
 print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"test with normal After Do labelencode and minmax")
-cicids2019_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\x_01_12_test_AfterPCA79_20250113.npy", allow_pickle=True)
-cicids2019_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\y_01_12_test_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
+# cicids2019_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\x_01_12_test_AfterPCA79_20250113.npy", allow_pickle=True)
+# cicids2019_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\y_01_12_test_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
+                      
+cicids2019_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\x_ALLDay_test_Deleted79features_20250120.npy", allow_pickle=True)
+cicids2019_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\y_01_12_test_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
                       
 
 # # 载入Monday_and_Firday test chi-square
