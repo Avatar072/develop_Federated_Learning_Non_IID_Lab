@@ -24,8 +24,9 @@ from sklearn.metrics import classification_report
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from sklearn.metrics import confusion_matrix
-from mytoolfunction import generatefolder, ChooseLoadNpArray,ParseCommandLineArgs,ChooseTrainDatastes
+from mytoolfunction import generatefolder,ParseCommandLineArgs,ChooseTrainDatastes
 from mytoolfunction import ChooseUseModel, getStartorEndtime,EvaluatePercent
+from IID_ChooseNPfile import ChooseLoadNpArray
 from collections import Counter
 from Add_ALL_LayerToCount import DoCountModelWeightSum,evaluateWeightDifferences
 from Add_ALL_LayerToCount import Calculate_Weight_Diffs_Distance_OR_Absolute
@@ -33,7 +34,7 @@ from colorama import Fore, Back, Style, init
 # 初始化 colorama（Windows 系統中必須）
 init(autoreset=True)
 #CICIIDS2017 or Edge 62個特徵
-# labelCount = 15
+labelCount = 15
 #TONIOT 44個特徵
 # labelCount = 10
 #CICIIDS2019
@@ -46,7 +47,7 @@ init(autoreset=True)
 # labelCount = 35
 
 # CICIDS2017、CICIDS2018、CICIDS2019 聯集
-labelCount = 32
+# labelCount = 32
 # CICIIDS2017、TONIOT、EdgwIIOT 聯集
 # labelCount = 31
 
@@ -66,9 +67,9 @@ torch.cuda.get_device_name(0)
 # 返回当前设备索引；
 torch.cuda.current_device()
 print(f"DEVICE: {DEVICE}")
-#python client_Noniid.py --dataset_split client1_train --epochs 50 --method normal
-#python client_Noniid.py --dataset_split client2_train --epochs 50 --method normal
-#python client_Noniid.py --dataset_split client3_train --epochs 50 --method normal
+#python client_IID.py --dataset_split client1_train --epochs 50 --method normal
+#python client_IID.py --dataset_split client2_train --epochs 50 --method normal
+#python client_IID.py --dataset_split client3_train --epochs 50 --method normal
 file, num_epochs,Choose_method = ParseCommandLineArgs(["dataset_split", "epochs", "method"])
 print(f"Dataset: {file}")
 print(f"Number of epochs: {num_epochs}")
@@ -85,36 +86,40 @@ generatefolder(f"./FL_AnalyseReportfolder/", today)
 generatefolder(f"./FL_AnalyseReportfolder/{today}/", client_str)
 generatefolder(f"./FL_AnalyseReportfolder/{today}/{client_str}/", Choose_method)
 getStartorEndtime("starttime",start_IDS,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}")
-labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ,29, 30, 31]
+# labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ,29, 30, 31]
+labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 
 if client_str == "client1":
     # labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14]
     x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
+    # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
     # labelCount = 15
     counter = Counter(y_test)
     print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)
 
 if client_str == "client2":
     # labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 13]
-    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_20250106.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_After_20250121_ChangeLabelencode.npy", allow_pickle=True)
+    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+    # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
     # labelCount = 15
     counter = Counter(y_test)
     print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)
-if client_str == "client3":
-    # labels_to_calculate = [0, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ,29, 30, 31]
-    print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"test with normal After Do labelencode and minmax")
-    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\x_ALLDay_test_Deleted79features_20250120.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\y_ALLDay_test_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
-    # labelCount = 18
-    counter = Counter(y_test)
-    print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)                    
+# if client_str == "client3":
+#     # labels_to_calculate = [0, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ,29, 30, 31]
+#     print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"test with normal After Do labelencode and minmax")
+#     x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\x_ALLDay_test_Deleted79features_20250120.npy", allow_pickle=True)
+#     y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\y_ALLDay_test_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
+#     # labelCount = 18
+#     counter = Counter(y_test)
+#     print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)                    
 
-# 20240121 CICIDS2017 和 CICIDS2018 和CICIDS2019 after do labelencode and minmax  75 25分 drop feature to 79 feature
-global_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\merged_x_Non_IID_ALL_test.npy", allow_pickle=True)
-global_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\merged_y_Non_IID_ALL_test.npy", allow_pickle=True)   
-
+# 20240121 CICIDS2017 after do labelencode and minmax  75 25分 drop feature to 79 feature
+global_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
+global_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+    
 counter = Counter(global_y_test)
 print(Fore.GREEN+Style.BRIGHT+client_str+"\tglobal test筆數",counter)
 
@@ -270,173 +275,175 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         # 如果 class_names 未提供，根據 labels_to_calculate 動態生成
         if class_names_local is None:
             class_names_local = {label: f"Class_{label}" for label in labels_to_calculate}
-            if client_str == "client1"or (client_str == "client1"and str_globalOrlocal == "global_model_local_test"):    
-                class_names_local = {
-                                # 0: '0_BENIGN', 
-                                # 1: '1_Bot', 
-                                # 2: '2_DDoS', 
-                                # 3: '3_DoS GoldenEye', 
-                                # 4: '4_DoS Hulk', 
-                                # 5: '5_DoS Slowhttptest', 
-                                # 6: '6_DoS slowloris', 
-                                # 7: '7_Infilteration', 
-                                # 8: '8_Web Attack', 
-                                # 9: '9_Heartbleed', 
-                                # 10: '10_PortScan',  
-                                # 12: '12_FTP-Patator',  
-                                # 14: '14_SSH-Patator'
-                                0: '0_BENIGN', 
-                                1: '1_Bot', 
-                                2: '2_DDoS', 
-                                3: '3_DoS GoldenEye', 
-                                4: '4_DoS Hulk', 
-                                5: '5_DoS Slowhttptest', 
-                                6: '6_DoS slowloris', 
-                                7: '7_Infilteration', 
-                                8: '8_Web Attack', 
-                                9: '9_Heartbleed', 
-                                10: '10_PortScan', 
-                                11: '11_FTP-BruteForce', 
-                                12: '12_FTP-Patator', 
-                                13: '13_SSH-Bruteforce', 
-                                14: '14_SSH-Patator',
-                                15: '15_DrDoS_DNS',
-                                16: '16_DrDoS_LDAP',
-                                17: '17_DrDoS_MSSQL',
-                                18: '18_DrDoS_NTP',
-                                19: '19_DrDoS_NetBIOS',
-                                20: '20_DrDoS_SNMP',
-                                21: '21_DrDoS_SSDP',
-                                22: '22_DrDoS_UDP',
-                                23: '23_LDAP',
-                                24: '24_MSSQL',
-                                25: '25_NetBIOS',
-                                26: '26_Portmap',
-                                27: '27_Syn',
-                                28: '28_TFTP',
-                                29: '29_UDP',
-                                30: '30_UDPlag',
-                                31: '31_WebDDoS'
-                            }  
-            # CICIDS2018 Union
-            elif client_str == "client2"or (client_str == "client2"and str_globalOrlocal == "global_model_local_test"):    
-                class_names_local = {
-                                # 0: '0_BENIGN', 
-                                # 1: '1_Bot', 
-                                # 2: '2_DDoS', 
-                                # 3: '3_DoS GoldenEye', 
-                                # 4: '4_DoS Hulk', 
-                                # 5: '5_DoS Slowhttptest', 
-                                # 6: '6_DoS slowloris', 
-                                # 7: '7_Infilteration', 
-                                # 8: '8_Web Attack',
-                                # 11: '11_FTP-BruteForce', 
-                                # 13: '13_SSH-Bruteforce'
-                                0: '0_BENIGN', 
-                                1: '1_Bot', 
-                                2: '2_DDoS', 
-                                3: '3_DoS GoldenEye', 
-                                4: '4_DoS Hulk', 
-                                5: '5_DoS Slowhttptest', 
-                                6: '6_DoS slowloris', 
-                                7: '7_Infilteration', 
-                                8: '8_Web Attack', 
-                                9: '9_Heartbleed', 
-                                10: '10_PortScan', 
-                                11: '11_FTP-BruteForce', 
-                                12: '12_FTP-Patator', 
-                                13: '13_SSH-Bruteforce', 
-                                14: '14_SSH-Patator',
-                                15: '15_DrDoS_DNS',
-                                16: '16_DrDoS_LDAP',
-                                17: '17_DrDoS_MSSQL',
-                                18: '18_DrDoS_NTP',
-                                19: '19_DrDoS_NetBIOS',
-                                20: '20_DrDoS_SNMP',
-                                21: '21_DrDoS_SSDP',
-                                22: '22_DrDoS_UDP',
-                                23: '23_LDAP',
-                                24: '24_MSSQL',
-                                25: '25_NetBIOS',
-                                26: '26_Portmap',
-                                27: '27_Syn',
-                                28: '28_TFTP',
-                                29: '29_UDP',
-                                30: '30_UDPlag',
-                                31: '31_WebDDoS'
-                            }  
-            # # CICIDS2019 Union
-            elif client_str == "client3" or (client_str == "client3"and str_globalOrlocal == "global_model_local_test"):    
-                class_names_local = {
-                                0: '0_BENIGN', 
-                                1: '1_Bot', 
-                                2: '2_DDoS', 
-                                3: '3_DoS GoldenEye', 
-                                4: '4_DoS Hulk', 
-                                5: '5_DoS Slowhttptest', 
-                                6: '6_DoS slowloris', 
-                                7: '7_Infilteration', 
-                                8: '8_Web Attack', 
-                                9: '9_Heartbleed', 
-                                10: '10_PortScan', 
-                                11: '11_FTP-BruteForce', 
-                                12: '12_FTP-Patator', 
-                                13: '13_SSH-Bruteforce', 
-                                14: '14_SSH-Patator',
-                                15: '15_DrDoS_DNS',
-                                16: '16_DrDoS_LDAP',
-                                17: '17_DrDoS_MSSQL',
-                                18: '18_DrDoS_NTP',
-                                19: '19_DrDoS_NetBIOS',
-                                20: '20_DrDoS_SNMP',
-                                21: '21_DrDoS_SSDP',
-                                22: '22_DrDoS_UDP',
-                                23: '23_LDAP',
-                                24: '24_MSSQL',
-                                25: '25_NetBIOS',
-                                26: '26_Portmap',
-                                27: '27_Syn',
-                                28: '28_TFTP',
-                                29: '29_UDP',
-                                30: '30_UDPlag',
-                                31: '31_WebDDoS'
+            # if client_str == "client1"or (client_str == "client1"and str_globalOrlocal == "global_model_local_test"):    
+            #     class_names_local = {
+            #                     # 0: '0_BENIGN', 
+            #                     # 1: '1_Bot', 
+            #                     # 2: '2_DDoS', 
+            #                     # 3: '3_DoS GoldenEye', 
+            #                     # 4: '4_DoS Hulk', 
+            #                     # 5: '5_DoS Slowhttptest', 
+            #                     # 6: '6_DoS slowloris', 
+            #                     # 7: '7_Infilteration', 
+            #                     # 8: '8_Web Attack', 
+            #                     # 9: '9_Heartbleed', 
+            #                     # 10: '10_PortScan',  
+            #                     # 12: '12_FTP-Patator',  
+            #                     # 14: '14_SSH-Patator'
+            #                     0: '0_BENIGN', 
+            #                     1: '1_Bot', 
+            #                     2: '2_DDoS', 
+            #                     3: '3_DoS GoldenEye', 
+            #                     4: '4_DoS Hulk', 
+            #                     5: '5_DoS Slowhttptest', 
+            #                     6: '6_DoS slowloris', 
+            #                     7: '7_Infilteration', 
+            #                     8: '8_Web Attack', 
+            #                     9: '9_Heartbleed', 
+            #                     10: '10_PortScan', 
+            #                     11: '11_FTP-BruteForce', 
+            #                     12: '12_FTP-Patator', 
+            #                     13: '13_SSH-Bruteforce', 
+            #                     14: '14_SSH-Patator',
+            #                     15: '15_DrDoS_DNS',
+            #                     16: '16_DrDoS_LDAP',
+            #                     17: '17_DrDoS_MSSQL',
+            #                     18: '18_DrDoS_NTP',
+            #                     19: '19_DrDoS_NetBIOS',
+            #                     20: '20_DrDoS_SNMP',
+            #                     21: '21_DrDoS_SSDP',
+            #                     22: '22_DrDoS_UDP',
+            #                     23: '23_LDAP',
+            #                     24: '24_MSSQL',
+            #                     25: '25_NetBIOS',
+            #                     26: '26_Portmap',
+            #                     27: '27_Syn',
+            #                     28: '28_TFTP',
+            #                     29: '29_UDP',
+            #                     30: '30_UDPlag',
+            #                     31: '31_WebDDoS'
+            #                 }  
+            # # CICIDS2018 Union
+            # elif client_str == "client2"or (client_str == "client2"and str_globalOrlocal == "global_model_local_test"):    
+            #     class_names_local = {
+            #                     # 0: '0_BENIGN', 
+            #                     # 1: '1_Bot', 
+            #                     # 2: '2_DDoS', 
+            #                     # 3: '3_DoS GoldenEye', 
+            #                     # 4: '4_DoS Hulk', 
+            #                     # 5: '5_DoS Slowhttptest', 
+            #                     # 6: '6_DoS slowloris', 
+            #                     # 7: '7_Infilteration', 
+            #                     # 8: '8_Web Attack',
+            #                     # 11: '11_FTP-BruteForce', 
+            #                     # 13: '13_SSH-Bruteforce'
+            #                     0: '0_BENIGN', 
+            #                     1: '1_Bot', 
+            #                     2: '2_DDoS', 
+            #                     3: '3_DoS GoldenEye', 
+            #                     4: '4_DoS Hulk', 
+            #                     5: '5_DoS Slowhttptest', 
+            #                     6: '6_DoS slowloris', 
+            #                     7: '7_Infilteration', 
+            #                     8: '8_Web Attack', 
+            #                     9: '9_Heartbleed', 
+            #                     10: '10_PortScan', 
+            #                     11: '11_FTP-BruteForce', 
+            #                     12: '12_FTP-Patator', 
+            #                     13: '13_SSH-Bruteforce', 
+            #                     14: '14_SSH-Patator',
+            #                     15: '15_DrDoS_DNS',
+            #                     16: '16_DrDoS_LDAP',
+            #                     17: '17_DrDoS_MSSQL',
+            #                     18: '18_DrDoS_NTP',
+            #                     19: '19_DrDoS_NetBIOS',
+            #                     20: '20_DrDoS_SNMP',
+            #                     21: '21_DrDoS_SSDP',
+            #                     22: '22_DrDoS_UDP',
+            #                     23: '23_LDAP',
+            #                     24: '24_MSSQL',
+            #                     25: '25_NetBIOS',
+            #                     26: '26_Portmap',
+            #                     27: '27_Syn',
+            #                     28: '28_TFTP',
+            #                     29: '29_UDP',
+            #                     30: '30_UDPlag',
+            #                     31: '31_WebDDoS'
+            #                 }  
+            # # # CICIDS2019 Union
+            # elif client_str == "client3" or (client_str == "client3"and str_globalOrlocal == "global_model_local_test"):    
+            #     class_names_local = {
+            #                     0: '0_BENIGN', 
+            #                     1: '1_Bot', 
+            #                     2: '2_DDoS', 
+            #                     3: '3_DoS GoldenEye', 
+            #                     4: '4_DoS Hulk', 
+            #                     5: '5_DoS Slowhttptest', 
+            #                     6: '6_DoS slowloris', 
+            #                     7: '7_Infilteration', 
+            #                     8: '8_Web Attack', 
+            #                     9: '9_Heartbleed', 
+            #                     10: '10_PortScan', 
+            #                     11: '11_FTP-BruteForce', 
+            #                     12: '12_FTP-Patator', 
+            #                     13: '13_SSH-Bruteforce', 
+            #                     14: '14_SSH-Patator',
+            #                     15: '15_DrDoS_DNS',
+            #                     16: '16_DrDoS_LDAP',
+            #                     17: '17_DrDoS_MSSQL',
+            #                     18: '18_DrDoS_NTP',
+            #                     19: '19_DrDoS_NetBIOS',
+            #                     20: '20_DrDoS_SNMP',
+            #                     21: '21_DrDoS_SSDP',
+            #                     22: '22_DrDoS_UDP',
+            #                     23: '23_LDAP',
+            #                     24: '24_MSSQL',
+            #                     25: '25_NetBIOS',
+            #                     26: '26_Portmap',
+            #                     27: '27_Syn',
+            #                     28: '28_TFTP',
+            #                     29: '29_UDP',
+            #                     30: '30_UDPlag',
+            #                     31: '31_WebDDoS'
+            #                 }   
+            #  # CICIDS2017
+            # if str_globalOrlocal == "local_test":
+
+            class_names_local = {
+                                        0: '0_BENIGN', 
+                                        1: '1_Bot', 
+                                        2: '2_DDoS', 
+                                        3: '3_DoS GoldenEye', 
+                                        4: '4_DoS Hulk', 
+                                        5: '5_DoS Slowhttptest', 
+                                        6: '6_DoS slowloris', 
+                                        7: '7_Infilteration', 
+                                        8: '8_Web Attack', 
+                                        9: '9_Heartbleed', 
+                                        10: '10_PortScan', 
+                                        11: '11_FTP-BruteForce', 
+                                        12: '12_FTP-Patator', 
+                                        13: '13_SSH-Bruteforce', 
+                                        14: '14_SSH-Patator'
                             }   
-            #  # CICIDS2017 CICIDS2018 CICIDS2019 Union
-            if str_globalOrlocal == "global_test":
-                class_names_global = {
-                                0: '0_BENIGN', 
-                                1: '1_Bot', 
-                                2: '2_DDoS', 
-                                3: '3_DoS GoldenEye', 
-                                4: '4_DoS Hulk', 
-                                5: '5_DoS Slowhttptest', 
-                                6: '6_DoS slowloris', 
-                                7: '7_Infilteration', 
-                                8: '8_Web Attack', 
-                                9: '9_Heartbleed', 
-                                10: '10_PortScan', 
-                                11: '11_FTP-BruteForce', 
-                                12: '12_FTP-Patator', 
-                                13: '13_SSH-Bruteforce', 
-                                14: '14_SSH-Patator',
-                                15: '15_DrDoS_DNS',
-                                16: '16_DrDoS_LDAP',
-                                17: '17_DrDoS_MSSQL',
-                                18: '18_DrDoS_NTP',
-                                19: '19_DrDoS_NetBIOS',
-                                20: '20_DrDoS_SNMP',
-                                21: '21_DrDoS_SSDP',
-                                22: '22_DrDoS_UDP',
-                                23: '23_LDAP',
-                                24: '24_MSSQL',
-                                25: '25_NetBIOS',
-                                26: '26_Portmap',
-                                27: '27_Syn',
-                                28: '28_TFTP',
-                                29: '29_UDP',
-                                30: '30_UDPlag',
-                                31: '31_WebDDoS'
-                                }     
+            # if str_globalOrlocal == "global_test":
+            class_names_global = {
+                                            0: '0_BENIGN', 
+                                            1: '1_Bot', 
+                                            2: '2_DDoS', 
+                                            3: '3_DoS GoldenEye', 
+                                            4: '4_DoS Hulk', 
+                                            5: '5_DoS Slowhttptest', 
+                                            6: '6_DoS slowloris', 
+                                            7: '7_Infilteration', 
+                                            8: '8_Web Attack', 
+                                            9: '9_Heartbleed', 
+                                            10: '10_PortScan', 
+                                            11: '11_FTP-BruteForce', 
+                                            12: '12_FTP-Patator', 
+                                            13: '13_SSH-Bruteforce', 
+                                            14: '14_SSH-Patator'
+                                    }     
         else:
             # 寫法
             # {key: value for key in iterable if condition}
@@ -697,14 +704,16 @@ class FlowerClient(fl.client.NumPyClient):
         #     train_data_attacked = TensorDataset(x_train_attacked, y_train_attacked)
         #     trainloader = DataLoader(train_data_attacked, batch_size=512, shuffle=True)
         # el
-        if self.global_round >= 125  and self.client_id == "client1":
-            print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
+        if (self.global_round >= 125 and self.global_round <= 200) and self.client_id == "client1":
+            print(Fore.GREEN+Style.BRIGHT+f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             # 20250121 CIC-IDS2017 after do labelencode and all featrue minmax 75 25分 do Do feature drop to 79 feature DOFGSM
-            # Non-iid
-            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2017 after do labelencode do Drop feature" +f"cicids2017 with normal attack type")
-            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_x.npy", allow_pickle=True)
-            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_y.npy", allow_pickle=True)
-           
+            # iid
+            # print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2017 after do labelencode do Drop feature" +f"cicids2017 with normal attack type")
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_x.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_y.npy", allow_pickle=True)
+            # CICIDS2017 iid Dirichlet 0.5
+            x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_CICIDS2017_eps0.05.npy", allow_pickle=True)
+            y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_CICIDS2017_eps0.05.npy", allow_pickle=True)
             x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
             y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
             
@@ -855,7 +864,7 @@ class FlowerClient(fl.client.NumPyClient):
                                                                                                            False)
 
         print(Fore.BLUE+Style.BRIGHT+"Current_After_FedAVG_and_Current_Localmodel_dis"+str(self.Current_Global_vs_Local_total_weight_diff_dis))
-        print(Fore.BLUE+Style.BRIGHT+"Current_Localmodel_and_Previous_Localmodel_dist"+str(self.Previous_and_Current_Local_model_weight_diff_dis))
+        print(Fore.BLUE+Style.BRIGHT+"Current_Localmodel_and_Previous_Localmodel_dis"+str(self.Previous_and_Current_Local_model_weight_diff_dis))
         # 載入上一回合聚合後的最後一次未受攻擊汙染的全局模型
         
         if (self.global_round >= 125 and self.global_round <= 200):
@@ -866,7 +875,7 @@ class FlowerClient(fl.client.NumPyClient):
             Local_model_unattack = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_124.pth")
         elif(self.global_round < 125 or self.global_round > 200):
             self.bool_Unattack_Judage = True
-            
+
         if(not self.bool_Unattack_Judage): #fasle表示受到攻擊
             # After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth')
             
@@ -888,6 +897,7 @@ class FlowerClient(fl.client.NumPyClient):
                                                                                                                             diff_dis_csv_file_path,
                                                                                                                             "distance",
                                                                                                                             False)
+
             # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以L2範數計算)
             diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_unattack_Norm.csv"
             weight_diffs_dis, self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
@@ -907,6 +917,7 @@ class FlowerClient(fl.client.NumPyClient):
             self.Unattck_dis_threshold_Previous_and_Current_Local_model = self.Previous_and_Current_Local_model_weight_diff_dis*0.2 + self.Previous_and_Current_Local_model_weight_diff_dis_Unattack*0.8
 
         else:
+
             # 算每一回合權重距離變化的百分比  
             # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100%      
             # self.dis_percent_diff = EvaluatePercent(self.Current_Global_vs_Local_total_weight_diff_dis,
@@ -920,7 +931,7 @@ class FlowerClient(fl.client.NumPyClient):
             # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
             self.dis_threshold_Global_Local = self.Current_Global_vs_Local_total_weight_diff_dis*0.2 + self.Record_Previous_Global_vs_Local_total_weight_diff_dis*0.8
             self.dis_threshold_Previous_and_Current_Local_model = self.Previous_and_Current_Local_model_weight_diff_dis*0.2 + self.Record_Previous_Local_weight_diff_dis*0.8
-            
+
             # 計算兩個模型的每層權重差距 將每層權重差距值相加（以L2範數計算）
             diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_Norm.csv"
             
@@ -929,17 +940,17 @@ class FlowerClient(fl.client.NumPyClient):
                                                                                                         diff_dis_csv_file_path,
                                                                                                         "distance",
                                                                                                         True)
-
             # Global vs Local未受到攻擊就讀當前Local vs 上一回合的值
             self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Record_Previous_Global_vs_Local_total_weight_diff_dis
             self.Unattck_dis_percent_diff_Global_Local = self.dis_percent_diff_Global_Local
             self.Unattck_dis_threshold_Global_Local = self.dis_threshold_Global_Local
             self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Norm_Current_Global_vs_Local_total_weight_diff_dis
-
+            
             #Local vs Previous Local未受到攻擊就讀當前Local vs 上一回合的值
             self.Previous_and_Current_Local_model_weight_diff_dis_Unattack = self.Previous_and_Current_Local_model_weight_diff_dis
             self.Unattck_dis_threshold_Previous_and_Current_Local_model = self.dis_threshold_Previous_and_Current_Local_model
             self.Unattck_dis_percent_diff_Previous_and_Current_Local_model = self.dis_percent_diff_Previous_and_Current_Local_model
+        
 
 
         # # 計算兩個模型的每層權重差距 將每層權重差距值相加（以絕對值(absolute)計算）
@@ -1002,7 +1013,7 @@ class FlowerClient(fl.client.NumPyClient):
                             f"{self.Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離計算）
                             f"{self.Record_Previous_Global_vs_Local_total_weight_diff_dis},"#上一回的全局模型與本地端每層差異總和（以距離計算）
                             f"{self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis},"#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離計算）
-                            f"{self.Unattck_dis_percent_diff_Global_Local},"#上一回未受到攻擊的的全局模型與本地端每層差異總和變化百分比（以距離計算）
+                            f"{self.Unattck_dis_percent_diff_Global_Local},"#上一回未受到攻擊的的的全局模型與本地端每層差異總和變化百分比（以距離計算）
                             f"{self.dis_threshold_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
                             f"{self.Unattck_dis_threshold_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
                             f"{self.Norm_Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離範數計算）
@@ -1015,7 +1026,6 @@ class FlowerClient(fl.client.NumPyClient):
                             f"{self.Unattck_dis_percent_diff_Previous_and_Current_Local_model},"#上一回的未受到攻擊的本地模型與當前本地端每層差異總和變化百分比（以距離計算）
                             f"{self.dis_threshold_Previous_and_Current_Local_model},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
                             f"{self.Unattck_dis_threshold_Previous_and_Current_Local_model}\n")#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
-
 
         #step1上傳給權重，#step2在server做聚合，step3往下傳給server
         # return self.get_parameters(config={}), len(trainloader.dataset), {"accuracy": accuracy}
