@@ -556,12 +556,19 @@ class FlowerClient(fl.client.NumPyClient):
         self.Unattck_dis_percent_diff_Global_Local = 0
         self.Unattck_dis_percent_diff_Previous_and_Current_Local_model = 0
         self.Record_Previous_Local_weight_diff_dis = 0
+        self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = 0
+        self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = 0
+        self.dis_threshold_Inital_Local = 0
+        self.dis_percent_diff_Inital_Local = 0
         ####### dis
         self.Previous_total_weight_diff_abs = 0 #用於保存上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以絕對值)
         self.Current_total_weight_diff_abs = 0 #當前每一回合全局模型與本地端模型間權重差異總和
         ####### Norm
         self.Norm_Current_Global_vs_Local_total_weight_diff_dis = 0#當前每一回合全局模型與本地端模型間權重差異總和
         self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis = 0 #用於保存上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以距離範數)
+        ####### To Save Unattack model
+        self.Last_round_Unattack_After_FedAVG_model = net
+        self.Last_round_Local_model_unattack = net
 
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
@@ -571,56 +578,339 @@ class FlowerClient(fl.client.NumPyClient):
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
         net.load_state_dict(state_dict, strict=True)
 
-    def fit(self, parameters, config):
-       
-        #####################################################初始化一個模型#####################################################
-        # 用於保存聚合後的未受攻擊汙染的全局模型
-        # After_FedAVG_model_unattack_initial_model = ChooseUseModel("MLP", 44, labelCount)
-        # 獲取初始化模型的 state_dict
-        # After_FedAVG_model_unattack = After_FedAVG_model_unattack_initial_model.state_dict()
-        #####################################################初始化一個模型#####################################################
-
-        # 要記錄未受到攻擊聚合後的全局模型 先載入net這個state_dict當作初始化使用
-        After_FedAVG_model_unattack = net
-        # 紀錄全局回合次數
-        self.global_round += 1
-        print(f"Current global round: {self.global_round}")
+    ######################################################Fedavg完的模型每層加總總和############################################# 
+    def Global_Model_each_layer_sum(self,weights_after_FedAVG):
+        # 算聚合完的全局模型每層權重加總總和
+        # True 以絕對值加總 False 為直接加總
+        # self.Current_total_FedAVG_weight_sum = DoCountModelWeightSum(weights_after_FedAVG,True,"After_FedAVG") 
+        self.Current_total_FedAVG_weight_sum = DoCountModelWeightSum(weights_after_FedAVG,False,"After_FedAVG") 
+    
+    ######################################################Local train完的模型每層加總總和############################################# 
+    def Local_Model_each_layer_sum(self,weights_after_Localtrain):
+        print("Weights after local training:")
+        # True 以絕對值加總 False 為直接加總
+        # self.Current_total_Local_weight_sum = DoCountModelWeightSum(weights_after_Localtrain,
+        #                                   True,
+        #                                 self.client_id)    
+        self.Current_total_Local_weight_sum = DoCountModelWeightSum(weights_after_Localtrain,False,self.client_id) 
+        # 打印模型每層加總後權重總重總和
+        print(Fore.YELLOW+Style.BRIGHT+"self.Current_total_Local_weight_sum",self.Current_total_Local_weight_sum)
+        print(Fore.YELLOW+Style.BRIGHT+"self.Current_total_FedAVG_weight_sum",self.Current_total_FedAVG_weight_sum)
+        # self.Record_List[0] = self.Current_total_Local_weight_sum
+        self.Record_Local_Current_total_FedAVG_weight_sum = self.Current_total_Local_weight_sum
         
+    ######################################################模型每層加總後求差異##############################################        
+    def Model_each_layer_sum_diff(self):
+        # local train計算權重加總 - 實際每一回合FedAVG計算權重加總
+        self.current_array[0],self.current_array[1],self.current_array[2],self.current_array[3] = evaluateWeightDifferences("Local-Current_FedAVG",
+                                                                                                                                    self.Current_total_Local_weight_sum, 
+                                                                                                                                    self.Current_total_FedAVG_weight_sum)
+            
+        
+        # local train計算權重加總 - 上一回合FedAVG計算權重加總(最後一次未受到攻擊的回合)
+        self.previous_array[0],self.previous_array[1],self.previous_array[2],self.previous_array[3] = evaluateWeightDifferences("Local-Last UnAttack_FedAVG",
+                                                                                                                                        self.Current_total_Local_weight_sum,     
+                                                                                                                                        self.Previous_Unattack_round_total_FedAVG_weight_sum)
+        self.AllLayertotalSum_diff = self.previous_array[0]        
+        print(Fore.GREEN+Style.BRIGHT+"Current_total_Local_weight_sum\t", self.Record_Local_Current_total_FedAVG_weight_sum)
+        print(Fore.GREEN+Style.BRIGHT+"Previous_total_FedAVG_weight_sum\t", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+
+    
+    #####################################################用accuracy保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
+    def By_Accuracy_Save_Previous_Unattack_After_FedAvg_Model_each_layer_sum_diff(self):
+        if self.Reocrd_global_model_accuracy >= 0.8:
+                    self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
+                    # 保存上一回合未受到攻擊FedAVG後的正常權重總和 進行後續權重每層總和求差異計算
+                    self.Previous_Temp = self.Previous_Unattack_round_total_FedAVG_weight_sum
+                    print("Last_round_After_FedAVG", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+
+                    # 保存上一回合未受到攻擊剛聚合完的全局模型
+                    torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth")        
+        else:
+                            if self.global_round <=10:
+                                self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
+                            print("Previous_total_FedAVG_weight_sum", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+                            print("Last_round_After_FedAVG_normal", self.Previous_Unattack_round_total_FedAVG_weight_sum)         
+    
+    #####################################################保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
+    def Save_Previous_Unattack_After_FedAvg_Model_each_layer_sum_diff(self):
+        if self.global_round <=10:
+            # 初始回合直接給1當亂數初值
+            if self.global_round == 1 :
+                self.Current_total_FedAVG_weight_sum = 1
+            print("After_FedAVG",self.Current_total_FedAVG_weight_sum)
+            self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
+            print("Previous_total_FedAVG_weight_sum", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+        else:
+            # weight_diff = float(self.Record_List[2])
+            weight_diff = float(self.AllLayertotalSum_diff)
+            print("**********************weight_diff**********************", weight_diff)
+            # 權重差異超過當前本地權重總和的5%就要過濾掉                 
+            # threshold = float(self.Record_List[0]) * 0.05
+            threshold = float(self.Current_total_FedAVG_weight_sum) * 0.05
+            print("**********************threshold**********************", threshold)
+            print("**********************self.Previous_Unattack_round_total_FedAVG_weight_sum**********************", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+            if  weight_diff <= threshold:
+                    # 保存上一回合未受到攻擊FedAVG後的正常權重總和 進行後續權重每層總和求差異計算
+                    self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
+                    print("**********************Last_round_After_FedAVG_Unattack_round_total_FedAVG_weight_sum:**********************", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+                    self.Previous_Temp = self.Previous_Unattack_round_total_FedAVG_weight_sum
+                    # 保存上一回合未受到攻擊剛聚合完的全局模型
+                    torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth")
+                    print(f"Model saved to ./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth with updated weights.")
+            else:
+                    # 當條件不符合時，打印未更新的變數值並使用上一回合未受到攻擊的總和
+                    self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Previous_Temp
+                    print("**********************No update performed on Previous_Unattack_round_total_FedAVG_weight_sum.**********************")                
+
+    
+    def Record_Previous_Value(self):
         # 需紀錄上一回合FedAVG後的權重總和，這邊權重可能已遭受到攻擊而汙染
         self.Record_Previous_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
         # 需紀錄上一回合FedAVG後與Local train的模型間權重差異總和，這邊權重可能已遭受到攻擊而汙染
         self.Record_Previous_Global_vs_Local_total_weight_diff_dis = self.Current_Global_vs_Local_total_weight_diff_dis
-       
         # 需紀錄上一回合Local train後與Local train的模型間權重差異總和，這邊權重可能已遭受到攻擊而汙染
         self.Record_Previous_Local_weight_diff_dis = self.Previous_and_Current_Local_model_weight_diff_dis
+        # 需紀錄每一回未Local train後與Local train的模型間權重差異總和，這邊權重可能已遭受到攻擊而汙染
+        self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis
+        print(Fore.GREEN+Style.BRIGHT+"Record_Previous_total_FedAVG_weight_sum", self.Record_Previous_total_FedAVG_weight_sum)
+        print(Fore.GREEN+Style.BRIGHT+"Record_Previous_Global_vs_Local_total_weight_diff_dis", self.Record_Previous_Global_vs_Local_total_weight_diff_dis)
+        print(Fore.GREEN+Style.BRIGHT+"Record_Previous_Local_weight_diff_dis", self.Record_Previous_Local_weight_diff_dis)
+        print(Fore.GREEN+Style.BRIGHT+"Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis", self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
 
-        if(not self.bool_Unattack_Judage):
-            # 需紀錄上一回合未操受攻擊FedAVG後與Local train的模型間權重差異總和，權重變化百分比
-            # self.Record_dis_percent_diff = self.Unattck_dis_percent_diff
-            # 測試
-            self.Record_dis_percent_diff = self.dis_percent_diff
+    ##########################################計算兩個模型的每層權重差距 將每層權重差距值相加（以距離(distance)計算）##########################################
+    def Euclidean_distance(self,weights_after_Localtrain,After_FedAVG_model,Last_round_Local_weights):
+        # Calculate_Weight_Diffs_Distance_OR_Absolute True表示計算L2範數 False表示計算歐基里德距離
+
+        #########################################################################以歐基里德距離#####################################################################
+        # 計算兩個模型的每層權重差距 當前每一回合聚合後的全局模型與本地端模型間權重差異總和(以歐基里德距離)
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_Global_weight_diffs_dis_{client_str}.csv"
+        weight_diffs_dis, self.Current_Global_vs_Local_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
+                                                                                                           After_FedAVG_model,
+                                                                                                           diff_dis_csv_file_path,
+                                                                                                          "distance",
+                                                                                                           False)
+        # 計算兩個模型的每層權重差距 當前每一回合本地端模型與上一回合本地端模型間權重差異總和(以歐基里德距離)
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_weight_diffs_dis_{client_str}.csv"
+        weight_diffs_dis, self.Previous_and_Current_Local_model_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
+                                                                                                           Last_round_Local_weights,
+                                                                                                           diff_dis_csv_file_path,
+                                                                                                          "distance",
+                                                                                                           False)
+
+        
+        # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
+        self.dis_threshold_Global_Local = self.Current_Global_vs_Local_total_weight_diff_dis*0.2 + self.Record_Previous_Global_vs_Local_total_weight_diff_dis*0.8
+        self.dis_threshold_Previous_and_Current_Local_model = self.Previous_and_Current_Local_model_weight_diff_dis*0.2 + self.Record_Previous_Local_weight_diff_dis*0.8
+
+        print(Fore.BLUE+Style.BRIGHT+"Current_After_FedAVG_and_Current_Local_model_dis\t"+str(self.Current_Global_vs_Local_total_weight_diff_dis))
+        print(Fore.BLUE+Style.BRIGHT+"Current_Local_model_and_Previous_Local_model_dis\t"+str(self.Previous_and_Current_Local_model_weight_diff_dis))
+        
+        # 算每一回合權重距離變化的百分比  
+            # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100%  
+        self.dis_percent_diff_Global_Local = EvaluatePercent(self.Current_Global_vs_Local_total_weight_diff_dis,
+                                                                self.Record_Previous_Global_vs_Local_total_weight_diff_dis)
+        self.dis_percent_diff_Previous_and_Current_Local_model = EvaluatePercent(self.Previous_and_Current_Local_model_weight_diff_dis,
+                                                                        self.Record_Previous_Local_weight_diff_dis)
+    
+    ##########################################計算兩個模型的每層權重差距 將每層權重差距值相加（以距離(distance)計算）##########################################
+    def Unattack_Euclidean_distance(self,weights_after_Localtrain,Last_round_Unattack_After_FedAVG_model,Last_round_Local_model_unattack):
+        # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以歐基里德距離)
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_Global_weight_diffs_dis_{client_str}_unattack.csv"
+        weight_diffs_dis, self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
+                                                                                                                     Last_round_Unattack_After_FedAVG_model,
+                                                                                                                     diff_dis_csv_file_path,
+                                                                                                                     "distance",
+                                                                                                                     False)
+                                                                                                                   
+        # 計算兩個模型的每層權重差距 當前每一回合本地端模型與上一回合未受攻擊汙染本地端模型間權重差異總和(以歐基里德距離)
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_weight_diffs_dis_{client_str}_unattack.csv"
+
+        # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以歐基里德距離)
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_Global_weight_diffs_dis_{client_str}_unattack.csv"
+        weight_diffs_dis, self.Previous_and_Current_Local_model_weight_diff_dis_Unattack = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
+                                                                                                                     Last_round_Local_model_unattack,
+                                                                                                                     diff_dis_csv_file_path,
+                                                                                                                     "distance",
+                                                                                                                     False)
+
+        # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以L2範數計算)
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_unattack_Norm.csv"
+        weight_diffs_dis, self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
+                                                                                                    Last_round_Unattack_After_FedAVG_model,
+                                                                                                    diff_dis_csv_file_path,
+                                                                                                    "distance",
+                                                                                                    True)
+        print(Fore.CYAN+Style.BRIGHT+"Previous_Unattack_Global_vs_Local_total_weight_diff_dis\t"+str(self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis))
+        print(Fore.CYAN+Style.BRIGHT+"Previous_Unattack_Local_vs_Current_Local_model_weight_diff_dis\t"+str(self.Previous_and_Current_Local_model_weight_diff_dis_Unattack))
+
+        # 算每一回合權重距離變化的百分比  
+            # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100% 
+        self.Unattck_dis_percent_diff_Global_Local = EvaluatePercent(self.Current_Global_vs_Local_total_weight_diff_dis,
+                                                            self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis)
+        
+        self.Unattck_dis_percent_diff_Previous_and_Current_Local_model = EvaluatePercent(self.Previous_and_Current_Local_model_weight_diff_dis,
+                                                            self.Previous_and_Current_Local_model_weight_diff_dis_Unattack)
+        # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%(FedAvg and Local)
+        self.Unattck_dis_threshold_Global_Local = self.Current_Global_vs_Local_total_weight_diff_dis*0.2 + self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis*0.8
+        # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%(Local and Local)
+        self.Unattck_dis_threshold_Previous_and_Current_Local_model = self.Previous_and_Current_Local_model_weight_diff_dis*0.2 + self.Previous_and_Current_Local_model_weight_diff_dis_Unattack*0.8
+
+    ##########################################計算兩個模型的每層權重差距 將每層權重差距值相加（以距離(distance)計算）##########################################
+    def Initial_Local_weights_Euclidean_distance(self,weights_after_Localtrain,Initial_Local_weights):
+        # 計算兩個模型的每層權重差距 每回合未訓練本地模型與本地訓練後本地模型間權重差異總和(以歐基里德距離)
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Initial_Local_and_Atfer_Local_trian_weight_diffs_dis_{client_str}.csv"
+        weight_diffs_dis, self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(Initial_Local_weights,
+                                                                                                                     weights_after_Localtrain,
+                                                                                                                     diff_dis_csv_file_path,
+                                                                                                                     "distance",
+                                                                                                                     False)
+        # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
+        self.dis_threshold_Inital_Local = self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis*0.2 + self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis*0.8
+
+        #  算每一回合權重距離變化的百分比  
+            # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100%  
+        self.dis_percent_diff_Inital_Local = EvaluatePercent(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
+                                                                self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
+    ######################################################模型每層加總後求差異##############################################        
+    def L2_Norm_distance(self,weights_after_Localtrain,After_FedAVG_model):
+        # 計算兩個模型的每層權重差距 將每層權重差距值相加（以L2範數計算）
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_Norm.csv"
+            
+        weight_diffs_dis, self.Norm_Current_Global_vs_Local_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
+                                                                                                        After_FedAVG_model,
+                                                                                                        diff_dis_csv_file_path,
+                                                                                                        "distance",
+                                                                                                        True)
+    
+    def Record_file(self):
+        Global_vs_Local_file_name = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_FedAVG_weight_diff_{client_str}.csv"
+        Previous_and_Current_Local_file_name = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Previous_and_Current_Local_model_weight_diff_{client_str}.csv"
+        Inital_Local_vs_AfterLocalTrain_file_name = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Inital_Local_weight_diff_{client_str}.csv"
+        # 檢查檔案是否存在
+        file_exists_Param_fedavg = os.path.exists(Global_vs_Local_file_name)
+        file_exists_Param_Local = os.path.exists(Previous_and_Current_Local_file_name)
+        file_exists_Param_Inital_Local = os.path.exists(Inital_Local_vs_AfterLocalTrain_file_name)
+
+        
+        if not file_exists_Param_fedavg:
+            with open(Global_vs_Local_file_name, "w", newline='') as file:
+                file.write("Current_Global_vs_Local,"
+                           "Previous_Global_vs_Local,"
+                           "Previous_Unattack_Global_vs_Local,"
+                           "dis_percent,"
+                           "Unattck_dis_percent,"
+                           "dis_threshold_Global_Local,"
+                           "Unattck_dis_threshold_Global_Local,"
+                           "Norm_Current_Global_vs_Local,"
+                           "Norm_Previous_Unattack_Global_vs_Local\n")
+        # 如果兩個檔案不存在，則創建並寫入表頭
+        if not file_exists_Param_Local:
+            with open(Previous_and_Current_Local_file_name, "w", newline='') as file:
+                file.write("Previous_and_Current_Local,"
+                           "Previous_and_Current_Local_Unattack,"
+                           "dis_percent,"
+                           "Unattck_dis_percent,"
+                           "dis_threshold_Previous_and_Current_Local,"
+                           "Unattck_dis_threshold_Previous_and_Current_Local\n")
+        
+        # 如果兩個檔案不存在，則創建並寫入表頭
+        if not file_exists_Param_Inital_Local:
+            with open(Inital_Local_vs_AfterLocalTrain_file_name, "w", newline='') as file:
+                file.write("Inital_Local_vs_AfterLocalTrain\n")
+
+
+
+        with open(Global_vs_Local_file_name, "a+") as file:
+                file.write(
+                            f"{self.Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離計算）
+                            f"{self.Record_Previous_Global_vs_Local_total_weight_diff_dis},"#上一回的全局模型與本地端每層差異總和（以距離計算）
+                            f"{self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis},"#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離計算）
+                            f"{self.dis_percent_diff_Global_Local},"#上一回全局模型與本地端每層差異總和變化百分比（以距離計算）
+                            f"{self.Unattck_dis_percent_diff_Global_Local},"#上一回未受到攻擊的的的全局模型與本地端每層差異總和變化百分比（以距離計算）
+                            f"{self.dis_threshold_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
+                            f"{self.Unattck_dis_threshold_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
+                            f"{self.Norm_Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離範數計算）
+                            f"{self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis}\n")#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離範數計算）
+
+        with open(Previous_and_Current_Local_file_name, "a+") as file:
+                file.write(
+                            f"{self.Previous_and_Current_Local_model_weight_diff_dis},"#上一回本地模型與當前本地端模型每層差異總和（以距離計算）
+                            f"{self.Previous_and_Current_Local_model_weight_diff_dis_Unattack},"#上一回未受到攻擊的本地模型與當前本地端模型每層差異總和（以距離計算）
+                            f"{self.dis_percent_diff_Previous_and_Current_Local_model},"#上一回的本地模型與當前本地端每層差異總和變化百分比（以距離計算）
+                            f"{self.Unattck_dis_percent_diff_Previous_and_Current_Local_model},"#上一回的未受到攻擊的本地模型與當前本地端每層差異總和變化百分比（以距離計算）
+                            f"{self.dis_threshold_Previous_and_Current_Local_model},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
+                            f"{self.Unattck_dis_threshold_Previous_and_Current_Local_model}\n")#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
+
+        with open(Inital_Local_vs_AfterLocalTrain_file_name, "a+") as file:
+                file.write(
+                            f"{self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和（以距離計算）
+                            f"{self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#上一回未訓練本地模型與本地訓練後本地模型（以距離計算）
+                            f"{self.dis_percent_diff_Inital_Local},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
+                            f"{self.dis_threshold_Inital_Local}\n")#類似weight average算法計算閥值 當前回合距離佔20% 上一回合模型距離佔80%
+
+    def Setting_Adversarial_Attack(self, start_round, end_round,bool_enabel,client_id,trainloader):
+        if bool_enabel:
+            if (self.global_round >= start_round and self.global_round <= end_round) and client_id == "client1":
+                # 20250121 CIC-IDS2017 after do labelencode and all featrue minmax 75 25分 do Do feature drop to 79 feature DOFGSM
+                # Non-iid
+                # print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2017 after do labelencode do Drop feature" +f"cicids2017 with normal attack type")
+                # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_x.npy", allow_pickle=True)
+                # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_y.npy", allow_pickle=True)
+                # CICIDS2017 iid Dirichlet 0.5
+                x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_CICIDS2017_eps0.05.npy", allow_pickle=True)
+                y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_CICIDS2017_eps0.05.npy", allow_pickle=True)
+                x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
+                y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
+                
+                train_data_attacked = TensorDataset(x_train_attacked, y_train_attacked)
+                trainloader = DataLoader(train_data_attacked, batch_size=512, shuffle=True)
+                print(Fore.RED+Style.BRIGHT+Back.YELLOW+f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
+
+            else:
+                print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"*********************在第{self.global_round}使用正常trainloader*********************************************")
+                trainloader = self.original_trainloader
         else:
-            # 需紀錄上一回合FedAVG後與Local train的模型間權重差異總和，權重變化百分比
-            self.Record_dis_percent_diff = self.dis_percent_diff
+                print(Fore.WHITE+Style.BRIGHT+Back.YELLOW+f"*********************使用正常trainloader*********************************************")
+                trainloader = self.original_trainloader
+        
 
-        print("Last_round_After_FedAVG_may have been attacked", self.Record_Previous_total_FedAVG_weight_sum)
-        print("Last_round_After_FedAVG_may have been attacked distance", self.Record_Previous_Global_vs_Local_total_weight_diff_dis)
-        print("Last_round_After_FedAVG_may have been attacked distance raise percent", self.Record_dis_percent_diff)
+    # 先強制存指定round的model當測試
+    def designate_Round_To_Save_Model(self,designate_Round,model,bool_Global_Or_Local):
+        # True存Local
+        # Fale存global
+        if (self.global_round == designate_Round):
+            if bool_Global_Or_Local:
+                torch.save(model,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Last_round_Local_model_unattack_{designate_Round}.pth")
+            else:
+                torch.save(model,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_{designate_Round}.pth")
+
+    # 載入上一回合聚合後的最後一次未受攻擊汙染的全局模型和本地模型
+    def Load_Last_round_Unattack_Model(self,start_attack_round,end_attack_round):
+        try:
+            if (self.global_round >= start_attack_round and self.global_round <= end_attack_round):
+                # 強制觸發條件 bool_Unattack_Judage 以測試
+                self.bool_Unattack_Judage = False
+                # 強制載入正常global和local當試測
+                self.Last_round_Unattack_After_FedAVG_model = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_{start_attack_round-1}.pth")
+                self.Last_round_Local_model_unattack = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Last_round_Local_model_unattack_{start_attack_round-1}.pth")
+            elif(self.global_round < start_attack_round or self.global_round > end_attack_round):
+                self.bool_Unattack_Judage = True
+        except FileNotFoundError:
+            print("Warning: Unattack model not found, using fallback model.")
+            self.Last_round_Unattack_After_FedAVG_model = net.state_dict()
+            self.Last_round_Local_model_unattack = net.state_dict()
+    
+    def fit(self, parameters, config):
+       
+        # 要記錄未受到攻擊聚合後的全局模型 先載入net這個state_dict當作初始化使用
+        Last_round_Unattack_After_FedAVG_model = net
+        # 紀錄全局回合次數
+        self.global_round += 1
+        print(Fore.YELLOW+Style.BRIGHT+f"Current global round: {self.global_round}")
 
         #####################################################用accuracy保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
-        # if self.Reocrd_global_model_accuracy >= 0.8:
-        #         self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
-        #         # 保存上一回合未受到攻擊FedAVG後的正常權重總和 進行後續權重每層總和求差異計算
-        #         self.Previous_Temp = self.Previous_Unattack_round_total_FedAVG_weight_sum
-        #         print("Last_round_After_FedAVG", self.Previous_Unattack_round_total_FedAVG_weight_sum)
-
-        #         # 保存上一回合未受到攻擊剛聚合完的全局模型
-        #         torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth")        
-        # else:
-        #         if self.global_round <=10:
-        #              self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
-        #         print("Previous_total_FedAVG_weight_sum", self.Previous_Unattack_round_total_FedAVG_weight_sum)
-        #         print("Last_round_After_FedAVG_normal", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+        # self.By_Accuracy_Save_Previous_Unattack_After_FedAvg_Model_each_alyer_sum_diff()
         #####################################################用accuracy保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
 
         # 更新客戶端模型參數為新的全局模型參數
@@ -642,420 +932,181 @@ class FlowerClient(fl.client.NumPyClient):
         print(Fore.RED+Style.BRIGHT+"Reocrd_global_model_accuracy:"+str(self.Reocrd_global_model_accuracy))
         print(Fore.RED+Style.BRIGHT+"test_global_in_Local_test_accuracy:"+str(test_global_inLocaltest_accuracy))
 
-        # 算聚合完的全局模型每層權重加總總和
+        # 聚合完的全局模型
+        # weights_after_FedAVG = net.state_dict()
+        
+        # 先強制存第124round global當測試
+        # if (self.global_round == 124):
+        #     torch.save(net.state_dict(),f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_124.pth")
+        # True存Local
+        # Fale存global
+        self.designate_Round_To_Save_Model(14,net.state_dict(),False)
+
         ######################################################Fedavg完的模型每層加總總和############################################# 
-        weights_after_FedAVG = net.state_dict()
-        # True 以絕對值加總 False 為直接加總
-        # self.Current_total_FedAVG_weight_sum = DoCountModelWeightSum(weights_after_FedAVG,True,"After_FedAVG") 
-        self.Current_total_FedAVG_weight_sum = DoCountModelWeightSum(weights_after_FedAVG,False,"After_FedAVG") 
-
-        #####################################################保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
-        # if self.global_round <=10:
-        #     # 初始回合直接給1當亂數初值
-        #     if self.global_round == 1 :
-        #         self.Current_total_FedAVG_weight_sum = 1
-        #     print("After_FedAVG",self.Current_total_FedAVG_weight_sum)
-        #     self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
-        #     print("Previous_total_FedAVG_weight_sum", self.Previous_Unattack_round_total_FedAVG_weight_sum)
-        # else:
-        #     # weight_diff = float(self.Record_List[2])
-        #     weight_diff = float(self.AllLayertotalSum_diff)
-        #     print("**********************weight_diff**********************", weight_diff)
-        #     # 權重差異超過當前本地權重總和的5%就要過濾掉                 
-        #     # threshold = float(self.Record_List[0]) * 0.05
-        #     threshold = float(self.Current_total_FedAVG_weight_sum) * 0.05
-        #     print("**********************threshold**********************", threshold)
-        #     print("**********************self.Previous_Unattack_round_total_FedAVG_weight_sum**********************", self.Previous_Unattack_round_total_FedAVG_weight_sum)
-        #     if  weight_diff <= threshold:
-        #             # 保存上一回合未受到攻擊FedAVG後的正常權重總和 進行後續權重每層總和求差異計算
-        #             self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Current_total_FedAVG_weight_sum
-        #             print("**********************Last_round_After_FedAVG_Unattack_round_total_FedAVG_weight_sum:**********************", self.Previous_Unattack_round_total_FedAVG_weight_sum)
-        #             self.Previous_Temp = self.Previous_Unattack_round_total_FedAVG_weight_sum
-        #             # 保存上一回合未受到攻擊剛聚合完的全局模型
-        #             torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth")
-        #             print(f"Model saved to ./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack.pth with updated weights.")
-        #     else:
-        #             # 當條件不符合時，打印未更新的變數值並使用上一回合未受到攻擊的總和
-        #             self.Previous_Unattack_round_total_FedAVG_weight_sum = self.Previous_Temp
-        #             print("**********************No update performed on Previous_Unattack_round_total_FedAVG_weight_sum.**********************")                
-        #####################################################保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
-
+        # self.Global_Model_each_layer_sum(weights_after_FedAVG)
         #####################################################Fedavg完的模型每層加總總和############################################# 
 
+        #####################################################每層加總總和_保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
+        # self.Save_Previous_Unattack_After_FedAvg_Model_each_layer_sum_diff()
+        #####################################################每層加總總和_保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
+       
         #  寫入Accuracy文件
         with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-gobal_model_{client_str}.csv", "a+") as file:
             file.write(f"{accuracy}\n")
-        
-        
+         
         #####################################################對抗式攻擊設定#################################################   
-        ### 訓練中途加入JSMA Attack or FGSM attack
-        # if (self.global_round >= 50 and self.global_round <= 100) and self.client_id == "client3":
-        # if (self.global_round >= 50 and self.global_round <= 125) and self.client_id == "client3":
-        # if (self.global_round >= 30 and self.global_round <= 80)  and self.client_id == "client2":
-        # #     print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
-            
-        # #     # 載入被FGSM攻擊的數據
-        #     x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoFGSM_train_half2_20240827.npy", allow_pickle=True)
-        #     y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoFGSM_train_half2_20240827.npy", allow_pickle=True)
-            
-        #     x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
-        #     y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
-            
-        #     train_data_attacked = TensorDataset(x_train_attacked, y_train_attacked)
-        #     trainloader = DataLoader(train_data_attacked, batch_size=512, shuffle=True)
-        # el
-        if (self.global_round >= 125 and self.global_round <= 200) and self.client_id == "client1":
-            print(Fore.GREEN+Style.BRIGHT+f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
-            # 20250121 CIC-IDS2017 after do labelencode and all featrue minmax 75 25分 do Do feature drop to 79 feature DOFGSM
-            # iid
-            # print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2017 after do labelencode do Drop feature" +f"cicids2017 with normal attack type")
-            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_x.npy", allow_pickle=True)
-            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_y.npy", allow_pickle=True)
-            # CICIDS2017 iid Dirichlet 0.5
-            x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_CICIDS2017_eps0.05.npy", allow_pickle=True)
-            y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_CICIDS2017_eps0.05.npy", allow_pickle=True)
-            x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
-            y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
-            
-            train_data_attacked = TensorDataset(x_train_attacked, y_train_attacked)
-            trainloader = DataLoader(train_data_attacked, batch_size=512, shuffle=True)
-            # # 正常
-            # trainloader = self.original_trainloader
-        # elif self.global_round >= 50  and self.client_id == "client3":
-        #     print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
-            
-        #     # 載入正常的non-iid數據
-        #     print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do pca" +f"cicids2019 with normal attack type")
-        #     x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_x.npy", allow_pickle=True)
-        #     y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_y.npy", allow_pickle=True)
-            
-        #     x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
-        #     y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
-            
-        #     train_data_attacked = TensorDataset(x_train_attacked, y_train_attacked)
-        #     trainloader = DataLoader(train_data_attacked, batch_size=512, shuffle=True)
-        else:
-            print(f"*********************在第{self.global_round}回合結束攻擊*********************************************")
-            trainloader = self.original_trainloader
+        self.Setting_Adversarial_Attack(15, 25,False,"client1",trainloader)
         #####################################################對抗式攻擊設定#################################################  
 
 
-        ####################################################歐基里德距離-模型每層差異求總和#################################################  
-        # 先強制存第124round global當測試
-        if (self.global_round == 124):
-            torch.save(net.state_dict(),f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_124.pth")
-      
         
         # 檢查 state_dict1 和 state_dict2 是否為 None
 
         if After_FedAVG_model is None:
             print("After_FedAVG_model is None")
-        if After_FedAVG_model_unattack is None:
-            print("After_FedAVG_model_unattack is None")
+        if Last_round_Unattack_After_FedAVG_model is None:
+            print("Last_round_Unattack_After_FedAVG_model is None")
         # 上一回合未受到攻擊剛聚合完的全局模型 
         # 前10回合當前的聚合後的模型
         if self.global_round <= 10: 
             try:
-                After_FedAVG_model_unattack = After_FedAVG_model
+                Last_round_Unattack_After_FedAVG_model = After_FedAVG_model
             except Exception as e:
                 print(f"Error loading After_FedAVG_model: {e}")
                 After_FedAVG_model = None
-        else:
-            # After_FedAVG_model_unattack = After_FedAVG_model
-            # 上一回合的距離跟這一回比距離突然大幅增大表示受到攻擊
-            percent_threshold = 100 
-            threshold = self.Record_dis_percent_diff
-            print(Fore.RED+Style.BRIGHT+"*****************Record_Previous_Global_vs_Local_total_weight_diff_dis**********************", self.Record_Previous_Global_vs_Local_total_weight_diff_dis)
-            if threshold >= percent_threshold: #假設超過一百視為攻擊
-                self.bool_Unattack_Judage = False #大於100那瞬間開始使用正常的模型
-                self.Previous_diff_dis_Temp  = self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis 
-                try:
-                    After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth')
+        # else:
+        #     # Last_round_Unattack_After_FedAVG_model = After_FedAVG_model
+        #     # 上一回合的距離跟這一回比距離突然大幅增大表示受到攻擊
+        #     percent_threshold = 100 
+        #     threshold = self.Record_dis_percent_diff
+        #     print(Fore.RED+Style.BRIGHT+"*****************Record_Previous_Global_vs_Local_total_weight_diff_dis**********************", self.Record_Previous_Global_vs_Local_total_weight_diff_dis)
+        #     if threshold >= percent_threshold: #假設超過一百視為攻擊
+        #         self.bool_Unattack_Judage = False #大於100那瞬間開始使用正常的模型
+        #         self.Previous_diff_dis_Temp  = self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis 
+        #         try:
+        #             Last_round_Unattack_After_FedAVG_model = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth')
                 
-                except Exception as e:
-                    print(f"Error loading fedavg_unattack: {e}")
-                    After_FedAVG_model_unattack = None
+        #         except Exception as e:
+        #             print(f"Error loading fedavg_unattack: {e}")
+        #             Last_round_Unattack_After_FedAVG_model = None
             
-            # # 當條件不符合時，打印未更新的變數值並使用上一回合未受到攻擊的總和
-            else:
-                # 經測試在一進入第50回合就已受到攻擊影響 所以要在第50回合前 還沒進入else且bool_Unattack_Judage == False之前就存正常的global model存起來
-                print(f"*********************在第{self.global_round}回合進入else*********************************************")
+            # # # 當條件不符合時，打印未更新的變數值並使用上一回合未受到攻擊的總和
+            # else:
+            #     # 經測試在一進入第50回合就已受到攻擊影響 所以要在第50回合前 還沒進入else且bool_Unattack_Judage == False之前就存正常的global model存起來
+            #     print(f"*********************在第{self.global_round}回合進入else*********************************************")
                 
-                # True表示正常未受到攻擊
-                if self.bool_Unattack_Judage:
-                    # 保存上一回合未受到攻擊FedAVG後的正常每層權重差異總和
-                    self.Previous_diff_dis_Temp = self.Current_Global_vs_Local_total_weight_diff_dis
-                    # self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Previous_diff_dis_Temp   
-                    self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Current_Global_vs_Local_total_weight_diff_dis                    
+            #     # True表示正常未受到攻擊
+            #     if self.bool_Unattack_Judage:
+            #         # 保存上一回合未受到攻擊FedAVG後的正常每層權重差異總和
+            #         self.Previous_diff_dis_Temp = self.Current_Global_vs_Local_total_weight_diff_dis
+            #         # self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Previous_diff_dis_Temp   
+            #         self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Current_Global_vs_Local_total_weight_diff_dis                    
                  
-                    # 保存最後上一回合未受到攻擊剛聚合完的全局模型
-                    After_FedAVG_model_unattack = net.state_dict()
-                    torch.save(After_FedAVG_model_unattack,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth")                
+            #         # 保存最後上一回合未受到攻擊剛聚合完的全局模型
+            #         Last_round_Unattack_After_FedAVG_model = net.state_dict()
+            #         torch.save(Last_round_Unattack_After_FedAVG_model,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth")                
                 
-                # 先不用 if else 方便除錯
-                # False表示受到攻擊
-                if self.bool_Unattack_Judage == False:
-                    # 要分析不加任何過濾機制時要加上註解
-                    # 載入正常的global model
-                    After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth')
+            #     # 先不用 if else 方便除錯
+            #     # False表示受到攻擊
+            #     if self.bool_Unattack_Judage == False:
+            #         # 要分析不加任何過濾機制時要加上註解
+            #         # 載入正常的global model
+            #         Last_round_Unattack_After_FedAVG_model = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth')
                    
-                print("**********************No update performed on Previous_Unattack_Global_vs_Local_total_weight_diff_dis.**********************")                
+            #     print("**********************No update performed on Previous_Unattack_Global_vs_Local_total_weight_diff_dis.**********************")                
 
-        print(Fore.RED+Style.BRIGHT+"self.bool_Unattack_Judage True表示正常未受到攻擊;False表示受到攻擊"+str(self.bool_Unattack_Judage))
-        ####################################################模型每層差異求總和#################################################  
+        print(Fore.YELLOW+Style.BRIGHT+"self.bool_Unattack_Judage True表示正常未受到攻擊;False表示受到攻擊"+Fore.RED+Style.BRIGHT+str(self.bool_Unattack_Judage))
 
+        #####################################################未本地訓練階段#################################################  
+        Initial_Local_weights = net.state_dict
+        #####################################################未本地訓練階段#################################################  
 
-        # 在本地訓練階段前保存模型
-        # weights_before_Localtrain = net.state_dict()
-        # torch.save(weights_before_Localtrain, 
-        #            f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_before_local_train_{self.global_round}.pth")
         #####################################################本地訓練階段#################################################  
         # 本地訓練階段
         self.Local_train_accuracy = train(net, trainloader, epochs=num_epochs)
-        #####################################################本地訓練階段#################################################  
-
         # 在本地訓練階段後保存模型
         weights_after_Localtrain = net.state_dict()
-        torch.save(weights_after_Localtrain, f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train.pth")
+        torch.save(weights_after_Localtrain, f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train_{self.global_round}.pth")
         # 載入本地訓練後的模型
-        weights_after_Localtrain = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train.pth")
+        weights_after_Localtrain = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train_{self.global_round}.pth")
         
         # 載入上一回合本地訓練後的本地模型
         # 從第一回合開始取值 避免0值寫入問題
-        if self.global_round <= 1:
-            Last_round_Local_weights = net.state_dict()
+        if self.global_round > 1:
+            Last_round_Local_weights = torch.load(
+                f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train_model_{self.global_round-1}.pth"
+            )
+            # Local_model_After_local_train_model_
+            # Local_model_After_local_train_
         else:
-            Last_round_Local_weights = torch.load( f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train_model_{self.global_round-1}.pth")
-        
+            Last_round_Local_weights = net.state_dict()  # 避免第一輪讀取不存在的檔案
+        #####################################################本地訓練階段#################################################  
+
+        ######################################################Local train完的模型每層加總總和############################################# 
+        # self.Local_Model_each_layer_sum(weights_after_Localtrain)
+
+
         # 先強制存第124_round Local當測試
-        if (self.global_round == 124):
-            torch.save(net.state_dict(),f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_unattack_124.pth")
-      
-        ######################################################Local train完的模型每層加總總和############################################# 
-        print("Weights after local training:")
-        # True 以絕對值加總 False 為直接加總
-        # self.Current_total_Local_weight_sum = DoCountModelWeightSum(weights_after_Localtrain,
-        #                                   True,
-        #                                 self.client_id)    
-        self.Current_total_Local_weight_sum = DoCountModelWeightSum(weights_after_Localtrain,False,self.client_id) 
-        # 打印模型每層加總後權重總重總和
-        print("self.Current_total_Local_weight_sum",self.Current_total_Local_weight_sum)
-        print("self.Current_total_FedAVG_weight_sum",self.Current_total_FedAVG_weight_sum)
-        # self.Record_List[0] = self.Current_total_Local_weight_sum
-        self.Record_Local_Current_total_FedAVG_weight_sum = self.Current_total_Local_weight_sum
-        ######################################################Local train完的模型每層加總總和############################################# 
+        self.designate_Round_To_Save_Model(14,net.state_dict(),True)
+
+        #放在更新變數之前執行以記錄
+        self.Record_Previous_Value()
+
+        # 計算模型每層差異求總和之歐基里得距離距離
+        # 用當前回合的全局模型和當前訓練後本地模型
+        # 用前一次的本地模型和當前訓練後本地模型
+        ####################################################歐基里德距離-模型每層差異求總和#################################################  
+        self.Euclidean_distance(weights_after_Localtrain,After_FedAVG_model,Last_round_Local_weights)
+        ####################################################歐基里德距離-模型每層差異求總和#################################################  
+
         
-        ##########################################計算兩個模型的每層權重差距 將每層權重差距值相加（以距離(distance)計算）##########################################
-        # Calculate_Weight_Diffs_Distance_OR_Absolute True表示計算L2範數 False表示計算歐基里德距離
+        # 載入上一回合聚合後的最後一次未受攻擊汙染的全局模型和本地模型
+        self.Load_Last_round_Unattack_Model(15, 25)
+        # if (self.global_round >= 125 and self.global_round <= 200):
+        #     # 強制觸發條件 bool_Unattack_Judage 以測試
+        #     self.bool_Unattack_Judage = False
+        #     # 強制載入正常global和local當試測
+        #     Last_round_Unattack_After_FedAVG_model = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_124.pth")
+        #     Last_round_Local_model_unattack = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Last_round_Local_model_unattack_124.pth")
+        # elif(self.global_round < 125 or self.global_round > 200):
+        #     self.bool_Unattack_Judage = True
+        print(Fore.YELLOW+Style.BRIGHT+f"Round {self.global_round} - bool_Unattack_Judage: {self.bool_Unattack_Judage}")
 
-        #########################################################################以歐基里德距離#####################################################################
-        # 計算兩個模型的每層權重差距 當前每一回合聚合後的全局模型與本地端模型間權重差異總和(以歐基里德距離)
-        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_Global_weight_diffs_dis_{client_str}.csv"
-        weight_diffs_dis, self.Current_Global_vs_Local_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
-                                                                                                           After_FedAVG_model,
-                                                                                                           diff_dis_csv_file_path,
-                                                                                                          "distance",
-                                                                                                           False)
-        # 計算兩個模型的每層權重差距 當前每一回合本地端模型與上一回合本地端模型間權重差異總和(以歐基里德距離)
-        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_weight_diffs_dis_{client_str}.csv"
-        weight_diffs_dis, self.Previous_and_Current_Local_model_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(Last_round_Local_weights,
-                                                                                                           weights_after_Localtrain,
-                                                                                                           diff_dis_csv_file_path,
-                                                                                                          "distance",
-                                                                                                           False)
-
-        print(Fore.BLUE+Style.BRIGHT+"Current_After_FedAVG_and_Current_Localmodel_dis"+str(self.Current_Global_vs_Local_total_weight_diff_dis))
-        print(Fore.BLUE+Style.BRIGHT+"Current_Localmodel_and_Previous_Localmodel_dis"+str(self.Previous_and_Current_Local_model_weight_diff_dis))
-        # 載入上一回合聚合後的最後一次未受攻擊汙染的全局模型
-        
-        if (self.global_round >= 125 and self.global_round <= 200):
-            # 強制觸發條件 bool_Unattack_Judage 以測試
-            self.bool_Unattack_Judage = False
-            # 強制載入正常global和local當試測
-            After_FedAVG_model_unattack = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_124.pth")
-            Local_model_unattack = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_unattack_124.pth")
-        elif(self.global_round < 125 or self.global_round > 200):
-            self.bool_Unattack_Judage = True
-
-        if(not self.bool_Unattack_Judage): #fasle表示受到攻擊
-            # After_FedAVG_model_unattack = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth')
-            
-            # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以歐基里德距離)
-            diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_Global_weight_diffs_dis_{client_str}_unattack.csv"
-            weight_diffs_dis, self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
-                                                                                                                            After_FedAVG_model_unattack,
-                                                                                                                            diff_dis_csv_file_path,
-                                                                                                                            "distance",
-                                                                                                                            False)
-                                                                                                                          
-            # 計算兩個模型的每層權重差距 當前每一回合本地端模型與上一回合未受攻擊汙染本地端模型間權重差異總和(以歐基里德距離)
-            diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_weight_diffs_dis_{client_str}_unattack.csv"
-
-            # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以歐基里德距離)
-            diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_Global_weight_diffs_dis_{client_str}_unattack.csv"
-            weight_diffs_dis, self.Previous_and_Current_Local_model_weight_diff_dis_Unattack = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
-                                                                                                                            Local_model_unattack,
-                                                                                                                            diff_dis_csv_file_path,
-                                                                                                                            "distance",
-                                                                                                                            False)
-
-            # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以L2範數計算)
-            diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_unattack_Norm.csv"
-            weight_diffs_dis, self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
-                                                                                                        After_FedAVG_model_unattack,
-                                                                                                        diff_dis_csv_file_path,
-                                                                                                        "distance",
-                                                                                                        True)
-
-            self.Unattck_dis_percent_diff_Global_Local = EvaluatePercent(self.Current_Global_vs_Local_total_weight_diff_dis,
-                                                                self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis)
-            
-            self.Unattck_dis_percent_diff_Previous_and_Current_Local_model = EvaluatePercent(self.Previous_and_Current_Local_model_weight_diff_dis,
-                                                                self.Previous_and_Current_Local_model_weight_diff_dis_Unattack)
-            # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%(FedAvg and Local)
-            self.Unattck_dis_threshold_Global_Local = self.Current_Global_vs_Local_total_weight_diff_dis*0.2 + self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis*0.8
-            # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%(Local and Local)
-            self.Unattck_dis_threshold_Previous_and_Current_Local_model = self.Previous_and_Current_Local_model_weight_diff_dis*0.2 + self.Previous_and_Current_Local_model_weight_diff_dis_Unattack*0.8
+        if(not self.bool_Unattack_Judage): #fasle表示受到攻擊            
+            # 計算模型每層差異求總和之歐基里得距離
+            # 用最後一次未受攻擊汙染的全局模型和當前訓練後本地模型
+            # 用最後一次未受攻擊汙染的本地模型和當前訓練後本地模型
+            ####################################################歐基里德距離-模型每層差異求總和#################################################  
+            self.Unattack_Euclidean_distance(weights_after_Localtrain,self.Last_round_Unattack_After_FedAVG_model,self.Last_round_Local_model_unattack)
+            ####################################################歐基里德距離-模型每層差異求總和#################################################  
 
         else:
-
-            # 算每一回合權重距離變化的百分比  
-            # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100%      
-            # self.dis_percent_diff = EvaluatePercent(self.Current_Global_vs_Local_total_weight_diff_dis,
-            #                                         self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis)
-
-            self.dis_percent_diff_Global_Local = EvaluatePercent(self.Current_Global_vs_Local_total_weight_diff_dis,
-                                                                self.Record_Previous_Global_vs_Local_total_weight_diff_dis)
-            
-            self.dis_percent_diff_Previous_and_Current_Local_model = EvaluatePercent(self.Previous_and_Current_Local_model_weight_diff_dis,
-                                                                        self.Record_Previous_Local_weight_diff_dis)
-            # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
-            self.dis_threshold_Global_Local = self.Current_Global_vs_Local_total_weight_diff_dis*0.2 + self.Record_Previous_Global_vs_Local_total_weight_diff_dis*0.8
-            self.dis_threshold_Previous_and_Current_Local_model = self.Previous_and_Current_Local_model_weight_diff_dis*0.2 + self.Record_Previous_Local_weight_diff_dis*0.8
-
-            # 計算兩個模型的每層權重差距 將每層權重差距值相加（以L2範數計算）
-            diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_dis_{client_str}_Norm.csv"
-            
-            weight_diffs_dis, self.Norm_Current_Global_vs_Local_total_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
-                                                                                                        After_FedAVG_model,
-                                                                                                        diff_dis_csv_file_path,
-                                                                                                        "distance",
-                                                                                                        True)
             # Global vs Local未受到攻擊就讀當前Local vs 上一回合的值
             self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Record_Previous_Global_vs_Local_total_weight_diff_dis
             self.Unattck_dis_percent_diff_Global_Local = self.dis_percent_diff_Global_Local
             self.Unattck_dis_threshold_Global_Local = self.dis_threshold_Global_Local
             self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Norm_Current_Global_vs_Local_total_weight_diff_dis
-            
+                
             #Local vs Previous Local未受到攻擊就讀當前Local vs 上一回合的值
             self.Previous_and_Current_Local_model_weight_diff_dis_Unattack = self.Previous_and_Current_Local_model_weight_diff_dis
             self.Unattck_dis_threshold_Previous_and_Current_Local_model = self.dis_threshold_Previous_and_Current_Local_model
             self.Unattck_dis_percent_diff_Previous_and_Current_Local_model = self.dis_percent_diff_Previous_and_Current_Local_model
+            
         
-
-
-        # # 計算兩個模型的每層權重差距 將每層權重差距值相加（以絕對值(absolute)計算）
-        # diff_abs_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_abs_{client_str}.csv"   
-        # weight_diffs_abs,self.Current_total_weight_diff_abs = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
-        #                                                                                             After_FedAVG_model,
-        #                                                                                             diff_abs_csv_file_path,
-        #                                                                                             "absolute")
-        
-        # # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以絕對值)
-        # diff_abs_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/weight_diffs_abs_{client_str}_unattack.csv"   
-        # weight_diffs_abs,self.Previous_total_weight_diff_abs = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
-        #                                                                                             After_FedAVG_model_unattack,
-        #                                                                                             diff_abs_csv_file_path,
-        #                                                                                             "absolute")
+        ######################################################模型每層差異求總和################################################ 
+        # 計算兩個模型的每層權重差距 將每層權重差距值相加（以L2範數計算）
+        self.L2_Norm_distance(weights_after_Localtrain,After_FedAVG_model)
         ######################################################模型每層差異求總和################################################ 
 
 
-        ######################################################模型每層加總後求差異##############################################        
-        # local train計算權重加總 - 實際每一回合FedAVG計算權重加總
-        self.current_array[0],self.current_array[1],self.current_array[2],self.current_array[3] = evaluateWeightDifferences("Local-Current_FedAVG",
-                                                                                                                                    self.Current_total_Local_weight_sum, 
-                                                                                                                                    self.Current_total_FedAVG_weight_sum)
-            
-        
-        # local train計算權重加總 - 上一回合FedAVG計算權重加總(最後一次未受到攻擊的回合)
-        self.previous_array[0],self.previous_array[1],self.previous_array[2],self.previous_array[3] = evaluateWeightDifferences("Local-Last UnAttack_FedAVG",
-                                                                                                                                        self.Current_total_Local_weight_sum,     
-                                                                                                                                        self.Previous_Unattack_round_total_FedAVG_weight_sum)
-        self.AllLayertotalSum_diff = self.previous_array[0]
-        
-        # if self.global_round <=10:
-        #     #前10回合計算兩個模型加總後差值使用local train計算權重加總 - 實際每一回合FedAVG計算權重加總
-        #     self.AllLayertotalSum_diff = self.current_array[0]
-        # else:
-        #     # 權重差異超過當前本地權重總和的5%就要過濾掉
-        #     if  weight_diff <= threshold:
-        #         # 因weight_diff符合條件判斷小於等5%
-        #         # 計算兩個模型加總後差值AllLayertotalSum_diff使用
-        #         # local train計算權重加總 - 實際每一回合FedAVG計算權重加總                 
-        #         self.AllLayertotalSum_diff = self.current_array[0]
-        #     else:            
-        #         # 權重差異超過當前本地權重總和的5%就要過濾掉
-        #         # 計算兩個模型加總後差值AllLayertotalSum_diff使用
-        #         # local train計算權重加總 - 上一回合FedAVG計算權重加總(最後一次未受到攻擊的回合)
-        #         self.previous_array[0],self.previous_array[1],self.previous_array[2],self.previous_array[3] = evaluateWeightDifferences("Local-Current_FedAVG",
-        #                                                                                                                                 self.Current_total_Local_weight_sum,     
-        #                                                                                                                                 self.Previous_Unattack_round_total_FedAVG_weight_sum)
-        #         self.AllLayertotalSum_diff = self.previous_array[0]
-            
-
-        # self.Record_List[2] = self.current_array[0]                                                                                                                         
-   
         ######################################################模型每層加總後求差異##############################################    
+        # self.Model_each_layer_sum_diff()
+        ######################################################模型每層加總後求差異##############################################    
+
         
-        print("******************Current_total_Local_weight_sum**********************", self.Record_Local_Current_total_FedAVG_weight_sum)
-        print("******************Previous_total_FedAVG_weight_sum**********************", self.Previous_Unattack_round_total_FedAVG_weight_sum)
+        # 寫入相關參數進行紀錄
+        self.Record_file()
         
-        Global_vs_Local_file_name = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_FedAVG_weight_diff_{client_str}.csv"
-        Previous_and_Current_Local_file_name = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Previous_and_Current_Local_model_weight_diff_{client_str}.csv"
-        # 檢查檔案是否存在
-        file_exists_Param_fedavg = os.path.exists(Global_vs_Local_file_name)
-        file_exists_Param_Local = os.path.exists(Previous_and_Current_Local_file_name)
-        
-        if not file_exists_Param_fedavg:
-            with open(Global_vs_Local_file_name, "w", newline='') as file:
-                file.write("Current_Global_vs_Local,"
-                           "Previous_Global_vs_Local,"
-                           "Previous_Unattack_Global_vs_Local,"
-                           "Unattck_dis_percent,"
-                           "dis_threshold_Global_Local,"
-                           "Unattck_dis_threshold_Global_Local,"
-                           "Norm_Current_Global_vs_Local,"
-                           "Norm_Previous_Unattack_Global_vs_Local\n")
-        # 如果兩個檔案不存在，則創建並寫入表頭
-        if not file_exists_Param_Local:
-            with open(Previous_and_Current_Local_file_name, "w", newline='') as file:
-                file.write("Previous_and_Current_Local,"
-                           "Previous_and_Current_Local_Unattack,"
-                           "Unattck_dis_percent,"
-                           "dis_threshold_Previous_and_Current_Local,"
-                           "Unattck_dis_threshold_Previous_and_Current_Local\n")
-
-
-
-        with open(Global_vs_Local_file_name, "a+") as file:
-                file.write(
-                            f"{self.Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離計算）
-                            f"{self.Record_Previous_Global_vs_Local_total_weight_diff_dis},"#上一回的全局模型與本地端每層差異總和（以距離計算）
-                            f"{self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis},"#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離計算）
-                            f"{self.Unattck_dis_percent_diff_Global_Local},"#上一回未受到攻擊的的的全局模型與本地端每層差異總和變化百分比（以距離計算）
-                            f"{self.dis_threshold_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
-                            f"{self.Unattck_dis_threshold_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
-                            f"{self.Norm_Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離範數計算）
-                            f"{self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis}\n")#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離範數計算）
-
-        with open(Previous_and_Current_Local_file_name, "a+") as file:
-                file.write(
-                            f"{self.Previous_and_Current_Local_model_weight_diff_dis},"#上一回本地模型與當前本地端模型每層差異總和（以距離計算）
-                            f"{self.Previous_and_Current_Local_model_weight_diff_dis_Unattack},"#上一回未受到攻擊的本地模型與當前本地端模型每層差異總和（以距離計算）
-                            f"{self.Unattck_dis_percent_diff_Previous_and_Current_Local_model},"#上一回的未受到攻擊的本地模型與當前本地端每層差異總和變化百分比（以距離計算）
-                            f"{self.dis_threshold_Previous_and_Current_Local_model},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
-                            f"{self.Unattck_dis_threshold_Previous_and_Current_Local_model}\n")#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
-
         #step1上傳給權重，#step2在server做聚合，step3往下傳給server
         # return self.get_parameters(config={}), len(trainloader.dataset), {"accuracy": accuracy}
         return self.get_parameters(config={}), len(trainloader.dataset), {"global_round": self.global_round,
@@ -1111,11 +1162,11 @@ class FlowerClient(fl.client.NumPyClient):
 
         
         self.Current_total_Local_weight_sum = float(self.Current_total_Local_weight_sum)  # 將字符串轉換為浮點數
-        print("Local_weight_sum before multiplication:", self.Current_total_Local_weight_sum, "of type:", type(self.Current_total_Local_weight_sum))
+        # print("Local_weight_sum before multiplication:", self.Current_total_Local_weight_sum, "of type:", type(self.Current_total_Local_weight_sum))
         percentage_five = self.Current_total_Local_weight_sum * 0.05
         # # 保留小数点后两位
         percentage_five = round(percentage_five, 2)
-        print("Local_train_weight_sum_percentage_five\n",percentage_five)
+        # print("Local_train_weight_sum_percentage_five\n",percentage_five)
         return accuracy, len(local_testloader.dataset), {"global_round": self.global_round,
                                                    "accuracy": accuracy,
                                                    "Local_train_accuracy": self.Local_train_accuracy,
@@ -1134,8 +1185,8 @@ net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 
 # 启动Flower客户端
 fl.client.start_numpy_client(
-    # server_address="127.0.0.1:53388",
-    server_address="192.168.1.137:53388",
+    server_address="127.0.0.1:53388",
+    # server_address="192.168.1.137:53388",
     client=FlowerClient(),
     
 )
