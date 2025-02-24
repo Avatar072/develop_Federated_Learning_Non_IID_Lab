@@ -1214,8 +1214,8 @@ def EvaluatePercent(Current_round_dis,Last_round_dis):
 
     # 檢查 Last_round_dis 是否為零，避免除以零
     if Last_round_dis == 0:
-    # 返回無限大或者一個預設值，根據你的需求
-        return float('inf')  # 這裡返回無限大，可以根據具體情況修改
+        # return float('inf')  # 這裡返回無限大，可以根據具體情況修改
+         return 0 # 代表「沒有變化」
     Current_round_dis = float(Current_round_dis)
     Last_round_dis = float(Last_round_dis)
     percent_diff = abs(Current_round_dis-Last_round_dis)

@@ -283,12 +283,12 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
                             # distance_param1 = torch.norm(param2, p=2).item()
                             weight_diff_param1 = torch.norm(param1, p=2).item()
                             weight_diff_param2 = torch.norm(param2, p=2).item()
-                            print(f'{key}層param1的歐幾里得範數', weight_diff_param1)
-                            print(f'{key}層param2的歐幾里得範數', weight_diff_param2)
+                            # print(f'{key}層param1的歐幾里得範數', weight_diff_param1)
+                            # print(f'{key}層param2的歐幾里得範數', weight_diff_param2)
                             weight_diff = torch.norm(param1 - param2, p=2).item()
                             weight_diff_Norm= abs(weight_diff_param1-weight_diff_param2)
-                            print(f'{key}層的距離權重差距(以歐幾里得距離)', weight_diff)
-                            print(f'{key}層的距離權重差距(以歐幾里得範數)', weight_diff_Norm)
+                            # print(f'{key}層的距離權重差距(以歐幾里得距離)', weight_diff)
+                            # print(f'{key}層的距離權重差距(以歐幾里得範數)', weight_diff_Norm)
                             # True表示記錄歐基里得範數
                             if bool_use_Norm:
                                 weight_diff_Norm_List.append((key, 
@@ -325,7 +325,7 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
                 print(f"警告: {key} 在 state_dict2 中不存在")
 
     # 最後輸出結果
-    print(f"所有層的權重差距總和: {total_weight_diff}")
+    # print(f"所有層的權重差距總和: {total_weight_diff}")
 
     # 確保 weight_diff_Norm_List 不為空，否則設置默認值
     if len(weight_diff_Norm_List) == 0 and bool_use_Norm:
@@ -359,9 +359,9 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
             # 取得所有層的 weight_diff_Norm
             layer_diffs = [weight_diff_Norm for _,_,_,weight_diff_Norm in weight_diff_Norm_List]  
             # 打印 layer_diffs 和 total_weight_diff_Norm 的長度與 df.columns 的長度
-            print(f"layer_diffs: {layer_diffs}, total_weight_diff_Norm: {total_weight_diff_Norm}")
-            print(f"Number of columns in df: {len(df.columns)}")
-            print(f"Data to add length: {len(layer_diffs + [total_weight_diff_Norm])}")
+            # print(f"layer_diffs: {layer_diffs}, total_weight_diff_Norm: {total_weight_diff_Norm}")
+            # print(f"Number of columns in df: {len(df.columns)}")
+            # print(f"Data to add length: {len(layer_diffs + [total_weight_diff_Norm])}")
             if len(layer_diffs + [total_weight_diff_Norm]) == len(df.columns):
                 # 添加新的行
                 new_row = pd.DataFrame([layer_diffs + [total_weight_diff_Norm]], columns=df.columns)
@@ -373,12 +373,12 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
         else:
             # 每個元素是 (key, diff)
             # 取得所有層的 weight_diff
-            for i, item in enumerate(weight_diff_List):
-                print(f"Item {i} has {len(item)} values: {item}")    
+            # for i, item in enumerate(weight_diff_List):
+            #     print(f"Item {i} has {len(item)} values: {item}")    
             layer_diffs = [diff for _, diff in weight_diff_List] 
-            print(f"layer_diffs: {layer_diffs}, total_weight_diff: {total_weight_diff}")
-            print(f"Number of columns in df: {len(df.columns)}")
-            print(f"Data to add length: {len(layer_diffs + [total_weight_diff])}")
+            # print(f"layer_diffs: {layer_diffs}, total_weight_diff: {total_weight_diff}")
+            # print(f"Number of columns in df: {len(df.columns)}")
+            # print(f"Data to add length: {len(layer_diffs + [total_weight_diff])}")
             if len(layer_diffs + [total_weight_diff]) == len(df.columns):
                 # 添加新的行
                 new_row = pd.DataFrame([layer_diffs + [total_weight_diff]], columns=df.columns)
@@ -417,8 +417,8 @@ def Calculate_Weight_Diffs_Distance_OR_Absolute(state_dict1, state_dict2, file_p
 
     #使用 'a+' 模式追加寫入L2範數
     if Str_abs_Or_dis == "distance" and bool_use_Norm:
-        for i, item in enumerate(weight_diff_Norm_List):
-            print(f"Item {i} has {len(item)} values: {item}")
+        # for i, item in enumerate(weight_diff_Norm_List):
+            # print(f"Item {i} has {len(item)} values: {item}")
 
         # 去掉 .csv 後綴
         remove_str_file_path = file_path.replace('.csv', '')
