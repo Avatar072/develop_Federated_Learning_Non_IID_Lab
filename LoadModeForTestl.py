@@ -28,9 +28,9 @@ from colorama import Fore, Back, Style, init
 # python LoadModeForTestl.py --dataset total_train --epochs 500 --method normal
 # python LoadModeForTestl.py --Load_dataset CICIDS2019 --dataset_split baseLine_train --epochs 500 --method normal
 
-# labelCount = 15  # CICIDS2017
+labelCount = 15  # CICIDS2017
 # labelCount = 10  # TONIoT
-labelCount = 13  # CICIDS2019
+# labelCount = 13  # CICIDS2019
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
@@ -68,9 +68,9 @@ print("train筆數", counter)
 today = datetime.date.today().strftime("%Y%m%d")
 # generatefolder(f"./single_AnalyseReportFolder/", today)
 # generatefolder(f"./single_AnalyseReportFolder/{today}/", client_str)
-generatefolder(f"./single_AnalyseReportFolder/CICIDS2019/LoadModel_Test/{today}/{current_time}/{client_str}/", Choose_method)
+generatefolder(f"./single_AnalyseReportFolder/{Load_dataset}/LoadModel_Test/{today}/{current_time}/{client_str}/", Choose_method)
 
-getStartorEndtime("starttime", start_IDS, f"./single_AnalyseReportFolder/{today}/{client_str}/{Choose_method}")
+getStartorEndtime("starttime", start_IDS, f"./single_AnalyseReportFolder/{Load_dataset}/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}")
 # # 20240502 CIC-IDS2017 after do labelencode and minmax  75 25分
 # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_test_20240502.npy", allow_pickle=True)
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_test_20240502.npy", allow_pickle=True)    
@@ -147,8 +147,12 @@ getStartorEndtime("starttime", start_IDS, f"./single_AnalyseReportFolder/{today}
 
 # 20241103 CIC-IDS2019 after do labelencode and minmax 75 25分 DO CandW attack 0.5 Label0沒生成
 # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"{split_file} with normal After Do CandW attack")
-x_test = np.load(f"./Adversarial_Attack_Test/20241103_CandW_C0.5_Label0生成/x_DoCandW_test_genrate0_20241103.npy")
-y_test = np.load(f"./Adversarial_Attack_Test/20241103_CandW_C0.5_Label0生成/y_DoCandW_test_genrate0_20241103.npy")
+# x_test = np.load(f"./Adversarial_Attack_Test/20241103_CandW_C0.5_Label0生成/x_DoCandW_test_genrate0_20241103.npy")
+# y_test = np.load(f"./Adversarial_Attack_Test/20241103_CandW_C0.5_Label0生成/y_DoCandW_test_genrate0_20241103.npy")
+
+# 20250121 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
 
 counter = Counter(y_test)
 print("test筆數", counter)
@@ -202,12 +206,12 @@ def test(net, testloader, start_time, client_str, plot_confusion_matrix):
             RecordRecall = str(RecordRecall)[1:-1]
 
             header_written = False
-            with open(f"./single_AnalyseReportFolder/CICIDS2019/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
+            with open(f"./single_AnalyseReportFolder/{Load_dataset}/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
                 if not header_written:
                     header_written = True
                 file.write(str(RecordRecall) + "\n")
         
-            with open(f"./single_AnalyseReportFolder/CICIDS2019/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}.csv", "a+") as file:
+            with open(f"./single_AnalyseReportFolder/{Load_dataset}/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}.csv", "a+") as file:
                 if not header_written:
                     header_written = True
                 file.write(f"精確度,時間\n")
@@ -215,7 +219,7 @@ def test(net, testloader, start_time, client_str, plot_confusion_matrix):
 
                 GenrateReport = classification_report(y_true, y_pred, digits=4, output_dict=True)
                 report_df = pd.DataFrame(GenrateReport).transpose()
-                report_df.to_csv(f"./single_AnalyseReportFolder/CICIDS2019/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}/baseline_report_{client_str}.csv", header=True)
+                report_df.to_csv(f"./single_AnalyseReportFolder/{Load_dataset}/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}/baseline_report_{client_str}.csv", header=True)
 
     draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix)
     accuracy = correct / total
@@ -232,22 +236,22 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
         #CICIDS2017
-        # class_names = {
-        #                 0: '0_BENIGN', 
-        #                 1: '1_Bot', 
-        #                 2: '2_DDoS', 
-        #                 3: '3_DoS GoldenEye', 
-        #                 4: '4_DoS Hulk', 
-        #                 5: '5_DoS Slowhttptest', 
-        #                 6: '6_DoS slowloris', 
-        #                 7: '7_FTP-Patator', 
-        #                 8: '8_Heartbleed', 
-        #                 9: '9_Infiltration', 
-        #                 10: '10_PortScan', 
-        #                 11: '11_SSH-Patator', 
-        #                 12: '12_Web Attack Brute Force', 
-        #                 13: '13_Web Attack Sql Injection', 
-        #                 14: '14_Web Attack XSS'
+        class_names = {
+                        0: '0_BENIGN', 
+                        1: '1_Bot', 
+                        2: '2_DDoS', 
+                        3: '3_DoS GoldenEye', 
+                        4: '4_DoS Hulk', 
+                        5: '5_DoS Slowhttptest', 
+                        6: '6_DoS slowloris', 
+                        7: '7_FTP-Patator', 
+                        8: '8_Heartbleed', 
+                        9: '9_Infiltration', 
+                        10: '10_PortScan', 
+                        11: '11_SSH-Patator', 
+                        12: '12_Web Attack Brute Force', 
+                        13: '13_Web Attack Sql Injection', 
+                        14: '14_Web Attack XSS'
         #                 # 15: '15_backdoor',
         #                 # 16: '16_dos',
         #                 # 17: '17_injection',
@@ -284,20 +288,20 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
                         # 22: '22_xss'
                         # } 
         # # CICIDS2019
-        class_names = {
-                        0: '0_BENIGN', 
-                        1: '1_DrDoS_DNS', 
-                        2: '2_DrDoS_LDAP', 
-                        3: '3_DrDoS_MSSQL',
-                        4: '4_DrDoS_NTP', 
-                        5: '5_DrDoS_NetBIOS', 
-                        6: '6_DrDoS_SNMP', 
-                        7: '7_DrDoS_SSDP', 
-                        8: '8_DrDoS_UDP', 
-                        9: '9_Syn', 
-                        10: '10_TFTP', 
-                        11: '11_UDPlag', 
-                        12: '12_WebDDoS'
+        # class_names = {
+        #                 0: '0_BENIGN', 
+        #                 1: '1_DrDoS_DNS', 
+        #                 2: '2_DrDoS_LDAP', 
+        #                 3: '3_DrDoS_MSSQL',
+        #                 4: '4_DrDoS_NTP', 
+        #                 5: '5_DrDoS_NetBIOS', 
+        #                 6: '6_DrDoS_SNMP', 
+        #                 7: '7_DrDoS_SSDP', 
+        #                 8: '8_DrDoS_UDP', 
+        #                 9: '9_Syn', 
+        #                 10: '10_TFTP', 
+        #                 11: '11_UDPlag', 
+        #                 12: '12_WebDDoS'
         #                 # 13: '13_Web Attack Sql Injection', 
         #                 # 14: '14_Web Attack XSS'
         #                 # 15: '15_backdoor',
@@ -327,20 +331,41 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         #                 13: 'ransomware', 
         #                 14: 'xss'
         #                 } 
-        df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
+        # df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
+        df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names.values())
+
         plt.figure(figsize = (9,6))
         sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn')
+        # 固定子圖參數
+        plt.subplots_adjust(
+            left=0.26,    # 左邊界
+            bottom=0.23,  # 下邊界
+            right=1.0,     # 右邊界
+            top=0.88,      # 上邊界
+            wspace=0.207,  # 子圖間的寬度間隔
+            hspace=0.195   # 子圖間的高度間隔
+        )
         plt.title(client_str +"_"+ Choose_method)
         plt.xlabel("prediction")
         plt.ylabel("label (ground truth)")
-        plt.savefig(f"./single_AnalyseReportFolder/CICIDS2019/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
+        # Rotate the x-axis labels (prediction categories)
+        plt.xticks(rotation=30, ha='right',fontsize=9)
+        plt.savefig(f"./single_AnalyseReportFolder/{Load_dataset}/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
         plt.show()
 
 net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 #CICIDS2019
 # 每層神經元512下所訓練出來的model
-model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2019\\BaseLine_After_local_train_model_bk.pth'
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2019\\BaseLine_After_local_train_model_bk.pth'
 # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2019\\BaseLine_After_local_train_model_e500CandW.pth'
+
+#CICIDS2017
+# 每層神經元512下所訓練出來的model Dirchiet0.5訓練出來的分布
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250224\\gobal_model_Before_local_train_model_round_25.pth'
+model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\Unattack_AfterLocaltrain.pth'
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\Force_Save_fedavg_unattack_24.pth'
+
+# 加載的是模型的權重（state_dict()）
 net.load_state_dict(torch.load(model_path))
 print("Loaded model from", model_path)
 print(net)
@@ -385,7 +410,7 @@ testloader = DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 test_accuracy = test(net, testloader, start_IDS, client_str, True)
 
 end_IDS = time.time()
-getStartorEndtime("endtime", end_IDS, f"./single_AnalyseReportFolder/CICIDS2019/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}")
+getStartorEndtime("endtime", end_IDS, f"./single_AnalyseReportFolder/{Load_dataset}/LoadModel_Test/{today}/{current_time}/{client_str}/{Choose_method}")
 
 print("測試數據量:\n", len(test_data))
 print("訓練數據量:\n", len(train_data))

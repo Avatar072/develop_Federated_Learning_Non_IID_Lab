@@ -41,7 +41,7 @@ def SettingAderversarialConfig(choose_dataset):
     if choose_dataset == "CICIDS2017":
         # CICIDS2017 load model
         # 設定 FGSM 攻擊 eps
-        epsilons = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
+        epsilons = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
         # epsilons = [0.05]
         model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2017\\20250121\\79feature\\BaseLine_After_local_train_model_bk.pth'
         labelCount = 15
