@@ -559,7 +559,7 @@ class FlowerClient(fl.client.NumPyClient):
         print(Fore.GREEN+Style.BRIGHT+"Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis", self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
 
     ##########################################計算兩個模型的每層權重差距 將每層權重差距值相加（以歐基里德距離(distance)計算）##########################################
-    def Euclidean_distance(self,weights_after_Localtrain,After_FedAVG_model,Last_round_Local_weights):
+    def Euclidean_distance(self,weights_after_Localtrain,After_FedAVG_model,Previous_round_Local_weights):
         # Calculate_Weight_Diffs_Distance_OR_Absolute True表示計算L2範數 False表示計算歐基里德距離
 
         #########################################################################以歐基里德距離#####################################################################
@@ -573,7 +573,7 @@ class FlowerClient(fl.client.NumPyClient):
         # 計算兩個模型的每層權重差距 當前每一回合本地端模型與上一回合本地端模型間權重差異總和(以歐基里德距離)
         diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_weight_diffs_dis_{client_str}.csv"
         weight_diffs_dis, self.Previous_and_Current_Local_model_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(weights_after_Localtrain,
-                                                                                                           Last_round_Local_weights,
+                                                                                                           Previous_round_Local_weights,
                                                                                                            diff_dis_csv_file_path,
                                                                                                           "distance",
                                                                                                            False)
@@ -777,8 +777,8 @@ class FlowerClient(fl.client.NumPyClient):
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
                 # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
+                x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
+                y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
                 # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.1
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.1.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.1.npy", allow_pickle=True)
@@ -788,8 +788,8 @@ class FlowerClient(fl.client.NumPyClient):
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
 
                 # CICIDS2017 iid Dirichlet 0.5 c1 to GDA sigma 0.5
-                x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/x_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
-                y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/y_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/x_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/y_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
 
 
                 x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
@@ -835,8 +835,8 @@ class FlowerClient(fl.client.NumPyClient):
                 # 強制載入正常global和local當試測
                 self.Last_round_Unattack_After_FedAVG_model = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_{start_attack_round-1}.pth")
                 self.Last_round_Local_model_unattack = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Last_round_Local_model_unattack_{start_attack_round-1}.pth")
-            elif(self.global_round < start_attack_round or self.global_round > end_attack_round):
-                self.bool_Unattack_Judage = True
+            # elif(self.global_round < start_attack_round or self.global_round > end_attack_round):
+            #     # self.bool_Unattack_Judage = True
         except FileNotFoundError:
             print("Warning: Unattack model not found, using fallback model.")
             self.Last_round_Unattack_After_FedAVG_model = net.state_dict()
@@ -905,8 +905,6 @@ class FlowerClient(fl.client.NumPyClient):
          
     def fit(self, parameters, config):
        
-        # 要記錄未受到攻擊聚合後的全局模型 先載入net這個state_dict當作初始化使用
-        Last_round_Unattack_After_FedAVG_model = net
         # 紀錄全局回合次數
         self.global_round += 1
         print(Fore.YELLOW+Style.BRIGHT+f"Current global round: {self.global_round}")
@@ -915,8 +913,8 @@ class FlowerClient(fl.client.NumPyClient):
         # self.By_Accuracy_Save_Previous_Unattack_After_FedAvg_Model_each_alyer_sum_diff()
         #####################################################用accuracy保存上一回合未受到攻擊FedAVG後的正常模型每層權重總和#####################################################
 
-        # 更新客戶端模型參數為新的全局模型參數
-        self.set_parameters(parameters)# 剛聚合完的權重 # 置新參數之前保存權重
+        # 剛聚合完的global權重 更新客戶端模型參數為新的全局模型參數
+        self.set_parameters(parameters)
         
         """
         global test 對每global round剛聚合完的gobal model進行測試 要在Local_train之前測試
@@ -937,9 +935,6 @@ class FlowerClient(fl.client.NumPyClient):
         # 聚合完的全局模型
         # weights_after_FedAVG = net.state_dict()
         
-        # 先強制存第124round global當測試
-        # if (self.global_round == 124):
-        #     torch.save(net.state_dict(),f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_124.pth")
         # True存Local
         # Fale存global
         self.designate_Round_To_Save_Model(save_model_round,net.state_dict(),False,True)
@@ -974,80 +969,9 @@ class FlowerClient(fl.client.NumPyClient):
         #  寫入Accuracy文件
         with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-Before_LocalTrain-Inital_Local_model_{client_str}.csv", "a+") as file:
             file.write(f"{accuracy}\n")
-        #####################################################對抗式攻擊設定#################################################  
-
-
+        #####################################################對抗式攻擊設定#################################################
         
-        # 檢查 state_dict1 和 state_dict2 是否為 None
-
-        if After_FedAVG_model is None:
-            print("After_FedAVG_model is None")
-        if Last_round_Unattack_After_FedAVG_model is None:
-            print("Last_round_Unattack_After_FedAVG_model is None")
-        # 上一回合未受到攻擊剛聚合完的全局模型 
-        # 前10回合當前的聚合後的模型
-        if self.global_round <= 10: 
-            try:
-                Last_round_Unattack_After_FedAVG_model = After_FedAVG_model
-            except Exception as e:
-                print(f"Error loading After_FedAVG_model: {e}")
-                After_FedAVG_model = None
-        # else:
-        #     # Last_round_Unattack_After_FedAVG_model = After_FedAVG_model
-        #     # 上一回合的距離跟這一回比距離突然大幅增大表示受到攻擊
-        #     percent_threshold = 100 
-        #     threshold = self.Record_dis_percent_diff
-        #     print(Fore.RED+Style.BRIGHT+"*****************Record_Previous_Global_vs_Local_total_weight_diff_dis**********************", self.Record_Previous_Global_vs_Local_total_weight_diff_dis)
-        #     if threshold >= percent_threshold: #假設超過一百視為攻擊
-        #         self.bool_Unattack_Judage = False #大於100那瞬間開始使用正常的模型
-        #         self.Previous_diff_dis_Temp  = self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis 
-        #         try:
-        #             Last_round_Unattack_After_FedAVG_model = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth')
-                
-        #         except Exception as e:
-        #             print(f"Error loading fedavg_unattack: {e}")
-        #             Last_round_Unattack_After_FedAVG_model = None
-            
-            # # # 當條件不符合時，打印未更新的變數值並使用上一回合未受到攻擊的總和
-            # else:
-            #     # 經測試在一進入第50回合就已受到攻擊影響 所以要在第50回合前 還沒進入else且bool_Unattack_Judage == False之前就存正常的global model存起來
-            #     print(f"*********************在第{self.global_round}回合進入else*********************************************")
-                
-            #     # True表示正常未受到攻擊
-            #     if self.bool_Unattack_Judage:
-            #         # 保存上一回合未受到攻擊FedAVG後的正常每層權重差異總和
-            #         self.Previous_diff_dis_Temp = self.Current_Global_vs_Local_total_weight_diff_dis
-            #         # self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Previous_diff_dis_Temp   
-            #         self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Current_Global_vs_Local_total_weight_diff_dis                    
-                 
-            #         # 保存最後上一回合未受到攻擊剛聚合完的全局模型
-            #         Last_round_Unattack_After_FedAVG_model = net.state_dict()
-            #         torch.save(Last_round_Unattack_After_FedAVG_model,f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth")                
-                
-            #     # 先不用 if else 方便除錯
-            #     # False表示受到攻擊
-            #     if self.bool_Unattack_Judage == False:
-            #         # 要分析不加任何過濾機制時要加上註解
-            #         # 載入正常的global model
-            #         Last_round_Unattack_After_FedAVG_model = torch.load(f'./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_distance.pth')
-                   
-            #     print("**********************No update performed on Previous_Unattack_Global_vs_Local_total_weight_diff_dis.**********************")                
-
-
-        #####################################################未本地訓練階段#################################################  
-        # Initial_Local_weights = net.state_dict()
-        # torch.save(Initial_Local_weights, f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Initial_Local_model_Before_local_train_{self.global_round}.pth")
-        #####################################################未本地訓練階段#################################################  
-
-        ###################################################判斷是否受到攻擊#################################################
-        # # 前10round 模型未穩定所不看 必須在Local train之前判斷
-        # if self.global_round > 10:
-        #     self.JudageAttack()
-        # ###################################################判斷是否受到攻擊#################################################
-        # print(Fore.YELLOW+Style.BRIGHT+"self.bool_Unattack_Judage True表示正常未受到攻擊;False表示受到攻擊"+Fore.RED+Style.BRIGHT+str(self.bool_Unattack_Judage))
-
         #####################################################本地訓練階段#################################################  
-        # 本地訓練階段
         self.Local_train_accuracy = train(net, trainloader, epochs=num_epochs)
         # 在本地訓練階段後保存模型
         weights_after_Localtrain = net.state_dict()
@@ -1055,19 +979,25 @@ class FlowerClient(fl.client.NumPyClient):
         # 載入本地訓練後的模型
         weights_after_Localtrain = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train_{self.global_round}.pth")
         
+        accuracy = test(net, local_testloader, start_IDS, client_str,f"local_test",True)
+        # 寫入Accuracy
+        with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-local_model_{client_str}.csv", "a+") as file:
+            file.write(f"{accuracy}\n")
+
+        self.Local_train_accuracy = accuracy
+
         # 載入上一回合本地訓練後的本地模型
         # 從第一回合開始取值 避免0值寫入問題
         if self.global_round > 1:
-            Last_round_Local_weights = torch.load(
-                f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train_model_{self.global_round-1}.pth"
+            Previous_round_Local_weights = torch.load(
+                f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train_{self.global_round-1}.pth"
             )
         else:
-            Last_round_Local_weights = net.state_dict()  # 避免第一輪讀取不存在的檔案
+            Previous_round_Local_weights = net.state_dict()  # 避免第一輪讀取不存在的檔案
         #####################################################本地訓練階段#################################################  
 
         ######################################################Local train完的模型每層加總總和############################################# 
         # self.Local_Model_each_layer_sum(weights_after_Localtrain)
-
 
         # 先強制存第124_round Local當測試
         self.designate_Round_To_Save_Model(save_model_round,net.state_dict(),True,True)
@@ -1079,27 +1009,20 @@ class FlowerClient(fl.client.NumPyClient):
         # 用當前回合的全局模型和當前訓練後本地模型
         # 用前一次的本地模型和當前訓練後本地模型
         ####################################################歐基里德距離-模型每層差異求總和#################################################  
-        self.Euclidean_distance(weights_after_Localtrain,After_FedAVG_model,Last_round_Local_weights)
+        self.Euclidean_distance(weights_after_Localtrain,After_FedAVG_model,Previous_round_Local_weights)
         ####################################################歐基里德距離-模型每層差異求總和#################################################  
         
         ###################################################未本地訓練階段與本地訓練後差異#################################################
-        # Initial_Local_weights = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Initial_Local_model_Before_local_train_{self.global_round}.pth")
         Initial_Local_weights = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Initial_Local.pth")
-        # if (self.Record_UnAttack_counter != 0):
-        # if (not self.bool_Unattack_Judage):
-        #     UnAttack_weights_after_Localtrain = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Unattack_AfterLocaltrain.pth")
-
         # 確保載入的格式正確
         if not isinstance(Initial_Local_weights, dict):
             print(Fore.YELLOW+Style.BRIGHT+"Error: Initial_Local_weights is not a valid state_dict format!")
         else:
             self.Initial_Local_weights_Euclidean_distance(weights_after_Localtrain, Initial_Local_weights)
-
         ###################################################未本地訓練階段與本地訓練後差異#################################################
 
         # 載入上一回合聚合後的最後一次未受攻擊汙染的全局模型和本地模型
-        self.Load_Last_round_Unattack_Model(start_attack_round, end_attack_round)
-        print(Fore.YELLOW+Style.BRIGHT+f"Round {self.global_round} - bool_Unattack_Judage: {self.bool_Unattack_Judage}")
+        # self.Load_Last_round_Unattack_Model(start_attack_round, end_attack_round)
         if(not self.bool_Unattack_Judage): #fasle表示受到攻擊            
             # 計算模型每層差異求總和之歐基里得距離
             # 用最後一次未受攻擊汙染的全局模型和當前訓練後本地模型
@@ -1107,6 +1030,8 @@ class FlowerClient(fl.client.NumPyClient):
             #     # 強制載入正常global和local當試測
             #     Last_round_Unattack_After_FedAVG_model = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_124.pth")
             #     Last_round_Local_model_unattack = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Last_round_Local_model_unattack_124.pth")
+            self.Last_round_Local_model_unattack = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Unattack_AfterLocaltrain.pth")
+            self.Last_round_Unattack_After_FedAVG_model = torch.load(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Force_Save_fedavg_unattack_{start_attack_round-1}.pth")
 
             ####################################################歐基里德距離-模型每層差異求總和#################################################  
             self.Unattack_Euclidean_distance(weights_after_Localtrain,self.Last_round_Unattack_After_FedAVG_model,self.Last_round_Local_model_unattack)
@@ -1139,8 +1064,24 @@ class FlowerClient(fl.client.NumPyClient):
         # 寫入相關參數進行紀錄
         self.Record_file()
         
+        # # 前10round 模型未穩定所不看
+        ###################################################判斷是否受到攻擊#################################################
+        if self.global_round > 10:
+            # 改成這邊做評估去判斷權重，避免原本流程fit完才做evaluate造成會上傳初次攻擊髒權重的問題
+            self.JudageAttack()
+        ###################################################判斷是否受到攻擊#################################################
+
+        
+        # 若accuracy大於0.9表示攻擊結束
+        if self.Local_train_accuracy >= 0.9:
+            self.bool_Unattack_Judage = True
+            self.Record_UnAttack_counter = 0
+
+        print(Fore.YELLOW+Style.BRIGHT+f"Round {self.global_round} -self.bool_Unattack_Judage True表示正常未受到攻擊;False表示受到攻擊"+Fore.RED+Style.BRIGHT+str(self.bool_Unattack_Judage))
+
         #step1上傳給權重，#step2在server做聚合，step3往下傳給server
         # return self.get_parameters(config={}), len(trainloader.dataset), {"accuracy": accuracy}
+
         return self.get_parameters(config={}), len(trainloader.dataset), {"global_round": self.global_round,
                                                                           "accuracy": accuracy,
                                                                           "Local_train_accuracy": self.Local_train_accuracy,
@@ -1156,74 +1097,75 @@ class FlowerClient(fl.client.NumPyClient):
                                                                           "Current_Global_vs_Local_total_weight_diff_dis": float(self.Current_Global_vs_Local_total_weight_diff_dis),
                                                                           "Previous_total_weight_diff_dis": float(self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis)}
 
-    def evaluate(self, parameters, config):
-        # 当前 global round 数
-        print(f"Evaluating global round: {self.global_round}")
-        print("client_id",self.client_id)
-        # local test
-        # 這邊的測試結果會受到local train的影響
-        # 保存模型
-        torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train_model_{self.global_round}.pth")
-        accuracy = test(net, local_testloader, start_IDS, client_str,f"local_test",True)
-        # 寫入Accuracy
-        with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-local_model_{client_str}.csv", "a+") as file:
-            file.write(f"{accuracy}\n")
+    # def evaluate(self, parameters, config):
+    # def Customer_evaluate(self, parameters):
+    #     # 当前 global round 数
+    #     print(f"Evaluating global round: {self.global_round}")
+    #     print("client_id",self.client_id)
+    #     # local test
+    #     # 這邊的測試結果會受到local train的影響
+    #     # 保存模型
+    #     torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_model_After_local_train_model_{self.global_round}.pth")
+    #     accuracy = test(net, local_testloader, start_IDS, client_str,f"local_test",True)
+    #     # 寫入Accuracy
+    #     with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/accuracy-local_model_{client_str}.csv", "a+") as file:
+    #         file.write(f"{accuracy}\n")
 
-        self.Local_train_accuracy = accuracy
+    #     self.Local_train_accuracy = accuracy
 
-        # # 前10round 模型未穩定所不看
-        if self.global_round > 10:
-            self.JudageAttack()
+    #     # # 前10round 模型未穩定所不看
+    #     if self.global_round > 10:
+    #         self.JudageAttack()
         
-        # 若accuracy大於0.9表示攻擊結束
-        if self.Local_train_accuracy >= 0.9:
-            self.bool_Unattack_Judage = True
-            self.Record_UnAttack_counter = 0
+    #     # 若accuracy大於0.9表示攻擊結束
+    #     if self.Local_train_accuracy >= 0.9:
+    #         self.bool_Unattack_Judage = True
+    #         self.Record_UnAttack_counter = 0
 
-        ###################################################判斷是否受到攻擊#################################################
-        print(Fore.YELLOW+Style.BRIGHT+"self.bool_Unattack_Judage True表示正常未受到攻擊;False表示受到攻擊"+Fore.RED+Style.BRIGHT+str(self.bool_Unattack_Judage))
+    #     ###################################################判斷是否受到攻擊#################################################
+    #     print(Fore.YELLOW+Style.BRIGHT+"self.bool_Unattack_Judage True表示正常未受到攻擊;False表示受到攻擊"+Fore.RED+Style.BRIGHT+str(self.bool_Unattack_Judage))
 
-        self.set_parameters(parameters)#更新現有的知識#step4 更新model
-        print(f"Client {self.client_id} returning metrics: {{accuracy: {accuracy}, client_id: {self.client_id}}}")
+    #     # self.set_parameters(parameters)#更新現有的知識#step4 更新model
+    #     print(f"Client {self.client_id} returning metrics: {{accuracy: {accuracy}, client_id: {self.client_id}}}")
         
-        with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_train_weight_sum-FedAVG weight_sum_{client_str}.csv", "a+") as file:
-                file.write(f"{self.Current_total_Local_weight_sum},"
-                            f"{self.Current_total_FedAVG_weight_sum},"#當前每一回FedAVG後的權重
-                            f"{self.Previous_Unattack_round_total_FedAVG_weight_sum},"#上一回未受到攻擊FedAVG後的權重
-                            f"{self.Record_Previous_total_FedAVG_weight_sum},"#實際上一回FedAVG後的權重
-                            f"{self.current_array[0]},"#當前每一回Local_train_weight_sum-Previous_FedAVG weight_sum
-                            f"{self.previous_array[0]},"#上一回未受到攻擊Local_train_weight_sum-Previous_FedAVG weight_sum
-                            f"{self.Current_total_weight_diff_abs},"#模型每層差異求總和（以絕對值計算）  
-                            f"{self.Previous_total_weight_diff_abs},"#上一回未受到攻擊的全局模型與本地端模型每層差異總和（以絕對值計算）
-                            f"{self.Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離計算）
-                            f"{self.Record_Previous_Global_vs_Local_total_weight_diff_dis},"#上一回的全局模型與本地端每層差異總和（以距離計算）
-                            f"{self.dis_percent_diff},"#上一回的全局模型與本地端每層差異總和變化百分比（以距離計算）
-                            f"{self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis},"#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離計算）
-                            f"{self.Previous_and_Current_Local_model_weight_diff_dis},"#上一回未受到攻擊的本地模型與當前本地端模型每層差異總和（以距離計算）
-                            f"{self.Unattck_dis_percent_diff},"#上一回未受到攻擊的全局模型與本地端每層差異總和變化百分比（以距離計算）
-                            f"{self.Unattck_dis_smooth_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
-                            f"{self.Norm_Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離範數計算）
-                            f"{self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis}\n")#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離範數計算）
+    #     with open(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/Local_train_weight_sum-FedAVG weight_sum_{client_str}.csv", "a+") as file:
+    #             file.write(f"{self.Current_total_Local_weight_sum},"
+    #                         f"{self.Current_total_FedAVG_weight_sum},"#當前每一回FedAVG後的權重
+    #                         f"{self.Previous_Unattack_round_total_FedAVG_weight_sum},"#上一回未受到攻擊FedAVG後的權重
+    #                         f"{self.Record_Previous_total_FedAVG_weight_sum},"#實際上一回FedAVG後的權重
+    #                         f"{self.current_array[0]},"#當前每一回Local_train_weight_sum-Previous_FedAVG weight_sum
+    #                         f"{self.previous_array[0]},"#上一回未受到攻擊Local_train_weight_sum-Previous_FedAVG weight_sum
+    #                         f"{self.Current_total_weight_diff_abs},"#模型每層差異求總和（以絕對值計算）  
+    #                         f"{self.Previous_total_weight_diff_abs},"#上一回未受到攻擊的全局模型與本地端模型每層差異總和（以絕對值計算）
+    #                         f"{self.Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離計算）
+    #                         f"{self.Record_Previous_Global_vs_Local_total_weight_diff_dis},"#上一回的全局模型與本地端每層差異總和（以距離計算）
+    #                         f"{self.dis_percent_diff},"#上一回的全局模型與本地端每層差異總和變化百分比（以距離計算）
+    #                         f"{self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis},"#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離計算）
+    #                         f"{self.Previous_and_Current_Local_model_weight_diff_dis},"#上一回未受到攻擊的本地模型與當前本地端模型每層差異總和（以距離計算）
+    #                         f"{self.Unattck_dis_percent_diff},"#上一回未受到攻擊的全局模型與本地端每層差異總和變化百分比（以距離計算）
+    #                         f"{self.Unattck_dis_smooth_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
+    #                         f"{self.Norm_Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離範數計算）
+    #                         f"{self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis}\n")#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離範數計算）
 
         
-        self.Current_total_Local_weight_sum = float(self.Current_total_Local_weight_sum)  # 將字符串轉換為浮點數
-        # print("Local_weight_sum before multiplication:", self.Current_total_Local_weight_sum, "of type:", type(self.Current_total_Local_weight_sum))
-        percentage_five = self.Current_total_Local_weight_sum * 0.05
-        # # 保留小数点后两位
-        percentage_five = round(percentage_five, 2)
-        # print("Local_train_weight_sum_percentage_five\n",percentage_five)
-        return accuracy, len(local_testloader.dataset), {"global_round": self.global_round,
-                                                   "accuracy": accuracy,
-                                                   "Local_train_accuracy": self.Local_train_accuracy,
-                                                   "client_id": self.client_id,
-                                                   "Local_train_weight_sum":self.Current_total_Local_weight_sum,
-                                                   "Previous_round_FedAVG_weight_sum":self.Previous_Unattack_round_total_FedAVG_weight_sum,
-                                                   "Current_FedAVG_weight_sum":self.Current_total_FedAVG_weight_sum,
-                                                   "Local_train_weight_sum-Current_FedAVG weight_sum":float(self.current_array[0]),
-                                                    "Current_total_weight_diff_abs": float(self.Current_total_weight_diff_abs),
-                                                    "Current_Global_vs_Local_total_weight_diff_dis": float(self.Current_Global_vs_Local_total_weight_diff_dis),
-                                                    "Previous_total_weight_diff_abs": float(self.Previous_total_weight_diff_abs),
-                                                    "Previous_total_weight_diff_dis": float(self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis)}
+    #     self.Current_total_Local_weight_sum = float(self.Current_total_Local_weight_sum)  # 將字符串轉換為浮點數
+    #     # print("Local_weight_sum before multiplication:", self.Current_total_Local_weight_sum, "of type:", type(self.Current_total_Local_weight_sum))
+    #     percentage_five = self.Current_total_Local_weight_sum * 0.05
+    #     # # 保留小数点后两位
+    #     percentage_five = round(percentage_five, 2)
+    #     # print("Local_train_weight_sum_percentage_five\n",percentage_five)
+    #     return accuracy, len(local_testloader.dataset), {"global_round": self.global_round,
+    #                                                "accuracy": accuracy,
+    #                                                "Local_train_accuracy": self.Local_train_accuracy,
+    #                                                "client_id": self.client_id,
+    #                                                "Local_train_weight_sum":self.Current_total_Local_weight_sum,
+    #                                                "Previous_round_FedAVG_weight_sum":self.Previous_Unattack_round_total_FedAVG_weight_sum,
+    #                                                "Current_FedAVG_weight_sum":self.Current_total_FedAVG_weight_sum,
+    #                                                "Local_train_weight_sum-Current_FedAVG weight_sum":float(self.current_array[0]),
+    #                                                 "Current_total_weight_diff_abs": float(self.Current_total_weight_diff_abs),
+    #                                                 "Current_Global_vs_Local_total_weight_diff_dis": float(self.Current_Global_vs_Local_total_weight_diff_dis),
+    #                                                 "Previous_total_weight_diff_abs": float(self.Previous_total_weight_diff_abs),
+    #                                                 "Previous_total_weight_diff_dis": float(self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis)}
 
 # 初始化神经网络模型
 net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)

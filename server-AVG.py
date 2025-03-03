@@ -357,7 +357,9 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
 strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, 
                                      evaluate_metrics_aggregation_fn=weighted_average, 
                                      min_fit_clients = client_count, 
-                                     min_evaluate_clients = client_count,
+                                    #  min_evaluate_clients = client_count,
+                                    # min_evaluate_clients = 0為不使用flwr的內建評估
+                                     min_evaluate_clients = 0,
                                      min_available_clients = client_count)
 
 # 定義客戶端配置
