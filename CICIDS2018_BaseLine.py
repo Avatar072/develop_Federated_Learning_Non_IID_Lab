@@ -22,25 +22,21 @@ from DoChooseTestNpfile import ChooseLoadTestNpArray
 from collections import Counter
 from colorama import Fore, Back, Style, init
 ####################################################################################################
-# 初始化 colorama（Windows 系統中必須）
-init(autoreset=True)
-
-#TONIoT
-labelCount = 10
+#CICIDS2018
+labelCount = 15
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# DEVICE = torch.device("cpu")
 print(torch.cuda.is_available())
 print(torch.__version__)
 torch.cuda.empty_cache()  # 清除 CUDA 快取
+
 '''
 執行範例
-# python TONIOT_BaseLine.py --Load_dataset TONIOT --dataset_split baseLine_train --epochs 500 --method normal
-# python TONIOT_BaseLine.py --Load_dataset TONIOT --dataset_split client1_train --epochs 500 --method normal
-# python TONIOT_BaseLine.py --Load_dataset TONIOT --dataset_split client2_train --epochs 500 --method normal
-# python TONIOT_BaseLine.py --Load_dataset TONIOT --dataset_split client3_train --epochs 500 --method normal
-
+# python CICIDS2018_BaseLine.py --Load_dataset CICIDS2018 --dataset_split baseLine_train --epochs 500 --method normal
+# python CICIDS2018_BaseLine.py --Load_dataset CICIDS2018 --dataset_split client1_train --epochs 500 --method normal
+# python CICIDS2018_BaseLine.py --Load_dataset CICIDS2018 --dataset_split client2_train --epochs 500 --method normal
+# python CICIDS2018_BaseLine.py --Load_dataset CICIDS2018 --dataset_split client3_train --epochs 500 --method normal
 # --method normal表示未正常未受到攻擊且未做任何資料資強(GAN\SMOTE)
 # --method Evasion_Attack表示受到逃避攻擊
 '''
@@ -49,54 +45,60 @@ print(Fore.YELLOW+Style.BRIGHT+f"Dataset: {Load_dataset}")
 print(Fore.YELLOW+Style.BRIGHT+f"split: {split_file}")
 print(Fore.YELLOW+Style.BRIGHT+f"Number of epochs: {num_epochs}")
 print(Fore.YELLOW+Style.BRIGHT+f"Choose_method: {Choose_method}")
+# 載入np file
 # ChooseLoadNpArray function  return x_train、y_train 和 client_str and Choose_method
+# 載入train
 # x_train, y_train, client_str = ChooseLoadNpArray(filepath,Load_dataset,split_file,Choose_method)
 
 # 載入train
 # 正常
-# Choose_Attacktype = "normal"
-# Choose_Attacktype = Choose_method
-# Attack_method = None
+Choose_Attacktype = "normal"
+Attack_method = None
+
+
+# 防禦
+# Choose_Attacktype = "Defense"
+# Attack_method = "GDA"
+# Attack_method = "FS"
+# Attack_method = "MIX"
+# Attack_method = "FSandGDA"
 
 # Evasion_Attack
 # Choose_Attacktype = "Evasion_Attack"
 # Choose_Attacktype = Choose_method
 # Attack_method = "JSMA"
+# Attack_method = "FGSM"
 
-Choose_Attacktype = "Poisoning_Attack"
-Attack_method = "Backdoor"
-x_train, y_train, client_str  =ChooseLoadTrainNpArray(Load_dataset, split_file, filepath, Choose_Attacktype, Attack_method)
+# Poisoning_Attack
+# Choose_Attacktype = "Poisoning_Attack"
+# Attack_method = None
+x_train, y_train, client_str =ChooseLoadTrainNpArray(Load_dataset, split_file, filepath, Choose_Attacktype, Attack_method)
 
 # 載入test
 # 正常
 # Evasion_Attack
 test_Choose_Attacktype = "normal"
 test_Attack_method = None
+
 # Evasion_Attack
 # test_Choose_Attacktype = "Evasion_Attack"
 # test_Attack_method = "JSMA"
 # test_Attack_method = "FGSM"
 # test_Attack_method = "PGD"
 # test_Attack_method = "CandW"
-
-x_test,y_test = ChooseLoadTestNpArray('TONIOT','test', filepath, test_Choose_Attacktype,test_Attack_method)
+x_test,y_test = ChooseLoadTestNpArray('CICIDS2018','test', filepath, test_Choose_Attacktype, test_Attack_method)
 # 載入data frame(for one hot)
 # x_train, y_train, client_str = ChooseTrainDatastes(filepath, file, Choose_method)   
-print("特徵數",x_train.shape[1])
-print(y_train)
-print(client_str)
-counter = Counter(y_train)
-print("train筆數",counter)
+
+# 在single_AnalyseReportFolder產生天日期的資料夾
 today = datetime.date.today()
 today = today.strftime("%Y%m%d")
 current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
 print(Fore.YELLOW+Style.BRIGHT+f"當前時間: {current_time}")
-# 在single_AnalyseReportFolder產生天日期的資料夾
-# generatefolder(filepath, "\\single_AnalyseReportFolder")
-generatefolder(f"./single_AnalyseReportFolder/TONIOT/", today)
-generatefolder(f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/", client_str)
-generatefolder(f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/", Choose_method)
-getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/{Choose_method}")
+generatefolder(f"./single_AnalyseReportFolder/CICIDS2018/", today)
+generatefolder(f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/", client_str)
+generatefolder(f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/{client_str}/", Choose_method)
+getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/{client_str}/{Choose_method}")
 
 # 印出所選擇Npfile的資料
 print("特徵數",x_train.shape[1])
@@ -132,6 +134,9 @@ y_test = y_test.to(DEVICE)
 # 定義訓練函數
 def train(net, trainloader, epochs):
     print("訓練中")
+    #二元分類
+    # criterion = nn.BCELoss()  # Binary Cross Entropy Loss
+    #多元分類
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001)
 
@@ -193,14 +198,14 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
 
             # 標誌來跟踪是否已經添加了標題行
             header_written = False
-            with open(f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
+            with open(f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
                 if not header_written:
                     # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
                     header_written = True
                 file.write(str(RecordRecall) + "\n")
         
             # 將總體準確度和其他信息寫入 "accuracy-baseline.csv" 檔案
-            with open(f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}.csv", "a+") as file:
+            with open(f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}.csv", "a+") as file:
                 if not header_written:
                     # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
                     header_written = True
@@ -210,7 +215,7 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
                 # 生成分類報告
                 GenrateReport = classification_report(y_true, y_pred, digits=4, output_dict=True)
                 report_df = pd.DataFrame(GenrateReport).transpose()
-                report_df.to_csv(f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/{Choose_method}/baseline_report_{client_str}.csv",header=True)
+                report_df.to_csv(f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/{client_str}/{Choose_method}/baseline_report_{client_str}.csv",header=True)
 
     draw_confusion_matrix(y_true, y_pred,plot_confusion_matrix)
     accuracy = correct / total
@@ -228,33 +233,23 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，以標識混淆矩陣中每個類別的位置。
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
-        #TONIoT
+        # # CICIDS2018
         class_names = {
-                        # 0: 'BENIGN', 
-                        # 1: 'DDoS', 
-                        0: 'normal', 
-                        1: 'ddoS',
-                        2: 'backdoor', 
-                        3: 'dos', 
-                        4: 'injection', 
-                        5: 'mitm', 
-                        6: 'password', 
-                        7: 'ransomware', 
-                        8: 'scanning', 
-                        9: 'xss', 
-                        # 10: '10_PortScan', 
-                        # 11: '11_SSH-Patator', 
-                        # 12: '12_Web Attack Brute Force', 
-                        # 13: '13_Web Attack Sql Injection', 
-                        # 14: '14_Web Attack XSS'
-                        # 15: '15_backdoor',
-                        # 16: '16_dos',
-                        # 17: '17_injection',
-                        # 18: '18_mitm',
-                        # 19: '19_password',
-                        # 20: '20_ransomware',
-                        # 21: '21_scanning',
-                        # 22: '22_xss'
+                        0: '0_BENIGN', 
+                        1: '1_Bot', 
+                        2: '2_Brute Force-Web', 
+                        3: '3_Brute Force-XSS',
+                        4: '4_DDOS attack-HOIC', 
+                        5: '5_DDOS attack-LOIC-UDP', 
+                        6: '6_DDoS attacks-LOIC-HTTP', 
+                        7: '7_DoS attacks-GoldenEye', 
+                        8: '8_DoS attacks-Hulk', 
+                        9: '9_DoS attacks-SlowHTTPTest', 
+                        10: '10_DoS attacks-Slowloris', 
+                        11: '11_FTP-BruteForce', 
+                        12: '12_Infilteration',
+                        13: '13_SQL Injection', 
+                        14: '14_SSH-Bruteforce'
                         } 
         # df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names.values())
@@ -263,8 +258,8 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         
         # 固定子圖參數
         plt.subplots_adjust(
-            left=0.19,    # 左邊界
-            bottom=0.167,  # 下邊界
+            left=0.267,    # 左邊界
+            bottom=0.24,  # 下邊界
             right=1.0,     # 右邊界
             top=0.88,      # 上邊界
             wspace=0.207,  # 子圖間的寬度間隔
@@ -276,7 +271,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         plt.ylabel("label (ground truth)")
         # Rotate the x-axis labels (prediction categories)
         plt.xticks(rotation=30, ha='right',fontsize=9)
-        plt.savefig(f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
+        plt.savefig(f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
         plt.show()
 
 # 創建用於訓練和測試的數據加載器
@@ -289,18 +284,17 @@ testloader = DataLoader(test_data, batch_size=len(test_data), shuffle=False)
 # net = MLP().to(DEVICE)
 
 net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
-# 訓練模型
+# # 訓練模型
 train(net, trainloader, epochs=num_epochs)
 
 #紀錄結束時間
 end_IDS = time.time()
-getStartorEndtime("endtime",end_IDS,f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/{Choose_method}")
+getStartorEndtime("endtime",end_IDS,f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/{client_str}/{Choose_method}")
 
 # 評估模型
 test_accuracy = test(net, testloader, start_IDS, client_str,True)
-
 # 在训练或测试结束后，保存模型
-torch.save(net.state_dict(), f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/{Choose_method}/BaseLine_After_local_train_model.pth")
+torch.save(net.state_dict(), f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/{client_str}/{Choose_method}/BaseLine_After_local_train_model.pth")
 
 print(Fore.LIGHTYELLOW_EX + Style.BRIGHT+"測試數據量:\n", len(test_data))
 print(Fore.LIGHTYELLOW_EX + Style.BRIGHT+"訓練數據量:\n", len(train_data))

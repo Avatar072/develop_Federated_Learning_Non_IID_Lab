@@ -8,6 +8,7 @@ from colorama import Fore, Back, Style, init
 from sklearn import preprocessing
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -166,7 +167,7 @@ def ParseCommandLineArgs(commands):
 # print(ParseCommandLineArgs(['dataset', 'epochs', 'label']))
 
 ### Choose Load np array
-def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
+def ChooseLoadNpArray(filepath,split_file, Choose_method):
 
     if split_file == 'total_train':
         print("Training with total_train")
@@ -178,8 +179,8 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # y_train = np.load(filepath + "y_train_20231113.npy", allow_pickle=True)
 
             # 20240323 after Chi-square45
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_cicids2017_AfterFeatureSelect44_BaseLine_SpiltIP_20240323.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_cicids2017_AfterFeatureSelect44_BaseLine_SpiltIP_20240323.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_cicids2017_AfterFeatureSelect44_BaseLine_SplitIP_20240323.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\y_ALLDay_train_cicids2017_AfterFeatureSelect44_BaseLine_SplitIP_20240323.npy", allow_pickle=True)
 
             # 20240325 after PCA45
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\x_ALLDay_train_AfterPCA38_20240325.npy", allow_pickle=True)
@@ -205,12 +206,12 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_CICIDS2019_AfterFeatureSelect44_20240422.npy", allow_pickle=True)
 
-            if choose_datasets == "CICIDS2019":
+            # if choose_datasets == "CICIDS2019":
                 # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
                 # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_CICIDS2019_01_12_train_20240422.npy", allow_pickle=True)
                 # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
-                x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
-                y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
+                # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
+                # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
                 # 20241030 CIC-IDS2019 after do labelencode and minmax 75 25分 do GDA 高斯資料增強
                 # x_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/x_CICIDS2019_train_augmented.npy", allow_pickle=True)
                 # y_train = np.load(f"./Adversarial_Attack_Denfense/CICIDS2019/y_CICIDS2019_train_augmented.npy", allow_pickle=True)
@@ -219,12 +220,12 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_20240519.npy", allow_pickle=True)    
             
             # 20240520 EdgeIIoT after do labelencode and minmax chi_square45 75 25分
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
-            if choose_datasets == "TONIOT":
-            # 20240523 TONIoT after do labelencode and minmax  75 25分
-                x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
-                y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\x_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\EdgeIIoT\\y_EdgeIIoT_train_AfterFeatureSelect44_20240520.npy", allow_pickle=True)    
+            # if choose_datasets == "TONIOT":
+            # # 20240523 TONIoT after do labelencode and minmax  75 25分
+            #     x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
+            #     y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
 
         elif (Choose_method == 'SMOTE'):
             # x_train = np.load(filepath + "x_total_train_SMOTE_ALL_Label.npy", allow_pickle=True)
@@ -274,7 +275,7 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
         client_str = "BaseLine"
         print(Choose_method)
 
-    elif split_file == 'train_half1':
+    elif split_file == 'client1_train':
         if (Choose_method == 'normal'):
             # # 20240110 non iid client1 use cicids2017 after chi-square
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\x_train_CICIDS2017_20240110.npy", allow_pickle=True)
@@ -345,9 +346,14 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half1_20240523.npy", allow_pickle=True)  
 
             # 20240523 client1 use TONIoT after do labelencode and minmax  隨機劃分75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half1_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half1_20240523.npy", allow_pickle=True)  
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half1_20240523.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half1_20240523.npy", allow_pickle=True)  
 
+            # 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 do PCA Non-iid 
+            # 20250121 CIC-IDS2017 after do labelencode and all featrue minmax 75 25分 do Do feature drop to 79 feature 
+            # Non-iid
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_y.npy", allow_pickle=True)
 
         elif (Choose_method == 'SMOTE'):
             # # # # 20240317 Chi-square 45 SMOTE  K=5         
@@ -391,7 +397,7 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
         print("train_half1 y_train 的形狀:", y_train.shape)
         client_str = "client1"
         print("使用 train_half1 進行訓練")
-    elif split_file == 'train_half2':
+    elif split_file == 'client2_train':
         if (Choose_method == 'normal'):
             # # 20240317 non iid client3 use TONIOT
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240317.npy", allow_pickle=True)
@@ -436,10 +442,15 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_train_half2_20240523.npy", allow_pickle=True)  
 
             # 20240523 client2 use TONIoT after do labelencode and minmax  隨機劃分75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half2_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half2_20240523.npy", allow_pickle=True)  
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half2_20240523.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half2_20240523.npy", allow_pickle=True)  
 
-
+            # 20250113 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do PCA Non-iid
+            # 20250121 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do Do feature drop to 79 feature 
+            # Non-iid
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            
         elif (Choose_method == 'SMOTE'):
             # # # 20240317 Chi-square 45 SMOTE  K=5          
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_train_half2_SMOTE_Tuesday_and_Wednesday_and_Thursday_ALL_Label_20240317.npy", allow_pickle=True)
@@ -470,7 +481,7 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
         client_str = "client2"
         print("使用 train_half2 進行訓練")
 
-    elif split_file == 'train_half3':
+    elif split_file == 'client3_train':
         if (Choose_method == 'normal'):
             # # 20240110 non iid client2 use TONIOT
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240110.npy", allow_pickle=True)
@@ -520,13 +531,24 @@ def ChooseLoadNpArray(filepath, choose_datasets,split_file, Choose_method):
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240725.npy", allow_pickle=True)  
 
             # 20240523 client3 use TONIoT after do labelencode and minmax  隨機劃分75 25分
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)  
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)  
 
             # # 20240523 client3 use TONIoT after do labelencode and minmax  隨機劃分75 25分 DoJSMA 0.0.5 0.02
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)  
-
+            
+            # 20250113 CIC-IDS2019 after do labelencode  and all featrue minmax 75 25分 DoPCA Non-iid
+            # print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do pca" +f"{split_file} with normal attack type")
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            
+            # 20250121 01-12 and 03-11 merge ALLDay CIC-IDS2019 after do labelencode  and all featrue minmax 75 25分 Do feature drop to 79 feature 
+            # Non-iid
+            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do feature drop" +f"{split_file} with normal attack type")
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            
 
         elif (Choose_method == 'SMOTE'):
             # # 20240324 Chi-square 45 SMOTE  K=5          
@@ -559,7 +581,7 @@ def ChooseTrainDatastes(filepath, my_command,Choose_method):
     if my_command == 'total_train':
         if (Choose_method == 'normal'):
             # print("Training with total_train")
-            # train_dataframe = pd.read_csv(os.path.join(filepath, 'data', 'train_dataframes_respilt.csv'))
+            # train_dataframe = pd.read_csv(os.path.join(filepath, 'data', 'train_dataframes_resplit.csv'))
             # x_train = np.array(train_dataframe.iloc[:, :-1])
             # y_train = np.array(train_dataframe.iloc[:, -1])
             dftrain = pd.read_csv(filepath + "data\\dataset_AfterProcessed\\20231113\\train_dataframes_20231113.csv")
@@ -738,13 +760,14 @@ def splitdatasetbalancehalf(train_dataframes, label):
 
     return df1,df2
 
-def spiltweakLabelbalance(weakLabel,original_dataset,size):
-    label_data = original_dataset[original_dataset['type'] == weakLabel]
+def splitweakLabelbalance(weakLabel,original_dataset,size):
+    # label_data = original_dataset[original_dataset['type'] == weakLabel]
+    label_data = original_dataset[original_dataset['Label'] == weakLabel]
     # 使用train_test_split分別劃分取Label相等8、9、13、14的數據
     train_label, test_label = train_test_split(label_data, test_size=size, random_state=42)
     return train_label, test_label
 
-def spiltweakLabelbalance_afterOnehot(weak_label, original_dataset,size):
+def splitweakLabelbalance_afterOnehot(weak_label, original_dataset,size):
 
     weak_label_data = original_dataset[weak_label]
     # e.g:找到做完one hot Label_8 列中值等于1的行
@@ -804,31 +827,46 @@ def ChooseUseModel(model_type, input, ouput):
             def __init__(self):
                 super(MLP, self).__init__()
                  # 每層512神經元 for cicids2017
-                # self.layer1 = nn.Linear(input, 512)
-                # self.fc2 = nn.Linear(512, 512)
-                # self.fc3 = nn.Linear(512, 512)
-                # self.fc4 = nn.Linear(512, 512)
-                # self.layer5 = nn.Linear(512, ouput)
-                # 每層64神經元 for Toniot
-                self.layer1 = nn.Linear(input, 64)
-                self.fc2 = nn.Linear(64, 64)
-                self.fc3 = nn.Linear(64, 64)
-                self.fc4 = nn.Linear(64, 64)
-                self.layer5 = nn.Linear(64, ouput)
+                self.layer1 = nn.Linear(input, 512)
+                self.dropout1 = nn.Dropout(p=0.2)  # 第一層 Dropout
+                self.fc2 = nn.Linear(512, 512)
+                self.dropout2 = nn.Dropout(p=0.2)  # 第二層 Dropout
+                self.fc3 = nn.Linear(512, 512)
+                self.dropout3 = nn.Dropout(p=0.2)  # 第三層 Dropout
+                self.fc4 = nn.Linear(512, 512)
+                self.dropout4 = nn.Dropout(p=0.2)  # 第四層 Dropout
+                self.layer5 = nn.Linear(512, ouput)
+                # # 每層64神經元 for Toniot
+                # self.layer1 = nn.Linear(input, 64)
+                # self.fc2 = nn.Linear(64, 64)
+                # self.fc3 = nn.Linear(64, 64)
+                # self.fc4 = nn.Linear(64, 64)
+                # self.layer5 = nn.Linear(64, ouput)
+                # # 隱藏層分別配置了 40 、 30 和 15 個神經元 for CICIDS2019
+                # self.layer1 = nn.Linear(input, 40)
+                # self.fc2 = nn.Linear(40, 30)
+                # self.fc3 = nn.Linear(30, 30)
+                # self.fc4 = nn.Linear(30, 15)
+                # self.layer5 = nn.Linear(15, ouput)
 
             def forward(self, x):
                 # relu激活函数
                 # 输出范围在 (0, max) 之间
-                # x = F.relu(self.layer1(x))
-                # x = F.relu(self.fc2(x))
-                # x = F.relu(self.fc3(x))
-                # x = F.relu(self.fc4(x))
-                # 修改后的代码使用Sigmoid激活函数
+                x = F.relu(self.layer1(x))
+                x = self.dropout1(x)  # 第一層 Dropout
+                x = F.relu(self.fc2(x))
+                x = self.dropout2(x)  # 第二層 Dropout
+                x = F.relu(self.fc3(x))
+                x = self.dropout3(x)  # 第三層 Dropout
+                x = F.relu(self.fc4(x))
+                x = self.dropout4(x)  # 第四層 Dropout
+                # 修改后的代码使用Sigmoid激活函数每層64神經元 for Toniot
                 # 输出范围在 (0, 1) 之间
-                x = F.sigmoid(self.layer1(x))
-                x = F.sigmoid(self.fc2(x))
-                x = F.sigmoid(self.fc3(x))
-                x = F.sigmoid(self.fc4(x))
+                # x = F.sigmoid(self.layer1(x))
+                # x = F.sigmoid(self.fc2(x))
+                # x = F.sigmoid(self.fc3(x))
+                # x = F.sigmoid(self.fc4(x))
+                # x = self.sigmoid(self.output(x))  # 使用 Sigmoid 作為輸出層激活函數
                 x = self.layer5(x)
                 return x
         return MLP()  # 返回創建的model instance
@@ -940,7 +978,7 @@ def DoReSplit(Str_ChooseDataset,df):
         for i in range(15):
             if i == 8 or i == 9 or i ==13:
                 continue
-            train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.2)
+            train_label_split, test_label_split = splitweakLabelbalance(i,df,0.2)
             List_train_Label.append(train_label_split)
             List_test_Label.append(test_label_split)         
 
@@ -948,9 +986,9 @@ def DoReSplit(Str_ChooseDataset,df):
         test_dataframes = pd.concat(List_test_Label)
 
         # Label encode mode  分別取出Label等於8、9、13的數據 對6633分
-        train_label_Heartbleed, test_label_Heartbleed = spiltweakLabelbalance(8,df,0.33)
-        train_label_Infiltration, test_label_Infiltration = spiltweakLabelbalance(9,df,0.33)
-        train_label_WebAttackSql_Injection, test_label_WebAttackSql_Injection = spiltweakLabelbalance(13,df,0.33)
+        train_label_Heartbleed, test_label_Heartbleed = splitweakLabelbalance(8,df,0.33)
+        train_label_Infiltration, test_label_Infiltration = splitweakLabelbalance(9,df,0.33)
+        train_label_WebAttackSql_Injection, test_label_WebAttackSql_Injection = splitweakLabelbalance(13,df,0.33)
 
         # # 刪除Label相當於8、9、13的行
         test_dataframes = test_dataframes[~test_dataframes['Label'].isin([8, 9,13])]
@@ -983,7 +1021,7 @@ def DoReSplit(Str_ChooseDataset,df):
         List_test_Label = []
         for i in range(34):
             if i==0 or (i >= 23 and i <= 34):
-                train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.2)
+                train_label_split, test_label_split = splitweakLabelbalance(i,df,0.2)
                 List_train_Label.append(train_label_split)
                 List_test_Label.append(test_label_split)         
         
@@ -992,7 +1030,7 @@ def DoReSplit(Str_ChooseDataset,df):
         # encode後對照如下
         # WebDDoS:34
         # Label encode mode  分別取出Label等於12的數據 對6633分
-        train_label_WebDDoS, test_label_WebDDoS = spiltweakLabelbalance(34,df,0.33)
+        train_label_WebDDoS, test_label_WebDDoS = splitweakLabelbalance(34,df,0.33)
         # # 刪除Label相當於12的行
         test_dataframes = test_dataframes[~test_dataframes['Label'].isin([34])]
         train_dataframes = train_dataframes[~train_dataframes['Label'].isin([34])]
@@ -1021,7 +1059,7 @@ def DoReSplit(Str_ChooseDataset,df):
         List_train_Label = []
         List_test_Label = []
         for i in range(15):
-            train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+            train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
             List_train_Label.append(train_label_split)
             List_test_Label.append(test_label_split)         
 
@@ -1051,7 +1089,7 @@ def DoReSplit(Str_ChooseDataset,df):
         List_train_Label = []
         List_test_Label = []
         for i in range(4):
-            train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+            train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
             List_train_Label.append(train_label_split)
             List_test_Label.append(test_label_split)         
 
@@ -1081,7 +1119,7 @@ def DoReSplit(Str_ChooseDataset,df):
         List_train_Label = []
         List_test_Label = []
         for i in range(5):
-            train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+            train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
             List_train_Label.append(train_label_split)
             List_test_Label.append(test_label_split)         
 
@@ -1176,13 +1214,30 @@ def EvaluatePercent(Current_round_dis,Last_round_dis):
 
     # 檢查 Last_round_dis 是否為零，避免除以零
     if Last_round_dis == 0:
-    # 返回無限大或者一個預設值，根據你的需求
-        return float('inf')  # 這裡返回無限大，可以根據具體情況修改
+        # return float('inf')  # 這裡返回無限大，可以根據具體情況修改
+         return 0 # 代表「沒有變化」
     Current_round_dis = float(Current_round_dis)
     Last_round_dis = float(Last_round_dis)
     percent_diff = abs(Current_round_dis-Last_round_dis)
     percent_diff = (percent_diff/Last_round_dis)*100
     return percent_diff
+
+#針對Strig type做完label ecnode後補做minmax
+def DominmaxforStringTypefeature(doScalerdataset):
+    # 開始minmax
+    X=doScalerdataset
+    X=X.values
+    # scaler = preprocessing.StandardScaler() #資料標準化
+    scaler = MinMaxScaler(feature_range=(0, 1)).fit(X)
+    scaler.fit(X)
+    X=scaler.transform(X)
+    # 将缩放后的值更新到 doScalerdataset 中
+    doScalerdataset.iloc[:, :] = X
+    # 将排除的列名和选中的特征和 Label 合并为新的 DataFrame
+    # afterminmax_dataset = pd.concat([undoScalerdataset,doScalerdataset,afterprocess_dataset['Label']], axis = 1)
+    return doScalerdataset
+
+
 ## 將結合weakLabel Label8 的train_half1轉成np array
 # gan_dataframe = pd.read_csv("D:\\Labtest20230911\\GAN_data_train_half1\\GAN_data_train_half1_ADD_weakLabel_8.csv")
 # SaveDataframeTonpArray(gan_dataframe, "train_half1","weakpoint_8")

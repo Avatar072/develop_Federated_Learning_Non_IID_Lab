@@ -20,33 +20,50 @@ import datetime
 from collections import Counter, defaultdict
 from sklearn.metrics import classification_report
 from mytoolfunction import ChooseUseModel, getStartorEndtime
+from adeversarial_config import SettingAderversarialConfig
 from colorama import Fore, Back, Style, init
-labelCount = 13
-
+# 初始化 colorama（Windows 系統中必須）
+init(autoreset=True)
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
 client_str = "baseline_train"
 Choose_method = "normal"
 num_epochs = 1
+choose_dataset = "CICIDS2017"
+# choose_dataset = "TONIOT"
+# choose_dataset = "CICIDS2019"
+
 # 設定設備
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f"Using DEVICE: {DEVICE}")
+# 在Adversarial_Attack_Test產生天日期的資料夾
+today = datetime.date.today()
+today = today.strftime("%Y%m%d")
+current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
+
+# 傳入Adversarial_Attack相關參數
+epsilons, model_path, labelCount, class_names, x_train, y_train, x_test, y_test = SettingAderversarialConfig(choose_dataset)
+# 轉換為張量
+x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
+y_train = torch.from_numpy(y_train).type(torch.LongTensor)
+x_test = torch.from_numpy(x_test).type(torch.FloatTensor)
+y_test = torch.from_numpy(y_test).type(torch.LongTensor)
 
 def generatefolder(path, foldername):
     if not os.path.exists(os.path.join(path, foldername)):
         os.makedirs(os.path.join(path, foldername))
 
-# 在Adversarial_Attack_Test產生天日期的資料夾
-today = datetime.date.today()
-today = today.strftime("%Y%m%d")
-current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
-save_dir = f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}"
-
 print(Fore.YELLOW+Style.BRIGHT+f"當前時間: {current_time}")
-generatefolder(f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/", today)
-generatefolder(f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/", client_str)
-generatefolder(f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/{client_str}/", Choose_method)
-getStartorEndtime("starttime",start_IDS,f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/{client_str}/{Choose_method}")
+generatefolder(f"./Adversarial_Attack_Test/{choose_dataset}/PGD_Attack/", today)
+save_dir = f"./Adversarial_Attack_Test/{choose_dataset}/PGD_Attack/{today}"
+generatefolder(f"{save_dir}/{current_time}/", client_str)
+generatefolder(f"{save_dir}/{current_time}/{client_str}/", Choose_method)
+getStartorEndtime("starttime",start_IDS,f"{save_dir}/{current_time}/{client_str}/{Choose_method}")
+
+save_filepath = f"{save_dir}/{current_time}/{client_str}/{Choose_method}"
+recall_filepath = f"{save_filepath}/recall-baseline_{client_str}.csv"
+accuracy_baseline_filepath = f"{save_filepath}/accuracy-baseline_{client_str}.csv"
+report_df_filepath = f"{save_filepath}/baseline_report_{client_str}.csv"
 
 
 class MLP(nn.Module):
@@ -76,44 +93,14 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon 
         # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，以標識混淆矩陣中每個類別的位置。
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
-        # # CICIDS2019
-        class_names = {
-                        #二元分類
-                        # 0: '0_BENIGN', 
-                        # 1: 'Attack', 
-                        0: '0_BENIGN', 
-                        1: '1_DrDoS_DNS', 
-                        2: '2_DrDoS_LDAP', 
-                        3: '3_DrDoS_MSSQL',
-                        4: '4_DrDoS_NTP', 
-                        5: '5_DrDoS_NetBIOS', 
-                        6: '6_DrDoS_SNMP', 
-                        7: '7_DrDoS_SSDP', 
-                        8: '8_DrDoS_UDP', 
-                        9: '9_Syn', 
-                        10: '10_TFTP', 
-                        11: '11_UDPlag', 
-                        12: '12_WebDDoS'
-                        # 13: '13_Web Attack Sql Injection', 
-                        # 14: '14_Web Attack XSS'
-                        # 15: '15_backdoor',
-                        # 16: '16_dos',
-                        # 17: '17_injection',
-                        # 18: '18_mitm',
-                        # 19: '19_password',
-                        # 20: '20_ransomware',
-                        # 21: '21_scanning',
-                        # 22: '22_xss'
-                        } 
-        # df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names.values())
         plt.figure(figsize = (9,6))
         sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn')
         
         # 固定子圖參數
         plt.subplots_adjust(
-            left=0.19,    # 左邊界
-            bottom=0.167,  # 下邊界
+            left=0.26,    # 左邊界
+            bottom=0.23,  # 下邊界
             right=1.0,     # 右邊界
             top=0.88,      # 上邊界
             wspace=0.207,  # 子圖間的寬度間隔
@@ -125,14 +112,12 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon 
         plt.ylabel("label (ground truth)")
         # Rotate the x-axis labels (prediction categories)
         plt.xticks(rotation=30, ha='right',fontsize=9)
-        # plt.savefig(f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
         if epsilon == None:
-            plt.savefig(f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
+            plt.savefig(f"{save_filepath}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
         else:
             str_epsilon = f"epsilon_{epsilon}"
-            plt.savefig(f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
-
-        plt.show()
+            plt.savefig(f"{save_filepath}/{str_epsilon}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
+        # plt.show()
 
 def save_to_csv(data, filepath):
     df = pd.DataFrame(data)
@@ -177,7 +162,7 @@ def test_simple(model, DEVICE, test_loader):
           f'Accuracy: {correct}/{len(test_loader.dataset)} ({accuracy:.2f}%)')
     return accuracy, all_preds, all_labels
 
-def test(net,y_true,y_pred, testloader, start_time, client_str,plot_confusion_matrix):
+def test(net,testloader, start_time, client_str,plot_confusion_matrix):
     # print("測試中")
     criterion = nn.CrossEntropyLoss()
     correct = 0
@@ -218,14 +203,14 @@ def test(net,y_true,y_pred, testloader, start_time, client_str,plot_confusion_ma
 
             # 標誌來跟踪是否已經添加了標題行
             header_written = False
-            with open(f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
+            with open(recall_filepath, "a+") as file:
                 if not header_written:
                     # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
                     header_written = True
                 file.write(str(RecordRecall) + "\n")
         
             # 將總體準確度和其他信息寫入 "accuracy-baseline.csv" 檔案
-            with open(f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}.csv", "a+") as file:
+            with open(accuracy_baseline_filepath, "a+") as file:
                 if not header_written:
                     # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
                     header_written = True
@@ -235,14 +220,14 @@ def test(net,y_true,y_pred, testloader, start_time, client_str,plot_confusion_ma
                 # 生成分類報告
                 GenrateReport = classification_report(y_true, y_pred, digits=4, output_dict=True)
                 report_df = pd.DataFrame(GenrateReport).transpose()
-                report_df.to_csv(f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/{client_str}/{Choose_method}/baseline_report_{client_str}.csv",header=True)
+                report_df.to_csv(report_df_filepath, header=True)
 
     draw_confusion_matrix(y_true, y_pred,plot_confusion_matrix)
     accuracy = correct / total
     print(Fore.LIGHTYELLOW_EX + Style.BRIGHT+f"測試準確度:"+Fore.LIGHTWHITE_EX+ f"{accuracy:.4f}"+
           "\t"+Fore.LIGHTYELLOW_EX + Style.BRIGHT+f"loss:"+Fore.LIGHTWHITE_EX + f"{ave_loss:.4f}")
-    # print(Fore.LIGHTYELLOW_EX + Style.BRIGHT+f"loss:"+Fore.LIGHTWHITE_EX + f"{ave_loss:.4f}")
     return accuracy
+
 def plot_results(losses, accuracies, confusion_mtx, save_dir):
     # Plot training loss
     plt.figure(figsize=(10, 5))
@@ -262,7 +247,7 @@ def plot_results(losses, accuracies, confusion_mtx, save_dir):
     plt.savefig(os.path.join(save_dir, 'confusion_matrix.png'))
     plt.close()
 
-def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_dir, epsilon):
+def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_dir, epsilon,bool_genrate_Train_Or_Test):
     model.eval()  # 設置模型為評估模式
     successful_attacks = []  # 儲存成功的攻擊案例
     accuracies = []  # 儲存每個批次的準確率
@@ -322,7 +307,12 @@ def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
     # 計算每個類別的召回率
     y_true = np.array(y_true_all)
     y_pred = np.array(y_pred_all)
-    acc = classification_report(y_true, y_pred, digits=4, output_dict=True)
+    # 制警告並設置 zero_division 為 1 或 0，確保當某個類別沒有預測樣本時，精確度和 F1-score將被設為 0
+    # zero_division=0：當遇到除以零的情況（即某個類別沒有預測樣本），將返回 0，表示該類別的精確度或 F 分數無效或為 0。
+    # 即當類別沒有預測樣本時，精確度或 F 分數為 0。
+    # zero_division=1：當遇到除以零的情況時，返回 1，這表示對該類別給予最大分數，認為精確度或 F 分數是最好的。
+    # 即當類別沒有預測樣本時，精確度或 F 分數為 1
+    acc = classification_report(y_true, y_pred, digits=4, output_dict=True, zero_division=0)
     
     # 將每個類別的召回率寫入 "recall-baseline.csv" 檔案
     RecordRecall = ()
@@ -336,16 +326,17 @@ def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
     RecordRecall = str(RecordRecall)[1:-1]
 
     str_epsilon = f"epsilon_{epsilon}"
-    generatefolder(f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/{client_str}/{Choose_method}/", str_epsilon)
+    generatefolder(f"{save_filepath}/", str_epsilon)
+
     # 標誌來跟踪是否已經添加了標題行
     header_written = False
-    with open(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/recall-baseline_epsilon_{epsilon}.csv", "a+") as file:
+    with open(f"{save_filepath}/{str_epsilon}/recall-baseline_epsilon_{epsilon}.csv", "a+") as file:
         if not header_written:
             header_written = True
         file.write(str(RecordRecall) + "\n")
 
     # 將總體準確度和其他信息寫入 "accuracy-baseline.csv" 檔案
-    with open(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/accuracy-baseline_epsilon_{epsilon}.csv", "a+") as file:
+    with open(f"{save_filepath}/{str_epsilon}/accuracy-baseline_epsilon_{epsilon}.csv", "a+") as file:
         if not header_written:
             header_written = True
         file.write(f"精確度,時間,loss\n")
@@ -353,25 +344,30 @@ def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
 
     # 生成分類報告
     report_df = pd.DataFrame(acc).transpose()
-    report_df.to_csv(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/baseline_report_epsilon_{epsilon}.csv", header=True)
+    report_df.to_csv(f"{save_filepath}/{str_epsilon}/baseline_report_epsilon_{epsilon}.csv", header=True)
 
     # 畫出混淆矩陣
     draw_confusion_matrix(y_true, y_pred, True, epsilon=epsilon)
 
     # 保存成功攻擊的結果到 CSV
     attack_results = pd.DataFrame(successful_attacks)
-    attack_results.to_csv(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}/", f'successful_attacks_eps_{epsilon}.csv'), index=False)
+    attack_results.to_csv(os.path.join(f"{save_filepath}/{str_epsilon}/", f'successful_attacks_eps_{epsilon}.csv'), index=False)
 
     # 將對抗樣本和標籤保存為 CSV 和 npy 檔案
     x_adv_np = np.concatenate([attack.generate(x=data.cpu().numpy()) for data, _ in test_loader], axis=0)
     y_adv_np = np.concatenate([target.cpu().numpy() for _, target in test_loader], axis=0)
 
     x_adv_df = pd.DataFrame(x_adv_np.reshape(x_adv_np.shape[0], -1))  # 展平每個樣本
-    x_adv_df['label'] = y_adv_np  # 添加標籤欄位
-    x_adv_df.to_csv(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}", f'CICIDS2019_adversarial_samples_eps{epsilon}.csv'), index=False)
+    x_adv_df['Label'] = y_adv_np  # 添加標籤欄位
+    x_adv_df.to_csv(os.path.join(f"{save_filepath}/{str_epsilon}", f'{choose_dataset}_adversarial_samples_eps{epsilon}.csv'), index=False)
 
-    np.save(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}", f'x_test_CICIDS2019_adversarial_samples_eps{epsilon}.npy'), x_adv_np)
-    np.save(os.path.join(f"{save_dir}/{current_time}/{client_str}/{Choose_method}/{str_epsilon}", f'y_test_CICIDS2019_adversarial_labels_eps{epsilon}.npy'), y_adv_np)
+    # True 表示生成train data被攻擊後的資料
+    if bool_genrate_Train_Or_Test:
+        np.save(os.path.join(f"{save_filepath}/{str_epsilon}", f'x_train_{choose_dataset}_eps{epsilon}.npy'), x_adv_np)
+        np.save(os.path.join(f"{save_filepath}/{str_epsilon}", f'y_train_{choose_dataset}_eps{epsilon}.npy'), y_adv_np)
+    else:
+        np.save(os.path.join(f"{save_filepath}/{str_epsilon}", f'x_test_{choose_dataset}_eps{epsilon}.npy'), x_adv_np)
+        np.save(os.path.join(f"{save_filepath}/{str_epsilon}", f'y_test_{choose_dataset}_eps{epsilon}.npy'), y_adv_np)
 
     return avg_accuracy, successful_attacks
 
@@ -386,22 +382,6 @@ def main():
     parser.add_argument('--log-interval', type=int, default=10)
     parser.add_argument('--save-model', action='store_true', default=True)
     args = parser.parse_args()
-
-
-    # Load CICIDS2019 dataset
-    filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
-
-    # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
-    x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_train_20240502.npy", allow_pickle=True)
-    y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_train_20240502.npy", allow_pickle=True)
-    # 20240502 CIC-IDS2019 after do labelencode and minmax 75 25分
-    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_test_20240502.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\y_01_12_test_20240502.npy", allow_pickle=True)
-    # 轉換為張量
-    x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
-    y_train = torch.from_numpy(y_train).type(torch.LongTensor)
-    x_test = torch.from_numpy(x_test).type(torch.FloatTensor)
-    y_test = torch.from_numpy(y_test).type(torch.LongTensor)
     
     # 創建用於訓練和測試的數據加載器
     train_data = TensorDataset(x_train, y_train)
@@ -413,23 +393,13 @@ def main():
     input_size = x_train.shape[1]  # 特徵數量
     num_classes = len(np.unique(y_train))  # 類別數量
     model = MLP(input_size, num_classes).to(DEVICE)
-    
-    # 每層神經元512下所訓練出來的正常model
-    model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2019\\BaseLine_After_local_train_model_bk.pth'
-    # PGD攻擊後的模型
-    # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2019\\model_0.1.pt'
-    # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\\single_AnalyseReportFolder\\CICIDS2019\\BaseLine_After_local_train_model_e500CandW.pth'
-    model.load_state_dict(torch.load(model_path))
 
     # 設定優化器和調度器
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    # scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
 
     # 測試模型
     # accuracy, all_preds, all_labels = test_simple(model, DEVICE, test_loader)
-    y_true = None
-    y_pred = None
-    accuracy = test(model,y_true,y_pred, test_loader, start_IDS, client_str,True)
+    accuracy = test(model,test_loader, start_IDS, client_str,True)
     
     # 創建 ART 分類器
     classifier = PyTorchClassifier(
@@ -442,27 +412,34 @@ def main():
     )
 
     # 設定 PGD 攻擊
-    epsilons = [0.1, 0.2, 0.3]
+    # epsilons = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
+    # step_epsilons_list = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
+    # epsilons = [0.05, 0.1]
+    step_epsilons = 0.05
     for epsilon in epsilons:
+        # for step_epsilons in step_epsilons_list:
         attack = ProjectedGradientDescent(
-            estimator=classifier,
-            eps=epsilon,
-            eps_step=0.5,
-            max_iter=10,
-            targeted=False,
-            num_random_init=0
+                estimator=classifier,
+                eps=epsilon,
+                eps_step=step_epsilons,
+                max_iter=100,
+                targeted=False,
+                num_random_init=0
         )
         
         # 執行攻擊並評估
         acc, successful_attacks = pgd_attack_evaluation(
-            model, DEVICE, test_loader, classifier, attack, save_dir, epsilon
+            model, DEVICE, test_loader, classifier, attack, save_dir, epsilon, step_epsilons
         )
         
+        # 模型權重需經過訓練後才會發生變化
+        # 這邊經測試樣本只生成test的樣本未訓練
+        # 所以不用存模型
         # torch.save(model.state_dict(), os.path.join(save_dir, f"model_{epsilon}.pth"))
 
         #紀錄結束時間
         end_IDS = time.time()
-        getStartorEndtime("endtime",end_IDS,f"./Adversarial_Attack_Test/CICIDS2019/PGD_Attack/{today}/{current_time}/{client_str}/{Choose_method}")
+        getStartorEndtime("endtime",end_IDS,f"{save_filepath}")
 
 
 if __name__ == '__main__':

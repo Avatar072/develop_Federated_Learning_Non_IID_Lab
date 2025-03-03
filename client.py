@@ -29,12 +29,13 @@ from mytoolfunction import ChooseUseModel, getStartorEndtime,EvaluatePercent
 from collections import Counter
 from Add_ALL_LayerToCount import DoCountModelWeightSum,evaluateWeightDifferences
 from Add_ALL_LayerToCount import Calculate_Weight_Diffs_Distance_OR_Absolute
-
-
+from colorama import Fore, Back, Style, init
+# 初始化 colorama（Windows 系統中必須）
+init(autoreset=True)
 #CICIIDS2017 or Edge 62個特徵
 # labelCount = 15
 #TONIOT 44個特徵
-labelCount = 10
+# labelCount = 10
 #CICIIDS2019
 # labelCount = 13
 #Wustl 41個特徵
@@ -43,6 +44,9 @@ labelCount = 10
 # labelCount = 4
 #CICIIDS2017、TONIOT、CICIIDS2019 聯集
 # labelCount = 35
+
+# CICIDS2017、CICIDS2018、CICIDS2019 聯集
+labelCount = 27
 
 # CICIIDS2017、TONIOT、EdgwIIOT 聯集
 # labelCount = 31
@@ -63,10 +67,10 @@ torch.cuda.get_device_name(0)
 # 返回当前设备索引；
 torch.cuda.current_device()
 print(f"DEVICE: {DEVICE}")
-#python client.py --dataset train_half1 --epochs 50 --method normal
-#python client.py --dataset train_half2 --epochs 50 --method normal
-#python client.py --dataset train_half3 --epochs 50 --method normal
-file, num_epochs,Choose_method = ParseCommandLineArgs(["dataset", "epochs", "method"])
+#python client.py --dataset_split client1_train --epochs 50 --method normal
+#python client.py --dataset_split client2_train --epochs 50 --method normal
+#python client.py --dataset_split client3_train --epochs 50 --method normal
+file, num_epochs,Choose_method = ParseCommandLineArgs(["dataset_split", "epochs", "method"])
 print(f"Dataset: {file}")
 print(f"Number of epochs: {num_epochs}")
 print(f"Choose_method: {Choose_method}")
@@ -143,13 +147,17 @@ getStartorEndtime("starttime",start_IDS,f"./FL_AnalyseReportfolder/{today}/{clie
 # y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\merged_y_cicids2017_toniot_EdgeIIOT_Chi_square_45.npy", allow_pickle=True)
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
 
 
 # 20240523 TONIoT after do labelencode and minmax  75 25分 DOJSMA attack for FL Client3
 # x_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/x_DoJSMA_test_20240722.npy")
 # y_test  = np.load(f"./Adversarial_Attack_Test/20240722_FL_cleint3_.0.5_0.02/y_DoJSMA_test_20240722.npy")
+
+# 20240523 TONIoT after do labelencode and minmax  75 25分
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\merged_x_Non_IID_ALL_test.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\merged_y_Non_IID_ALL_test.npy", allow_pickle=True)   
 
 counter = Counter(y_test)
 print("test",counter)
@@ -298,19 +306,19 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         arr = confusion_matrix(y_true, y_pred)
         # class_names = [str(i) for i in range(labelCount)]
         #TONIoT
-        class_names = {
+        # class_names = {
                         # 0: 'BENIGN', 
                         # 1: 'DDoS', 
-                        0: 'normal', 
-                        1: 'ddos',
-                        2: 'backdoor', 
-                        3: 'dos', 
-                        4: 'injection', 
-                        5: 'mitm', 
-                        6: 'password', 
-                        7: 'ransomware', 
-                        8: 'scanning', 
-                        9: 'xss', 
+                        # 0: 'normal', 
+                        # 1: 'ddos',
+                        # 2: 'backdoor', 
+                        # 3: 'dos', 
+                        # 4: 'injection', 
+                        # 5: 'mitm', 
+                        # 6: 'password', 
+                        # 7: 'ransomware', 
+                        # 8: 'scanning', 
+                        # 9: 'xss', 
                         # 10: '10_PortScan', 
                         # 11: '11_SSH-Patator', 
                         # 12: '12_Web Attack Brute Force', 
@@ -324,7 +332,7 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
                         # 20: '20_ransomware',
                         # 21: '21_scanning',
                         # 22: '22_xss'
-                        } 
+                        # } 
         # CICIDS2017 TONIOT CICIDS2019
         # class_names = {
         #                 0: '0_BENIGN', 
@@ -396,7 +404,37 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         #                 28: '28_DDoS_HTTP' ,
         #                 29: '29_Uploading',
         #                 30: '30_Fingerprinting'
-        #                 }         
+        #                 }      
+        # CICIDS2017 CICIDS2018 CICIDS2019
+        class_names = {
+                        0: '0_BENIGN', 
+                        1: '1_Bot', 
+                        2: '2_DDoS', 
+                        3: '3_DoS GoldenEye', 
+                        4: '4_DoS Hulk', 
+                        5: '5_DoS Slowhttptest', 
+                        6: '6_DoS slowloris', 
+                        7: '7_Infilteration', 
+                        8: '8_Web Attack', 
+                        9: '9_Heartbleed', 
+                        10: '10_PortScan', 
+                        11: '11_FTP-BruteForce', 
+                        12: '12_FTP-Patator', 
+                        13: '13_SSH-Bruteforce', 
+                        14: '14_SSH-Patator',
+                        15: '15_DrDoS_DNS',
+                        16: '16_DrDoS_LDAP',
+                        17: '17_DrDoS_MSSQL',
+                        18: '18_DrDoS_NTP',
+                        19: '19_DrDoS_NetBIOS',
+                        20: '20_DrDoS_SNMP',
+                        21: '21_DrDoS_SSDP',
+                        22: '22_DrDoS_UDP',
+                        23: '23_Syn',
+                        24: '24_TFTP',
+                        25: '25_UDPlag',
+                        26: '26_WebDDoS'
+                        }     
         # class_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11','12','13','14','15','16','17','18','20','21']
         # class_names = ['0', '1', '2', '3']
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
@@ -428,6 +466,7 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.2)
         # 保存圖像到指定路徑
         plt.savefig(f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_{str_globalOrlocal}_confusion_matrix.png")
+        plt.close('all')  # 清除圖形對象
         # plt.show()
 
 # 創建用於訓練和測試的DataLoader
@@ -615,8 +654,8 @@ class FlowerClient(fl.client.NumPyClient):
             print(f"*********************{self.client_id}在第{self.global_round}回合開始使用被攻擊的數據*********************************************")
             
             # 載入被JSMA攻擊的數據 theta=0.05
-            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
-            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
+            # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_DoJSMA_train_half3_20240801.npy", allow_pickle=True)
             
             # 載入被JSMA攻擊的數據 theta=0.1
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_DoJSMA_train_half3_20240901_theta_0.1.npy", allow_pickle=True)
@@ -645,7 +684,13 @@ class FlowerClient(fl.client.NumPyClient):
             # 載入正常的數據
             # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)
             # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_dataframes_random_train_half3_20240523.npy", allow_pickle=True)  
-
+            
+            
+            # 載入正常的non-iid數據
+            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do pca" +f"cicids2019 with normal attack type")
+            x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            
             x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
             y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
             
@@ -659,8 +704,8 @@ class FlowerClient(fl.client.NumPyClient):
 
         ####################################################歐基里德距離-模型每層差異求總和#################################################  
         # 先強制存第49round global當測試
-        if (self.global_round == 49):
-            torch.save(net.state_dict(),f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_49.pth")
+        # if (self.global_round == 49):
+        #     torch.save(net.state_dict(),f"./FL_AnalyseReportfolder/{today}/{client_str}/{Choose_method}/fedavg_unattack_49.pth")
       
         
         # 檢查 state_dict1 和 state_dict2 是否為 None
