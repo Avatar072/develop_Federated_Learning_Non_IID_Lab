@@ -5,7 +5,6 @@ import flwr as fl
 from flwr.common import Metrics
 from flwr.common import Parameters, FitRes, EvaluateRes
 from flwr.server import client_proxy, client_manager
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -20,12 +19,31 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from mytoolfunction import ChooseUseModel
+# from flwr.simulation import simulate
+# from client_IID import FlowerClient
+import configparser
+
+# 初始化 ConfigParser
+config = configparser.ConfigParser()
+# 讀取 ini 文件
+config.read('./config.ini', encoding='utf-8')
+# 獲取 Round 節點下的值
+global_round = config.getint('Round', 'global_round')   # 使用 getint 來取得整數類型的值
+# 顯示讀取的配置
+print(f"global_round: {global_round}")
+# 獲取 Count 節點下的值
+labelCount = config.getint('Count', 'labelCount')
+print(f"Count: {labelCount}")
+
+# 獲取 Count 節點下的值
+client_count = config.getint('Fit_Clients', 'client_count')
+print(f"clients: {client_count}")
 
 class MLP(nn.Module):
     def __init__(self):
         super(MLP, self).__init__()
         # self.layer1 = nn.Linear(44, 512)
-        self.layer1 = nn.Linear(83, 512)
+        self.layer1 = nn.Linear(79, 512)
         self.fc2 = nn.Linear(512, 512)
         self.fc3 = nn.Linear(512, 512)
         self.fc4 = nn.Linear(512, 512)
@@ -43,22 +61,8 @@ class MLP(nn.Module):
 
 # 初始化模型和優化器
 # model = MLP()
-#CICIIDS2017 or Edge 62個特徵
-# labelCount = 15
-#TONIOT 44個特徵
-labelCount = 10
-#CICIIDS2019
-# labelCount = 13
-#Wustl 41個特徵
-# labelCount = 5
-#Kub 36個特徵
-# labelCount = 4
-#CICIIDS2017、TONIOT、CICIIDS2019 聯集
-# labelCount = 35
-#CICIIDS2017、TONIOT、EdgwIIOT 聯集
-# labelCount = 31
 
-model = ChooseUseModel("MLP", 44, labelCount)
+model = ChooseUseModel("MLP", 79, labelCount)
 
 optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001)
 
@@ -164,14 +168,19 @@ def weighted_average(metrics: List[Tuple[int, Dict[str, float]]]) -> Dict[str, f
         global_round = m.get("global_round", 0)
         round = global_round
         Local_weight_sum = m.get("Local_train_weight_sum", 0)
-        weight_diff = m.get("Local_train_weight_sum-Previous_FedAVG weight_sum", 0)
-        threshold = Local_weight_sum * 0.05
+        # weight_diff = m.get("Local_train_weight_sum-Previous_FedAVG weight_sum", 0)
+        # threshold = Local_weight_sum * 0.05
+        weight_diff = m.get("Initial_and_AfterLocalTrain_Local_model_weight_diff_dis", 0)
+        threshold = m.get("dis_threshold_Inital_Local", 0)
+        threshold = threshold*1.1
+
 
         #前面10round不看
         if global_round > 10:
             #權重差異超過當前本地權重總和的5%就要過濾掉  或 Local_train_accuracy大於90%才能列入計算
-            if weight_diff <= threshold or Local_train_accuracy > 0.8:
-                if "accuracy" in m and Local_train_accuracy > 0.8:#Local_train_accuracy大於90%才能列入計算
+            # if weight_diff <= threshold or Local_train_accuracy > 0.8:
+            if weight_diff <= threshold:
+                # if "accuracy" in m and Local_train_accuracy > 0.8:#Local_train_accuracy大於90%才能列入計算
                     print(m["accuracy"])
                     weighted_sum += num_examples * m["accuracy"]
                     total_examples += num_examples  # 只在满足条件时累加
@@ -283,8 +292,12 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
             global_round = m.get("global_round", 0)
             Local_weight_sum = m.get("Local_train_weight_sum", 0)
             #摸型整層加總後閥值
-            weight_diff = m.get("Local_train_weight_sum-Previous_FedAVG weight_sum", 0)
-            threshold = Local_weight_sum * 0.05
+            # weight_diff = m.get("Local_train_weight_sum-Previous_FedAVG weight_sum", 0)
+            # threshold = Local_weight_sum * 0.05
+            weight_diff = m.get("Initial_and_AfterLocalTrain_Local_model_weight_diff_dis", 0)
+            threshold = m.get("dis_threshold_Inital_Local", 0)
+            threshold = threshold*1.1
+
 
             #歐基里德距離閥值
             dis_weight_diff = m.get("dis_percent_diff", 0)
@@ -302,7 +315,8 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
 
                 #歐基里德距離閥值設定 當兩模型間各層差異總和的距離 
                 #上一回合的距離跟這一回比距離突然大幅增大表遭受到攻擊就要過濾掉
-                if dis_weight_diff <= dis_threshold:
+                # if dis_weight_diff <= dis_threshold:
+                if weight_diff <= threshold:
                         print(m["accuracy"])
                         weighted_sum += num_examples * m["accuracy"]
                         total_examples += num_examples  # 只在满足条件时累加
@@ -333,28 +347,43 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
 # 使用自定義策略啟動Flower伺服器
 # strategy = CustomFedAvg(
 #     initial_parameters=initial_parameters,
-#     min_fit_clients=3,
-#     min_evaluate_clients=3,
-#     min_available_clients=3,
+#     min_fit_clients=1,
+#     min_evaluate_clients=1,
+#     min_available_clients=client_count,
 #     # evaluate_metrics_aggregation_fn=weighted_average,
 # )
 
 # Define strategy
 strategy = fl.server.strategy.FedAvg(initial_parameters = initial_parameters, 
                                      evaluate_metrics_aggregation_fn=weighted_average, 
-                                     min_fit_clients = 3, 
-                                     min_evaluate_clients = 3,
-                                     min_available_clients = 3)
+                                     min_fit_clients = client_count, 
+                                    #  min_evaluate_clients = client_count,
+                                    # min_evaluate_clients = 0為不使用flwr的內建評估
+                                     min_evaluate_clients = 0,
+                                     min_available_clients = client_count)
 
+# 定義客戶端配置
+# clients_config = [
+#     {"client_id": i, "dataset_split": f"client{i}_train", "epochs": 50, "method": "normal"}
+#     for i in range(1, 4)  # 模擬3個客戶端
+# ]
 
+# 使用 simulate 函數來模擬這些客戶端
+# history = simulate(
+#     client_fn=FlowerClient,  # 客戶端函數
+#     num_clients=3,  # 客戶端數量
+#     num_rounds=5,  # 訓練的輪次
+#     strategy=None,  # 使用預設的聚合策略
+# )
 # Start Flower server
 fl.server.start_server(
-    # server_address="127.0.0.1:53388",
+    server_address="127.0.0.1:53388",
     # server_address="127.0.0.1:8080",
-    server_address="192.168.1.137:53388",
+    # server_address="192.168.1.137:53388",
 
-    # config=fl.server.ServerConfig(num_rounds=20),
-    config=fl.server.ServerConfig(num_rounds=150),
+    # config=fl.server.ServerConfig(num_rounds=15),
+    # config=fl.server.ServerConfig(num_rounds=50),
+    config=fl.server.ServerConfig(num_rounds=global_round),
 
     strategy=strategy,
 )

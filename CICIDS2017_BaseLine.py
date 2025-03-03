@@ -22,10 +22,8 @@ from DoChooseTestNpfile import ChooseLoadTestNpArray
 from collections import Counter
 from colorama import Fore, Back, Style, init
 ####################################################################################################
-#CICIIDS2019
-labelCount = 13
-# 二元分類
-# labelCount = 2
+#CICIDS2017
+labelCount = 15
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -35,10 +33,10 @@ torch.cuda.empty_cache()  # 清除 CUDA 快取
 
 '''
 執行範例
-# python CICIDS2019_BaseLine.py --Load_dataset CICIDS2019 --dataset_split baseLine_train --epochs 500 --method normal
-# python CICIDS2019_BaseLine.py --Load_dataset CICIDS2019 --dataset_split client1_train --epochs 500 --method normal
-# python CICIDS2019_BaseLine.py --Load_dataset CICIDS2019 --dataset_split client2_train --epochs 500 --method normal
-# python CICIDS2019_BaseLine.py --Load_dataset CICIDS2019 --dataset_split client3_train --epochs 500 --method normal
+# python CICIDS2017_BaseLine.py --Load_dataset CICIDS2017 --dataset_split baseLine_train --epochs 500 --method normal
+# python CICIDS2017_BaseLine.py --Load_dataset CICIDS2017 --dataset_split client1_train --epochs 500 --method normal
+# python CICIDS2017_BaseLine.py --Load_dataset CICIDS2017 --dataset_split client2_train --epochs 500 --method normal
+# python CICIDS2017_BaseLine.py --Load_dataset CICIDS2017 --dataset_split client3_train --epochs 500 --method normal
 # --method normal表示未正常未受到攻擊且未做任何資料資強(GAN\SMOTE)
 # --method Evasion_Attack表示受到逃避攻擊
 '''
@@ -88,7 +86,7 @@ test_Attack_method = None
 # test_Attack_method = "FGSM"
 # test_Attack_method = "PGD"
 # test_Attack_method = "CandW"
-x_test,y_test = ChooseLoadTestNpArray('CICIDS2019','test', filepath, test_Choose_Attacktype, test_Attack_method)
+x_test,y_test = ChooseLoadTestNpArray('CICIDS2017','test', filepath, test_Choose_Attacktype, test_Attack_method)
 # 載入data frame(for one hot)
 # x_train, y_train, client_str = ChooseTrainDatastes(filepath, file, Choose_method)   
 
@@ -97,10 +95,10 @@ today = datetime.date.today()
 today = today.strftime("%Y%m%d")
 current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
 print(Fore.YELLOW+Style.BRIGHT+f"當前時間: {current_time}")
-generatefolder(f"./single_AnalyseReportFolder/CICIDS2019/", today)
-generatefolder(f"./single_AnalyseReportFolder/CICIDS2019/{today}/{current_time}/", client_str)
-generatefolder(f"./single_AnalyseReportFolder/CICIDS2019/{today}/{current_time}/{client_str}/", Choose_method)
-getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/CICIDS2019/{today}/{current_time}/{client_str}/{Choose_method}")
+generatefolder(f"./single_AnalyseReportFolder/CICIDS2017/", today)
+generatefolder(f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/", client_str)
+generatefolder(f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/{client_str}/", Choose_method)
+getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/{client_str}/{Choose_method}")
 
 # 印出所選擇Npfile的資料
 print("特徵數",x_train.shape[1])
@@ -200,14 +198,14 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
 
             # 標誌來跟踪是否已經添加了標題行
             header_written = False
-            with open(f"./single_AnalyseReportFolder/CICIDS2019/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
+            with open(f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
                 if not header_written:
                     # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
                     header_written = True
                 file.write(str(RecordRecall) + "\n")
         
             # 將總體準確度和其他信息寫入 "accuracy-baseline.csv" 檔案
-            with open(f"./single_AnalyseReportFolder/CICIDS2019/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}.csv", "a+") as file:
+            with open(f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}.csv", "a+") as file:
                 if not header_written:
                     # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
                     header_written = True
@@ -217,7 +215,7 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
                 # 生成分類報告
                 GenrateReport = classification_report(y_true, y_pred, digits=4, output_dict=True)
                 report_df = pd.DataFrame(GenrateReport).transpose()
-                report_df.to_csv(f"./single_AnalyseReportFolder/CICIDS2019/{today}/{current_time}/{client_str}/{Choose_method}/baseline_report_{client_str}.csv",header=True)
+                report_df.to_csv(f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/{client_str}/{Choose_method}/baseline_report_{client_str}.csv",header=True)
 
     draw_confusion_matrix(y_true, y_pred,plot_confusion_matrix)
     accuracy = correct / total
@@ -231,45 +229,27 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
     #混淆矩陣
     if plot_confusion_matrix:
         # df_cm的PD.DataFrame 接受三個參數：
-        # arr：混淆矩陣的數據，這是一個二維陣列，其中包含了模型的預測和實際標籤之間的關係，以及它們在混淆矩陣中的計數。
+        # arr：混淆矩陣的數據，這是一個二維陣列，其中包含了模型的預測和實際標籤之間的關係，以及它DoBaselinesplitC們在混淆矩陣中的計數。
         # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，以標識混淆矩陣中每個類別的位置。
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
-        # # CICIDS2019
+        # # CICIDS2017
         class_names = {
-                        #01_12 Label
-                        # 0: '0_BENIGN', 
-                        # 1: '1_DrDoS_DNS', 
-                        # 2: '2_DrDoS_LDAP', 
-                        # 3: '3_DrDoS_MSSQL',
-                        # 4: '4_DrDoS_NTP', 
-                        # 5: '5_DrDoS_NetBIOS', 
-                        # 6: '6_DrDoS_SNMP', 
-                        # 7: '7_DrDoS_SSDP', 
-                        # 8: '8_DrDoS_UDP', 
-                        # 9: '9_Syn', 
-                        # 10: '10_TFTP', 
-                        # 11: '11_UDPlag', 
-                        # 12: '12_WebDDoS'
-                        #01_12 merge 03_11  Label
-                        0:	'0_BENIGN',
-                        1:	'1_DrDoS_DNS',
-                        2:	'2_DrDoS_LDAP',
-                        3:	'3_DrDoS_MSSQL',
-                        4:	'4_DrDoS_NTP',
-                        5:	'5_DrDoS_NetBIOS',
-                        6:	'6_DrDoS_SNMP',
-                        7:	'7_DrDoS_SSDP',
-                        8:	'8_DrDoS_UDP',
-                        9:	'9_LDAP',
-                        10:	'10_MSSQL',
-                        11:	'11_NetBIOS',
-                        12:	'12_Portmap',
-                        13:	'13_Syn',
-                        14:	'14_TFTP',
-                        15:	'15_UDP',
-                        16:	'16_UDPLag',
-                        17:	'17_WebDDoS'
+                        0: '0_BENIGN', 
+                        1: '1_Bot', 
+                        2: '2_DDoS', 
+                        3: '3_DoS GoldenEye', 
+                        4: '4_DoS Hulk', 
+                        5: '5_DoS Slowhttptest', 
+                        6: '6_DoS slowloris', 
+                        7: '7_FTP-Patator', 
+                        8: '8_Heartbleed', 
+                        9: '9_Infiltration', 
+                        10: '10_PortScan', 
+                        11: '11_SSH-Patator', 
+                        12: '12_Web Attack Brute Force', 
+                        13: '13_Web Attack Sql Injection', 
+                        14: '14_Web Attack XSS'
                         } 
         # df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names.values())
@@ -278,8 +258,8 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         
         # 固定子圖參數
         plt.subplots_adjust(
-            left=0.19,    # 左邊界
-            bottom=0.167,  # 下邊界
+            left=0.26,    # 左邊界
+            bottom=0.23,  # 下邊界
             right=1.0,     # 右邊界
             top=0.88,      # 上邊界
             wspace=0.207,  # 子圖間的寬度間隔
@@ -291,7 +271,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         plt.ylabel("label (ground truth)")
         # Rotate the x-axis labels (prediction categories)
         plt.xticks(rotation=30, ha='right',fontsize=9)
-        plt.savefig(f"./single_AnalyseReportFolder/CICIDS2019/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
+        plt.savefig(f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_confusion_matrix.png")
         plt.show()
 
 # 創建用於訓練和測試的數據加載器
@@ -309,12 +289,12 @@ train(net, trainloader, epochs=num_epochs)
 
 #紀錄結束時間
 end_IDS = time.time()
-getStartorEndtime("endtime",end_IDS,f"./single_AnalyseReportFolder/CICIDS2019/{today}/{current_time}/{client_str}/{Choose_method}")
+getStartorEndtime("endtime",end_IDS,f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/{client_str}/{Choose_method}")
 
 # 評估模型
 test_accuracy = test(net, testloader, start_IDS, client_str,True)
 # 在训练或测试结束后，保存模型
-torch.save(net.state_dict(), f"./single_AnalyseReportFolder/CICIDS2019/{today}/{current_time}/{client_str}/{Choose_method}/BaseLine_After_local_train_model.pth")
+torch.save(net.state_dict(), f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/{client_str}/{Choose_method}/BaseLine_After_local_train_model.pth")
 
 print(Fore.LIGHTYELLOW_EX + Style.BRIGHT+"測試數據量:\n", len(test_data))
 print(Fore.LIGHTYELLOW_EX + Style.BRIGHT+"訓練數據量:\n", len(train_data))

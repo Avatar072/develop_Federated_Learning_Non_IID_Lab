@@ -9,7 +9,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import OneHotEncoder
-from mytoolfunction import generatefolder,SaveDataToCsvfile,SaveDataframeTonpArray,CheckFileExists,spiltweakLabelbalance,DominmaxforStringTypefeature
+from mytoolfunction import generatefolder,SaveDataToCsvfile,SaveDataframeTonpArray,CheckFileExists,splitweakLabelbalance,DominmaxforStringTypefeature
 
 # filepath = "D:\\ToN-IoT-Network\\TON_IoT Datasets\\UNSW-ToN-IoT"
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
@@ -328,10 +328,10 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,bool_doencode):
     return afterminmax_dataset
 
 # do Labelencode and minmax 
-def DoSpiltAllfeatureAfterMinMax(df,bool_Noniid):  
+def DoSplitAllfeatureAfterMinMax(df,bool_Noniid):  
     train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
     #不能用手動劃分 因其劃分時不是random沒有將資料打亂會造成資料誤判
-    # train_dataframes, test_dataframes = manualspiltdataset(df)#test_size=0.2表示将数据集分成测试集的比例为20%
+    # train_dataframes, test_dataframes = manualsplitdataset(df)#test_size=0.2表示将数据集分成测试集的比例为20%
 
     if bool_Noniid !=True:
 
@@ -347,7 +347,7 @@ def DoSpiltAllfeatureAfterMinMax(df,bool_Noniid):
             List_train_Label = []
             List_test_Label = []
             for i in range(10):
-                train_label_split, test_label_split = spiltweakLabelbalance(i,df,0.25)
+                train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
                 List_train_Label.append(train_label_split)
                 List_test_Label.append(test_label_split)         
 
@@ -373,7 +373,7 @@ def DoSpiltAllfeatureAfterMinMax(df,bool_Noniid):
     SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/{today}", "train_ToN-IoT",today)
 
 
-def DoSpiltAfterDoPCA(df,number_of_components,bool_Noniid,bool_add_cicids2017feature):
+def DoSplitAfterDoPCA(df,number_of_components,bool_Noniid,bool_add_cicids2017feature):
     
     # add cicids2017 chisquare select 45出來除IP外的的39個特徵
     if(bool_add_cicids2017feature):
@@ -419,9 +419,20 @@ def DoSpiltAfterDoPCA(df,number_of_components,bool_Noniid,bool_add_cicids2017fea
                       f"./data/dataset_AfterProcessed/TONIOT/{today}/doPCA/{number_of_components}", 
                       f"TONIOT_AfterProcessed_minmax_PCA")
 
-    # train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
-    # 手動劃分資料集
-    train_dataframes, test_dataframes = manualspiltdataset(df)
+    train_dataframes, test_dataframes = train_test_split(df, test_size=0.25, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
+    # BaseLine時
+            # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+    List_train_Label = []
+    List_test_Label = []
+    for i in range(10):
+        train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
+        List_train_Label.append(train_label_split)
+        List_test_Label.append(test_label_split)         
+
+        train_dataframes = pd.concat(List_train_Label)
+        test_dataframes = pd.concat(List_test_Label)
+
+        print("test",test_dataframes['type'].value_counts())
     # printFeatureCountAndLabelCountInfo(train_dataframes, test_dataframes,"Label")
     if bool_Noniid !=True:
 
@@ -459,9 +470,9 @@ def DoSplitthrildClientForiid():
 
         for i in range(10):
             # 第一次拆分：将数据拆分成 33.3% 和 66.7%
-            train_half1_label_split, train_half2_label_split = spiltweakLabelbalance(i,df_ALLtrain,0.3333)
+            train_half1_label_split, train_half2_label_split = splitweakLabelbalance(i,df_ALLtrain,0.3333)
             # 第二次拆分：将 66.7% 的数据再拆分成 50% 和 50%（即 33.3% 和 33.3%）
-            train_half1_label_split_half1,train_half1_label_split_half2 = spiltweakLabelbalance(i,train_half1_label_split,0.5)
+            train_half1_label_split_half1,train_half1_label_split_half2 = splitweakLabelbalance(i,train_half1_label_split,0.5)
 
             List_train_half1_Label.append(train_half1_label_split_half1)
             List_train_half2_Label.append(train_half2_label_split)    
@@ -543,9 +554,9 @@ def DoRandomSplitthrildClientForiid():
             print("Second Random Size Dict:", total_second_random_size)
 
             # 第一次拆分
-            train_half1_label_split, train_half2_label_split = spiltweakLabelbalance(i, df_ALLtrain, first_random_size)
+            train_half1_label_split, train_half2_label_split = splitweakLabelbalance(i, df_ALLtrain, first_random_size)
             # 第二次拆分
-            train_half1_label_split_half1, train_half1_label_split_half2 = spiltweakLabelbalance(i, train_half1_label_split, first_random_size)
+            train_half1_label_split_half1, train_half1_label_split_half2 = splitweakLabelbalance(i, train_half1_label_split, first_random_size)
 
             # 保存到相应的列表中
             List_train_half1_Label.append(train_half1_label_split_half1)
@@ -587,7 +598,7 @@ def DoRandomSplitthrildClientForiid():
 
 
 #手動劃分
-def manualspiltdataset(df):
+def manualsplitdataset(df):
         train_dataframes = pd.concat([
                                             df[df['type'] == 0].iloc[:8000],
                                             df[df['type'] == 1].iloc[:1],
@@ -638,9 +649,9 @@ def forBaseLineUseData(bool_Noniid):
         # False for Noniid
         df=DoMinMaxAndLabelEncoding(df,bool_Noniid)
         # 一般全部特徵
-        DoSpiltAllfeatureAfterMinMax(df,bool_Noniid)
+        DoSplitAllfeatureAfterMinMax(df,bool_Noniid)
         # PCA
-        # DoSpiltAfterDoPCA(df,77,bool_Noniid,True)
+        DoSplitAfterDoPCA(df,77,bool_Noniid,True)
 
 
 # True for BaseLine
