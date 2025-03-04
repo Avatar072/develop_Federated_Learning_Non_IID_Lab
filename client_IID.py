@@ -25,7 +25,7 @@ from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from sklearn.metrics import confusion_matrix
 from mytoolfunction import generatefolder,ParseCommandLineArgs,ChooseTrainDatastes
-from mytoolfunction import ChooseUseModel, getStartorEndtime,EvaluatePercent
+from mytoolfunction import ChooseUseModel, getStartorEndtime,EvaluateVariation
 from IID_ChooseNPfile import ChooseLoadNpArray
 from collections import Counter
 from Add_ALL_LayerToCount import DoCountModelWeightSum,evaluateWeightDifferences
@@ -401,11 +401,11 @@ class FlowerClient(fl.client.NumPyClient):
         self.Previous_and_Current_Local_model_weight_diff_dis = 0 #當前回合本地端模型與上一回合本地端模型權重差異總和
         self.Previous_diff_dis_Temp = 0
         self.Record_Previous_Global_vs_Local_total_weight_diff_dis = 0
-        self.dis_percent_diff = 0
-        self.dis_percent_diff_Global_Local = 0
-        self.dis_percent_diff_Previous_and_Current_Local_model = 0
-        self.Record_dis_percent_diff = 0
-        self.Unattck_dis_percent_diff = 0
+        self.dis_variation = 0
+        self.dis_variation_Global_Local = 0
+        self.dis_variation_Previous_and_Current_Local_model = 0
+        self.Record_dis_variation = 0
+        self.Unattck_dis_variation = 0
         self.LastRound_UnattackCounter = 0 # 用來計數最後一次的正常FedAvg後的模型
         self.bool_Unattack_Judage = True
         self.dis_smooth_Global_Local = 0
@@ -413,15 +413,15 @@ class FlowerClient(fl.client.NumPyClient):
         self.Unattck_dis_smooth_Global_Local = 0
         self.Previous_and_Current_Local_model_weight_diff_dis_Unattack = 0
         self.Unattck_dis_smooth_Previous_and_Current_Local_model = 0
-        self.Unattck_dis_percent_diff_Global_Local = 0
-        self.Unattck_dis_percent_diff_Previous_and_Current_Local_model = 0
+        self.Unattck_dis_variation_Global_Local = 0
+        self.Unattck_dis_variation_Previous_and_Current_Local_model = 0
         self.Record_Previous_Local_weight_diff_dis = 0
         self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = 0
         self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = 0
         self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = 0
         self.dis_smooth_Inital_Local = 0
-        self.dis_percent_diff_Inital_Local = 0
-        self.UnAttack_dis_percent_diff_Inital_Local = 0
+        self.dis_variation_Inital_Local = 0
+        self.UnAttack_dis_variation_Inital_Local = 0
         self.threshold_List = []
         self.each_ten_round_sum = 0
         self.dis_threshold_Inital_Local = 0
@@ -588,9 +588,9 @@ class FlowerClient(fl.client.NumPyClient):
         
         # 算每一回合權重距離變化的百分比  
             # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100%  
-        self.dis_percent_diff_Global_Local = EvaluatePercent(self.Current_Global_vs_Local_total_weight_diff_dis,
+        self.dis_variation_Global_Local = EvaluateVariation(self.Current_Global_vs_Local_total_weight_diff_dis,
                                                                 self.Record_Previous_Global_vs_Local_total_weight_diff_dis)
-        self.dis_percent_diff_Previous_and_Current_Local_model = EvaluatePercent(self.Previous_and_Current_Local_model_weight_diff_dis,
+        self.dis_variation_Previous_and_Current_Local_model = EvaluateVariation(self.Previous_and_Current_Local_model_weight_diff_dis,
                                                                         self.Record_Previous_Local_weight_diff_dis)
     
     ##########################################計算兩個模型的每層權重差距 將每層權重差距值相加（以歐基里德距離(distance)計算）##########################################
@@ -626,10 +626,10 @@ class FlowerClient(fl.client.NumPyClient):
 
         # 算每一回合權重距離變化的百分比  
             # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100% 
-        self.Unattck_dis_percent_diff_Global_Local = EvaluatePercent(self.Current_Global_vs_Local_total_weight_diff_dis,
+        self.Unattck_dis_variation_Global_Local = EvaluateVariation(self.Current_Global_vs_Local_total_weight_diff_dis,
                                                             self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis)
         
-        self.Unattck_dis_percent_diff_Previous_and_Current_Local_model = EvaluatePercent(self.Previous_and_Current_Local_model_weight_diff_dis,
+        self.Unattck_dis_variation_Previous_and_Current_Local_model = EvaluateVariation(self.Previous_and_Current_Local_model_weight_diff_dis,
                                                             self.Previous_and_Current_Local_model_weight_diff_dis_Unattack)
         # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%(FedAvg and Local)
         self.Unattck_dis_smooth_Global_Local = self.Current_Global_vs_Local_total_weight_diff_dis*0.2 + self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis*0.8
@@ -662,13 +662,13 @@ class FlowerClient(fl.client.NumPyClient):
         #  算每一回合權重距離變化的百分比  
             # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100%  
         if (not self.bool_Unattack_Judage):
-             self.UnAttack_dis_percent_diff_Inital_Local = EvaluatePercent(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
+             self.UnAttack_dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
                                                                 self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
         else:
-            self.dis_percent_diff_Inital_Local = EvaluatePercent(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
+            self.dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
                                                                 self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
             
-            self.UnAttack_dis_percent_diff_Inital_Local = self.dis_percent_diff_Inital_Local
+            self.UnAttack_dis_variation_Inital_Local = self.dis_variation_Inital_Local
         
         # 計算門檻值
         self.count_threshold()
@@ -722,8 +722,8 @@ class FlowerClient(fl.client.NumPyClient):
                 file.write("Inital_Local_vs_AfterLocalTrain,"
                            "Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,"
                            "UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,"
-                           "dis_percent_diff_Inital_Local,"
-                           "UnAttack_dis_percent_diff_Inital_Local,"
+                           "dis_variation_Inital_Local,"
+                           "UnAttack_dis_variation_Inital_Local,"
                            "dis_each_ten_round_sum,"
                            "dis_each_ten_round_average,"
                            "dis_threshold_Inital_Local,"
@@ -736,8 +736,8 @@ class FlowerClient(fl.client.NumPyClient):
                             f"{self.Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離計算）
                             f"{self.Record_Previous_Global_vs_Local_total_weight_diff_dis},"#上一回的全局模型與本地端每層差異總和（以距離計算）
                             f"{self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis},"#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離計算）
-                            f"{self.dis_percent_diff_Global_Local},"#上一回全局模型與本地端每層差異總和變化百分比（以距離計算）
-                            f"{self.Unattck_dis_percent_diff_Global_Local},"#上一回未受到攻擊的的的全局模型與本地端每層差異總和變化百分比（以距離計算）
+                            f"{self.dis_variation_Global_Local},"#上一回全局模型與本地端每層差異總和變化百分比（以距離計算）
+                            f"{self.Unattck_dis_variation_Global_Local},"#上一回未受到攻擊的的的全局模型與本地端每層差異總和變化百分比（以距離計算）
                             f"{self.dis_smooth_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
                             f"{self.Unattck_dis_smooth_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
                             f"{self.Norm_Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離範數計算）
@@ -747,8 +747,8 @@ class FlowerClient(fl.client.NumPyClient):
                 file.write(
                             f"{self.Previous_and_Current_Local_model_weight_diff_dis},"#上一回本地模型與當前本地端模型每層差異總和（以距離計算）
                             f"{self.Previous_and_Current_Local_model_weight_diff_dis_Unattack},"#上一回未受到攻擊的本地模型與當前本地端模型每層差異總和（以距離計算）
-                            f"{self.dis_percent_diff_Previous_and_Current_Local_model},"#上一回的本地模型與當前本地端每層差異總和變化百分比（以距離計算）
-                            f"{self.Unattck_dis_percent_diff_Previous_and_Current_Local_model},"#上一回的未受到攻擊的本地模型與當前本地端每層差異總和變化百分比（以距離計算）
+                            f"{self.dis_variation_Previous_and_Current_Local_model},"#上一回的本地模型與當前本地端每層差異總和變化百分比（以距離計算）
+                            f"{self.Unattck_dis_variation_Previous_and_Current_Local_model},"#上一回的未受到攻擊的本地模型與當前本地端每層差異總和變化百分比（以距離計算）
                             f"{self.dis_smooth_Previous_and_Current_Local_model},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
                             f"{self.Unattck_dis_smooth_Previous_and_Current_Local_model}\n")#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
 
@@ -757,8 +757,8 @@ class FlowerClient(fl.client.NumPyClient):
                             f"{self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和（以距離計算）
                             f"{self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#上一回未訓練本地模型與本地訓練後本地模型（以距離計算）
                             f"{self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#最後一次正常本地模型 當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
-                            f"{self.dis_percent_diff_Inital_Local},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
-                            f"{self.UnAttack_dis_percent_diff_Inital_Local},"#最後一次正常本地模型 當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
+                            f"{self.dis_variation_Inital_Local},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
+                            f"{self.UnAttack_dis_variation_Inital_Local},"#最後一次正常本地模型 當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
                             f"{self.dis_each_ten_round_sum},"#每10回合的當前回合未訓練本地模型與本地訓練後本地模型每層差異總和之加總
                             f"{self.dis_each_ten_round_average},"#每10回合的當前回合未訓練本地模型與本地訓練後本地模型每層差異總和之平均
                             f"{self.dis_threshold_Inital_Local},"#每10回合的當前回合未訓練本地模型與本地訓練後本地模型每層差異總和之平均佔50%+當前回合距離佔50%
@@ -791,6 +791,9 @@ class FlowerClient(fl.client.NumPyClient):
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/x_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/y_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
 
+                # CICIDS2017 iid Dirichlet 0.5 c1 to JSMA theta 0.05 gamma 0.02
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_theta0.05_gamma_0.02.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_theta0.05_gamma_0.02.npy", allow_pickle=True)
 
                 x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
                 y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
@@ -878,7 +881,7 @@ class FlowerClient(fl.client.NumPyClient):
     # 判斷有沒有攻擊    
     def JudageAttack(self):
         # if self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis > self.dis_threshold_Inital_Local*1.1:
-        if self.dis_percent_diff_Inital_Local > 10:
+        if self.dis_variation_Inital_Local > 1:# 不超過原本距離的變化之1倍
             print(Fore.RED+Style.BRIGHT+Back.CYAN+f"global_round_{self.global_round}_occur Attack!!!")
             print(Fore.RED+Style.BRIGHT+Back.CYAN+f"Initial_and_AfterLocalTrain_Local_model_weight_diff_dis:{self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis}")
             self.bool_Unattack_Judage = False
@@ -1040,14 +1043,14 @@ class FlowerClient(fl.client.NumPyClient):
         else:
             # Global vs Local未受到攻擊就讀當前Local vs 上一回合的值
             self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Record_Previous_Global_vs_Local_total_weight_diff_dis
-            self.Unattck_dis_percent_diff_Global_Local = self.dis_percent_diff_Global_Local
+            self.Unattck_dis_variation_Global_Local = self.dis_variation_Global_Local
             self.Unattck_dis_smooth_Global_Local = self.dis_smooth_Global_Local
             self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis = self.Norm_Current_Global_vs_Local_total_weight_diff_dis
                 
             #Local vs Previous Local未受到攻擊就讀當前Local vs 上一回合的值
             self.Previous_and_Current_Local_model_weight_diff_dis_Unattack = self.Previous_and_Current_Local_model_weight_diff_dis
             self.Unattck_dis_smooth_Previous_and_Current_Local_model = self.dis_smooth_Previous_and_Current_Local_model
-            self.Unattck_dis_percent_diff_Previous_and_Current_Local_model = self.dis_percent_diff_Previous_and_Current_Local_model
+            self.Unattck_dis_variation_Previous_and_Current_Local_model = self.dis_variation_Previous_and_Current_Local_model
             
         
         ######################################################模型每層差異求總和################################################ 
@@ -1093,7 +1096,7 @@ class FlowerClient(fl.client.NumPyClient):
                                                                           "Local_train_weight_sum-Previous_FedAVG weight_sum": float(self.previous_array[0]),
                                                                           "Initial_and_AfterLocalTrain_Local_model_weight_diff_dis": float(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis),
                                                                           "dis_threshold_Inital_Local": float(self.dis_threshold_Inital_Local),
-                                                                          "dis_percent_diff": float(self.dis_percent_diff), 
+                                                                          "dis_variation": float(self.dis_variation), 
                                                                           "Current_Global_vs_Local_total_weight_diff_dis": float(self.Current_Global_vs_Local_total_weight_diff_dis),
                                                                           "Previous_total_weight_diff_dis": float(self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis)}
 
@@ -1139,10 +1142,10 @@ class FlowerClient(fl.client.NumPyClient):
     #                         f"{self.Previous_total_weight_diff_abs},"#上一回未受到攻擊的全局模型與本地端模型每層差異總和（以絕對值計算）
     #                         f"{self.Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離計算）
     #                         f"{self.Record_Previous_Global_vs_Local_total_weight_diff_dis},"#上一回的全局模型與本地端每層差異總和（以距離計算）
-    #                         f"{self.dis_percent_diff},"#上一回的全局模型與本地端每層差異總和變化百分比（以距離計算）
+    #                         f"{self.dis_variation},"#上一回的全局模型與本地端每層差異總和變化百分比（以距離計算）
     #                         f"{self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis},"#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離計算）
     #                         f"{self.Previous_and_Current_Local_model_weight_diff_dis},"#上一回未受到攻擊的本地模型與當前本地端模型每層差異總和（以距離計算）
-    #                         f"{self.Unattck_dis_percent_diff},"#上一回未受到攻擊的全局模型與本地端每層差異總和變化百分比（以距離計算）
+    #                         f"{self.Unattck_dis_variation},"#上一回未受到攻擊的全局模型與本地端每層差異總和變化百分比（以距離計算）
     #                         f"{self.Unattck_dis_smooth_Global_Local},"#類似weight average算法計算閥值 當前回合距離佔20% 上一回合未受攻擊模型距離佔80%
     #                         f"{self.Norm_Current_Global_vs_Local_total_weight_diff_dis},"#模型每層差異求總和（以距離範數計算）
     #                         f"{self.Norm_Previous_Unattack_Global_vs_Local_total_weight_diff_dis}\n")#上一回未受到攻擊的全局模型與本地端每層差異總和（以距離範數計算）
