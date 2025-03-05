@@ -188,7 +188,7 @@ def test(net,testloader, start_time, client_str,plot_confusion_matrix):
             y_pred = predicted.data.cpu().numpy()
         
             # 計算每個類別的召回率
-            acc = classification_report(y_true, y_pred, digits=4, output_dict=True)
+            acc = classification_report(y_true, y_pred, digits=4, output_dict=True, zero_division=0)
             accuracy = correct / total
 
             # 將每個類別的召回率寫入 "recall-baseline.csv" 檔案
@@ -218,7 +218,7 @@ def test(net,testloader, start_time, client_str,plot_confusion_matrix):
                 file.write(f"{accuracy},{time.time() - start_time}\n")
 
                 # 生成分類報告
-                GenrateReport = classification_report(y_true, y_pred, digits=4, output_dict=True)
+                GenrateReport = classification_report(y_true, y_pred, digits=4, output_dict=True, zero_division=0)
                 report_df = pd.DataFrame(GenrateReport).transpose()
                 report_df.to_csv(report_df_filepath, header=True)
 
@@ -247,7 +247,7 @@ def plot_results(losses, accuracies, confusion_mtx, save_dir):
     plt.savefig(os.path.join(save_dir, 'confusion_matrix.png'))
     plt.close()
 
-def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_dir, epsilon,bool_genrate_Train_Or_Test):
+def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_dir, epsilon, step_epsilon, bool_genrate_Train_Or_Test):
     model.eval()  # 設置模型為評估模式
     successful_attacks = []  # 儲存成功的攻擊案例
     accuracies = []  # 儲存每個批次的準確率
@@ -301,7 +301,8 @@ def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
 
     # 計算平均準確率並顯示結果
     avg_accuracy = correct / total
-    print(Fore.RED + Style.BRIGHT+f'Average accuracy under PGD attack (ε={epsilon}): {avg_accuracy:.4f}')
+    print(Fore.RED + Style.BRIGHT+f'Average accuracy under PGD attack (ε={epsilon})(eps_step{step_epsilon}): {avg_accuracy:.4f}')
+
     print(Fore.RED + Style.BRIGHT+f'loss: {ave_loss:.4f}')
 
     # 計算每個類別的召回率
@@ -326,17 +327,19 @@ def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
     RecordRecall = str(RecordRecall)[1:-1]
 
     str_epsilon = f"epsilon_{epsilon}"
+    str_step_epsilon = f"step_epsilon_{step_epsilon}"
     generatefolder(f"{save_filepath}/", str_epsilon)
+    generatefolder(f"{save_filepath}/{str_epsilon}/", str_step_epsilon)
 
     # 標誌來跟踪是否已經添加了標題行
     header_written = False
-    with open(f"{save_filepath}/{str_epsilon}/recall-baseline_epsilon_{epsilon}.csv", "a+") as file:
+    with open(f"{save_filepath}/{str_epsilon}/{str_step_epsilon}/recall-baseline_epsilon_{epsilon}.csv", "a+") as file:
         if not header_written:
             header_written = True
         file.write(str(RecordRecall) + "\n")
 
     # 將總體準確度和其他信息寫入 "accuracy-baseline.csv" 檔案
-    with open(f"{save_filepath}/{str_epsilon}/accuracy-baseline_epsilon_{epsilon}.csv", "a+") as file:
+    with open(f"{save_filepath}/{str_epsilon}/{str_step_epsilon}/accuracy-baseline_epsilon_{epsilon}.csv", "a+") as file:
         if not header_written:
             header_written = True
         file.write(f"精確度,時間,loss\n")
@@ -344,14 +347,14 @@ def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
 
     # 生成分類報告
     report_df = pd.DataFrame(acc).transpose()
-    report_df.to_csv(f"{save_filepath}/{str_epsilon}/baseline_report_epsilon_{epsilon}.csv", header=True)
+    report_df.to_csv(f"{save_filepath}/{str_epsilon}/{str_step_epsilon}/baseline_report_epsilon_{epsilon}.csv", header=True)
 
     # 畫出混淆矩陣
     draw_confusion_matrix(y_true, y_pred, True, epsilon=epsilon)
 
     # 保存成功攻擊的結果到 CSV
     attack_results = pd.DataFrame(successful_attacks)
-    attack_results.to_csv(os.path.join(f"{save_filepath}/{str_epsilon}/", f'successful_attacks_eps_{epsilon}.csv'), index=False)
+    attack_results.to_csv(os.path.join(f"{save_filepath}/{str_epsilon}/{str_step_epsilon}", f'successful_attacks_eps_{epsilon}.csv'), index=False)
 
     # 將對抗樣本和標籤保存為 CSV 和 npy 檔案
     x_adv_np = np.concatenate([attack.generate(x=data.cpu().numpy()) for data, _ in test_loader], axis=0)
@@ -359,15 +362,15 @@ def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
 
     x_adv_df = pd.DataFrame(x_adv_np.reshape(x_adv_np.shape[0], -1))  # 展平每個樣本
     x_adv_df['Label'] = y_adv_np  # 添加標籤欄位
-    x_adv_df.to_csv(os.path.join(f"{save_filepath}/{str_epsilon}", f'{choose_dataset}_adversarial_samples_eps{epsilon}.csv'), index=False)
+    x_adv_df.to_csv(os.path.join(f"{save_filepath}/{str_epsilon}/{str_step_epsilon}", f'{choose_dataset}_adversarial_samples_eps{epsilon}.csv'), index=False)
 
     # True 表示生成train data被攻擊後的資料
     if bool_genrate_Train_Or_Test:
-        np.save(os.path.join(f"{save_filepath}/{str_epsilon}", f'x_train_{choose_dataset}_eps{epsilon}.npy'), x_adv_np)
-        np.save(os.path.join(f"{save_filepath}/{str_epsilon}", f'y_train_{choose_dataset}_eps{epsilon}.npy'), y_adv_np)
+        np.save(os.path.join(f"{save_filepath}/{str_epsilon}/{str_step_epsilon}", f'x_train_{choose_dataset}_eps{epsilon}.npy'), x_adv_np)
+        np.save(os.path.join(f"{save_filepath}/{str_epsilon}/{str_step_epsilon}", f'y_train_{choose_dataset}_eps{epsilon}.npy'), y_adv_np)
     else:
-        np.save(os.path.join(f"{save_filepath}/{str_epsilon}", f'x_test_{choose_dataset}_eps{epsilon}.npy'), x_adv_np)
-        np.save(os.path.join(f"{save_filepath}/{str_epsilon}", f'y_test_{choose_dataset}_eps{epsilon}.npy'), y_adv_np)
+        np.save(os.path.join(f"{save_filepath}/{str_epsilon}/{str_step_epsilon}", f'x_test_{choose_dataset}_eps{epsilon}.npy'), x_adv_np)
+        np.save(os.path.join(f"{save_filepath}/{str_epsilon}/{str_step_epsilon}", f'y_test_{choose_dataset}_eps{epsilon}.npy'), y_adv_np)
 
     return avg_accuracy, successful_attacks
 
@@ -392,15 +395,19 @@ def main():
     # 初始化模型
     input_size = x_train.shape[1]  # 特徵數量
     num_classes = len(np.unique(y_train))  # 類別數量
-    model = MLP(input_size, num_classes).to(DEVICE)
-
+    # model = MLP(input_size, num_classes).to(DEVICE)
+    model = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
+    print(model)
+    # 加載的是模型的權重（state_dict()）
+    model.load_state_dict(torch.load(model_path))
     # 設定優化器和調度器
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    accuracy = test(model,test_loader, start_IDS, client_str,True)
 
     # 測試模型
     # accuracy, all_preds, all_labels = test_simple(model, DEVICE, test_loader)
-    accuracy = test(model,test_loader, start_IDS, client_str,True)
     
+    print(Fore.LIGHTYELLOW_EX + Style.BRIGHT+f"測試準確度:"+Fore.LIGHTWHITE_EX+ f"{accuracy:.4f}")
     # 創建 ART 分類器
     classifier = PyTorchClassifier(
         model=model,
@@ -417,6 +424,20 @@ def main():
     # epsilons = [0.05, 0.1]
     step_epsilons = 0.05
     for epsilon in epsilons:
+        # 重新載入原始模型！重要！
+        # 確保每次攻擊都是基於原始未被修改的模型，避免前一次攻擊的殘留影響。
+        model.load_state_dict(torch.load(model_path))
+       
+        # 重新創建分類器
+        classifier = PyTorchClassifier(
+            model=model,
+            loss=nn.CrossEntropyLoss(),
+            optimizer=optimizer,
+            input_shape=(input_size,),
+            nb_classes=num_classes,
+            clip_values=(0.0, 1.0)
+        )
+
         # for step_epsilons in step_epsilons_list:
         attack = ProjectedGradientDescent(
                 estimator=classifier,
@@ -427,9 +448,14 @@ def main():
                 num_random_init=0
         )
         
-        # 執行攻擊並評估
+        # test執行攻擊並評估
+        # acc, successful_attacks = pgd_attack_evaluation(
+        #     model, DEVICE, test_loader, classifier, attack, save_dir, epsilon, step_epsilons,False
+        # )
+
+        # # train執行攻擊並評估
         acc, successful_attacks = pgd_attack_evaluation(
-            model, DEVICE, test_loader, classifier, attack, save_dir, epsilon, step_epsilons
+            model, DEVICE, train_loader, classifier, attack, save_dir, epsilon, step_epsilons,True
         )
         
         # 模型權重需經過訓練後才會發生變化

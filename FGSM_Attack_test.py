@@ -400,7 +400,10 @@ def main():
     # 初始化模型
     input_size = x_train.shape[1]  # 特徵數量
     num_classes = len(np.unique(y_train))  # 類別數量
-    model = MLP(input_size, num_classes).to(DEVICE)
+    # model = MLP(input_size, num_classes).to(DEVICE)
+    model = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
+    print(model)
+    # 加載的是模型的權重（state_dict()）
     model.load_state_dict(torch.load(model_path))
 
     # 設定優化器和調度器
@@ -423,13 +426,27 @@ def main():
 
     # epsilons = [0.3]
     for epsilon in epsilons:
+        # 重新載入原始模型！重要！
+        # 確保每次攻擊都是基於原始未被修改的模型，避免前一次攻擊的殘留影響。
+        model.load_state_dict(torch.load(model_path))
+        
+        # 重新創建分類器
+        classifier = PyTorchClassifier(
+            model=model,
+            loss=nn.CrossEntropyLoss(),
+            optimizer=optimizer,
+            input_shape=(input_size,),
+            nb_classes=num_classes,
+            clip_values=(0.0, 1.0)
+        )
+
         attack = FastGradientMethod(
             estimator=classifier,
             eps=epsilon
         )
         # test執行攻擊並評估
         # acc, successful_attacks = FGSM_attack_evaluation(
-        #     model, DEVICE, test_loader, classifier, attack, save_dir, epsilon, Fasle
+        #     model, DEVICE, test_loader, classifier, attack, save_dir, epsilon, False
         # )
         
         # # train執行攻擊並評估
