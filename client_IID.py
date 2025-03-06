@@ -786,23 +786,23 @@ class FlowerClient(fl.client.NumPyClient):
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
                 # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.05
-                x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
-                y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
                 # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.1
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.1.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.1.npy", allow_pickle=True)
 
-                # CICIDS2017 iid Dirichlet 0.5 c1 to PGD eps 0.01
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
+                # CICIDS2017 iid Dirichlet 0.5 c1 to PGD eps 0.05
+                x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
+                y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
 
                 # CICIDS2017 iid Dirichlet 0.5 c1 to GDA sigma 0.5
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/x_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/y_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
 
-                # CICIDS2017 iid Dirichlet 0.5 c1 to JSMA theta 0.05 gamma 0.02
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_theta0.05_gamma_0.02.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_theta0.05_gamma_0.02.npy", allow_pickle=True)
+                # CICIDS2017 iid Dirichlet 0.5 c1 to JSMA theta 0.05 gamma 0.05
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_theta0.05_gamma_0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_theta0.05_gamma_0.05.npy", allow_pickle=True)
 
                 x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
                 y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
