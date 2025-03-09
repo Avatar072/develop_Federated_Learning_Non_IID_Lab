@@ -42,7 +42,7 @@ today = today.strftime("%Y%m%d")
 current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
 
 # 傳入Adversarial_Attack相關參數
-epsilons, model_path, labelCount, class_names, x_train, y_train, x_test, y_test = SettingAderversarialConfig(choose_dataset)
+epsilons, model_path, labelCount, class_names, labels_to_calculate, x_train, y_train, x_test, y_test = SettingAderversarialConfig(choose_dataset)
 # 轉換為張量
 x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
 y_train = torch.from_numpy(y_train).type(torch.LongTensor)
@@ -92,7 +92,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon 
         # arr：混淆矩陣的數據，這是一個二維陣列，其中包含了模型的預測和實際標籤之間的關係，以及它們在混淆矩陣中的計數。
         # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，以標識混淆矩陣中每個類別的位置。
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
-        arr = confusion_matrix(y_true, y_pred)
+        arr = confusion_matrix(y_true, y_pred,  labels=labels_to_calculate)
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names.values())
         plt.figure(figsize = (9,6))
         sns.heatmap(df_cm, annot=True, fmt="d", cmap='BuGn')
@@ -117,7 +117,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon 
         else:
             str_epsilon = f"epsilon_{epsilon}"
             plt.savefig(f"{save_filepath}/{str_epsilon}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
-        # plt.show()
+        plt.show()
 
 def save_to_csv(data, filepath):
     df = pd.DataFrame(data)
@@ -320,8 +320,15 @@ def pgd_attack_evaluation(model, DEVICE, test_loader, classifier, attack, save_d
     RecordAccuracy = ()
     start_time = time.time()
     
-    for i in range(len(acc) - 3):  # -3 因為 classification_report 會多出 'accuracy', 'macro avg', 'weighted avg'
-        RecordRecall = RecordRecall + (acc[str(i)]['recall'],)
+    # for i in range(len(acc) - 3):  # -3 因為 classification_report 會多出 'accuracy', 'macro avg', 'weighted avg'
+    #     if str(i) in acc:
+    #         RecordRecall = RecordRecall + (acc[str(i)]['recall'],)
+    #     else:
+    #         print(f"Key '{str(i)}' not found in acc dictionary.")
+    for label in range(labelCount):
+                    label_str = str(label)  # 將標籤轉為字串
+                    if label_str in acc:  # 檢查標籤是否存在於分類報告中
+                        RecordRecall = RecordRecall + (acc[label_str]['recall'],)
     
     RecordAccuracy = RecordAccuracy + (avg_accuracy, time.time() - start_time,)
     RecordRecall = str(RecordRecall)[1:-1]

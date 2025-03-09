@@ -37,9 +37,9 @@ Choose_method = "normal"
 num_epochs = 1
 choose_dataset = "CICIDS2017"
 # choose_dataset = "TONIOT"
-# choose_dataset = "CICIDS2019"
+# choose_dataset = "CICIDS2018"
 
-labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+# labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 
 # 設定設備
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -50,7 +50,7 @@ today = today.strftime("%Y%m%d")
 current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
 
 # 傳入Adversarial_Attack相關參數
-epsilons, model_path, labelCount, class_names, x_train, y_train, x_test, y_test = SettingAderversarialConfig(choose_dataset)
+epsilons, model_path, labelCount, class_names, labels_to_calculate, x_train, y_train, x_test, y_test = SettingAderversarialConfig(choose_dataset)
 
 counter = Counter(y_train)
 print(counter)
