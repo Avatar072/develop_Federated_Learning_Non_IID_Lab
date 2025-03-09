@@ -1210,7 +1210,7 @@ def ResotreTrainAndTestToCSVandReSplit(Str_ChooseDataset,filepath):
     df_combined = ReplaceMorethanTenthousandQuantity(df_combined)
     DoReSplit(Str_ChooseDataset,df_combined)
 
-def EvaluatePercent(Current_round_dis,Last_round_dis):
+def EvaluateVariation(Current_round_dis,Last_round_dis):
 
     # 檢查 Last_round_dis 是否為零，避免除以零
     if Last_round_dis == 0:
@@ -1218,9 +1218,10 @@ def EvaluatePercent(Current_round_dis,Last_round_dis):
          return 0 # 代表「沒有變化」
     Current_round_dis = float(Current_round_dis)
     Last_round_dis = float(Last_round_dis)
-    percent_diff = abs(Current_round_dis-Last_round_dis)
-    percent_diff = (percent_diff/Last_round_dis)*100
-    return percent_diff
+    variation = abs(Current_round_dis-Last_round_dis)
+    variation = (variation/Last_round_dis)
+
+    return variation
 
 #針對Strig type做完label ecnode後補做minmax
 def DominmaxforStringTypefeature(doScalerdataset):
