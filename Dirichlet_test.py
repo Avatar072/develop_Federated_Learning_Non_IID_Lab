@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import datetime
+import time
 from mytoolfunction import generatefolder,SaveDataframeTonpArray
 
 
@@ -10,10 +11,13 @@ csv_path = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\20250121\\D
 
 today = datetime.date.today()
 today = today.strftime("%Y%m%d")
+current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
 # 在D:\\Labtest20230911\\data\\dataset_original產生天日期的資料夾
 generatefolder(filepath + "\\", "dataset_AfterProcessed")
 generatefolder(filepath + "\\dataset_AfterProcessed\\", "CICIDS2017")
 generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\", today)
+generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\", current_time)
+
 
 # 讀取 CSV 檔案
 df_ALLtrain = pd.read_csv(csv_path)
@@ -24,7 +28,10 @@ print("原始資料各 Label 筆數：")
 print(df_grouped)
 
 # 設定 Dirichlet 分布的 alpha 值
-alpha = 0.5
+# 20250205
+# alpha = 0.5
+alpha = 0.1
+# alpha = 5.0
 
 # 用來儲存分配後，各 client 的資料索引
 client_indices = {"Client1": [], "Client2": []}
@@ -35,6 +42,7 @@ for label, group in df_ALLtrain.groupby("Label"):
     indices = group.index.tolist()
     n_samples = len(indices)
     # 產生兩個權重，這兩個權重的和為 1
+    np.random.seed(42)  # 使用任意固定數字作為種子 # 每次執行時得到完全相同的分配結果
     weights = np.random.dirichlet([alpha, alpha])
     print("權重0:",weights[0])
     print("權重1:",weights[1])
@@ -62,11 +70,14 @@ df_client2 = df_ALLtrain.loc[client_indices["Client2"]].reset_index(drop=True)
 # 檢查分配後，每個 client 各 Label 的分佈
 print("\nClient1 各 Label 筆數：")
 print(df_client1['Label'].value_counts())
+print(sum(df_client1['Label'].value_counts()))
 
 print("\nClient2 各 Label 筆數：")
 print(df_client2['Label'].value_counts())
+print(sum(df_client2['Label'].value_counts()))
+
 # filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
-df_client1.to_csv(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\client1.csv", index=False)
-df_client2.to_csv(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\client2.csv", index=False)
-SaveDataframeTonpArray(df_client1, f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/Dirichlet/{today}", "Dirichlet_client1",today)
-SaveDataframeTonpArray(df_client2, f"./data/dataset_AfterProcessed/CICIDS2017/ALLDay/Dirichlet/{today}", "Dirichlet_client2",today)
+df_client1.to_csv(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\{current_time}\\client1.csv", index=False)
+df_client2.to_csv(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\{current_time}\\client2.csv", index=False)
+SaveDataframeTonpArray(df_client1, f"{filepath}\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\{current_time}\\", "Dirichlet_client1",today)
+SaveDataframeTonpArray(df_client2, f"{filepath}\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\{current_time}\\", "Dirichlet_client2",today)

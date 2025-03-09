@@ -362,8 +362,14 @@ net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 #CICIDS2017
 # 每層神經元512下所訓練出來的model Dirchiet0.5訓練出來的分布
 # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250224\\gobal_model_Before_local_train_model_round_25.pth'
-model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\Unattack_AfterLocaltrain.pth'
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\Unattack_AfterLocaltrain.pth'
 # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\Force_Save_fedavg_unattack_24.pth'
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\Local_model_After_local_train_25.pth'
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\Local_model_After_local_train_40.pth'
+model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\BaseLine_After_local_train_model_bk.pth'
+
+
+
 
 # 加載的是模型的權重（state_dict()）
 net.load_state_dict(torch.load(model_path))
