@@ -26,7 +26,7 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 from sklearn.metrics import confusion_matrix
 from mytoolfunction import generatefolder,ParseCommandLineArgs,ChooseTrainDatastes
 from mytoolfunction import ChooseUseModel, getStartorEndtime,EvaluateVariation
-from IID_ChooseNPfile import ChooseLoadNpArray
+from IID_ChooseNPfile import CICIDS2017_IID_ChooseLoadNpArray, CICIDS2018_IID_ChooseLoadNpArray, ChooseLoad_class_names
 from collections import Counter
 from Add_ALL_LayerToCount import DoCountModelWeightSum,evaluateWeightDifferences
 from Add_ALL_LayerToCount import Calculate_Weight_Diffs_Distance_OR_Absolute
@@ -39,15 +39,21 @@ filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 config = configparser.ConfigParser()
 # 讀取 ini 文件
 config.read('./config.ini', encoding='utf-8')
+# 獲取 Datasets 節點下的值
+choose_dataset = config.get('Datasets', 'choose_dataset')
+# 獲取 Setting_Adversarial_Attack 節點下的值
+set_attack = config.getboolean ('Setting_Adversarial_Attack', 'set_attack')
 # 獲取 Round 節點下的值
 # 使用 getint 來取得整數類型的值
 start_attack_round = config.getint('Round', 'start_attack_round')
 end_attack_round = config.getint('Round', 'end_attack_round')  
 save_model_round = config.getint('Round', 'save_model_round')
 # 顯示讀取的配置
-print(f"start_attack_round: {start_attack_round}")
-print(f"end_attack_round: {end_attack_round}")
-print(f"save_model_round: {save_model_round}")
+print(Fore.YELLOW+Style.BRIGHT+f"choose_dataset: {choose_dataset}")
+print(Fore.YELLOW+Style.BRIGHT+f"set_attack: {set_attack}")
+print(Fore.YELLOW+Style.BRIGHT+f"start_attack_round: {start_attack_round}")
+print(Fore.YELLOW+Style.BRIGHT+f"end_attack_round: {end_attack_round}")
+print(Fore.YELLOW+Style.BRIGHT+f"save_model_round: {save_model_round}")
 
 # 獲取 Count 節點下的值
 labelCount = config.getint('Count', 'labelCount')
@@ -59,6 +65,8 @@ start_IDS = time.time()
 # #############################################################################
 
 warnings.filterwarnings("ignore", category=UserWarning)
+#  Clear GPU Cache
+torch.cuda.empty_cache()
 # DEVICE = torch.device("cpu")
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # 返回gpu数量；
@@ -75,7 +83,35 @@ file, num_epochs,Choose_method = ParseCommandLineArgs(["dataset_split", "epochs"
 print(f"Dataset: {file}")
 print(f"Number of epochs: {num_epochs}")
 print(f"Choose_method: {Choose_method}")
-x_train, y_train, client_str = ChooseLoadNpArray(filepath, file, Choose_method)
+
+# 初始化變數為None或空列表
+x_train =  np.array([]) # 預設初始化為一個空陣列
+y_train =  np.array([])  # 預設初始化為一個空陣列
+
+x_test = np.array([])  # 預設初始化為一個空陣列
+y_test = np.array([])  # 預設初始化為一個空陣列
+
+client_str = ""
+# 預設初始化 class_names
+class_names_global, class_names_local, labels_to_calculate = None, None, None
+
+# CICIDS2017
+if choose_dataset == "CICIDS2017":
+    print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
+    x_train, y_train, x_test, y_test, client_str = CICIDS2017_IID_ChooseLoadNpArray(filepath, file, Choose_method)
+    class_names_local, labels_to_calculate = ChooseLoad_class_names("CICIDS2017")
+    # 確保資料加載成功
+    if y_train is None or len(y_train) == 0:
+        raise ValueError("Failed to load y_train for CICIDS2017")
+# CICIDS2018
+if choose_dataset == "CICIDS2018":
+    print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
+    x_train, y_train, x_test, y_test, client_str = CICIDS2018_IID_ChooseLoadNpArray(filepath, file, Choose_method)
+    class_names_local, labels_to_calculate = ChooseLoad_class_names("CICIDS2018")
+    # 確保資料加載成功
+    if y_train is None or len(y_train) == 0:
+        raise ValueError("Failed to load y_train for CICIDS2018")
+
 
 counter = Counter(y_train)
 y_train = y_train.astype(int)
@@ -90,36 +126,34 @@ generatefolder(f"./FL_AnalyseReportfolder/{today}/{current_time}/", client_str)
 generatefolder(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/", Choose_method)
 getStartorEndtime("starttime",start_IDS,f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}")
 # labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ,29, 30, 31]
-labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-# 預設初始化 class_names
-class_names_local = None
-class_names_global = None
+# labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 
-if client_str == "client1":
-    # labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14]
-    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
-    # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
-    # labelCount = 15
-    counter = Counter(y_test)
-    print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)
-    class_names_local = {0: '0_BENIGN', 1: '1_Bot', 2: '2_DDoS', 3: '3_DoS GoldenEye', 4: '4_DoS Hulk', 5: '5_DoS Slowhttptest', 6: '6_DoS slowloris', 
-						 7: '7_Infilteration', 8: '8_Web Attack', 9: '9_Heartbleed', 10: '10_PortScan', 11: '11_FTP-BruteForce', 12: '12_FTP-Patator', 
-						 13: '13_SSH-Bruteforce', 14: '14_SSH-Patator'
-						}  
 
-if client_str == "client2":
-    # labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 13]
-    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
-    # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
-    # labelCount = 15
-    counter = Counter(y_test)
-    print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)
-    class_names_local = {0: '0_BENIGN', 1: '1_Bot', 2: '2_DDoS', 3: '3_DoS GoldenEye', 4: '4_DoS Hulk', 5: '5_DoS Slowhttptest', 6: '6_DoS slowloris', 
-						 7: '7_Infilteration', 8: '8_Web Attack', 9: '9_Heartbleed', 10: '10_PortScan', 11: '11_FTP-BruteForce', 12: '12_FTP-Patator', 
-						 13: '13_SSH-Bruteforce', 14: '14_SSH-Patator'
-						} 
+# if client_str == "client1":
+#     # labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14]
+#     x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+#     # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
+#     y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+#     # labelCount = 15
+#     counter = Counter(y_test)
+#     print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)
+#     class_names_local = {0: '0_BENIGN', 1: '1_Bot', 2: '2_DDoS', 3: '3_DoS GoldenEye', 4: '4_DoS Hulk', 5: '5_DoS Slowhttptest', 6: '6_DoS slowloris', 
+# 						 7: '7_Infilteration', 8: '8_Web Attack', 9: '9_Heartbleed', 10: '10_PortScan', 11: '11_FTP-BruteForce', 12: '12_FTP-Patator', 
+# 						 13: '13_SSH-Bruteforce', 14: '14_SSH-Patator'
+# 						}  
+
+# if client_str == "client2":
+#     # labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 13]
+#     x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+#     # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
+#     y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+#     # labelCount = 15
+#     counter = Counter(y_test)
+#     print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)
+#     class_names_local = {0: '0_BENIGN', 1: '1_Bot', 2: '2_DDoS', 3: '3_DoS GoldenEye', 4: '4_DoS Hulk', 5: '5_DoS Slowhttptest', 6: '6_DoS slowloris', 
+# 						 7: '7_Infilteration', 8: '8_Web Attack', 9: '9_Heartbleed', 10: '10_PortScan', 11: '11_FTP-BruteForce', 12: '12_FTP-Patator', 
+# 						 13: '13_SSH-Bruteforce', 14: '14_SSH-Patator'
+# 						} 
 # if client_str == "client3":
 #     # labels_to_calculate = [0, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ,29, 30, 31]
 #     print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"test with normal After Do labelencode and minmax")
@@ -130,16 +164,18 @@ if client_str == "client2":
 #     print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)                    
 
 # 20240121 CICIDS2017 after do labelencode and minmax  75 25分 drop feature to 79 feature
-global_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
-# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
-global_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
-    
+# global_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+# # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
+# global_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+
+
+# 因為IID緣故
+global_x_test = x_test
+global_y_test = y_test
 counter = Counter(global_y_test)
 print(Fore.GREEN+Style.BRIGHT+client_str+"\tglobal test筆數",counter)
-class_names_global = {0: '0_BENIGN', 1: '1_Bot', 2: '2_DDoS', 3: '3_DoS GoldenEye', 4: '4_DoS Hulk', 5: '5_DoS Slowhttptest', 6: '6_DoS slowloris', 
-					  7: '7_Infilteration', 8: '8_Web Attack', 9: '9_Heartbleed', 10: '10_PortScan', 11: '11_FTP-BruteForce', 12: '12_FTP-Patator', 
-					 13: '13_SSH-Bruteforce', 14: '14_SSH-Patator'
-					 } 
+# 因為IID緣故
+class_names_global = class_names_local
 
 x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
 y_train = torch.from_numpy(y_train).type(torch.LongTensor)
@@ -788,13 +824,26 @@ class FlowerClient(fl.client.NumPyClient):
                 # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.05
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
+                 # CICIDS2017 iid Dirichlet 0.1 c1 to FGSM eps 0.05
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_a=0.1_client1_eps0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_a=0.1_client1_eps0.05.npy", allow_pickle=True)
+
+                # CICIDS2017 iid Dirichlet 0.1 c1 to PGD eps 0.05
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
+
+                # CICIDS2017 iid Dirichlet 0.1 c1 to JSMA theta 0.05 gamma 0.05
+                x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.1_theta0.05_gamma_0.05.npy", allow_pickle=True)
+                y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.1_theta0.05_gamma_0.05.npy", allow_pickle=True)
+
+
                 # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.1
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.1.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.1.npy", allow_pickle=True)
 
                 # CICIDS2017 iid Dirichlet 0.5 c1 to PGD eps 0.05
-                x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
-                y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
 
                 # CICIDS2017 iid Dirichlet 0.5 c1 to GDA sigma 0.5
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/x_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
@@ -803,6 +852,10 @@ class FlowerClient(fl.client.NumPyClient):
                 # CICIDS2017 iid Dirichlet 0.5 c1 to JSMA theta 0.05 gamma 0.05
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_theta0.05_gamma_0.05.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_theta0.05_gamma_0.05.npy", allow_pickle=True)
+
+                # CICIDS2018 iid Dirichlet 0.5 c1 to FGSM eps 0.05
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_a_0.5_client1_eps0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_a_0.5_client1_eps0.05.npy", allow_pickle=True)
 
                 x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
                 y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
@@ -890,7 +943,9 @@ class FlowerClient(fl.client.NumPyClient):
     # 判斷有沒有攻擊    
     def JudageAttack(self):
         # if self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis > self.dis_threshold_Inital_Local*1.1:
-        if self.dis_variation_Inital_Local > 1:# 不超過原本距離的變化之1倍
+        # if self.dis_variation_Inital_Local > 1:# 不超過原本距離的變化之1倍
+        if self.dis_variation_Inital_Local > 0.5:# 不超過原本距離的變化之1倍
+
             print(Fore.RED+Style.BRIGHT+Back.CYAN+f"global_round_{self.global_round}_occur Attack!!!")
             print(Fore.RED+Style.BRIGHT+Back.CYAN+f"Initial_and_AfterLocalTrain_Local_model_weight_diff_dis:{self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis}")
             self.bool_Unattack_Judage = False
@@ -965,8 +1020,9 @@ class FlowerClient(fl.client.NumPyClient):
          
         #####################################################對抗式攻擊設定#################################################   
         # True表示設定攻擊 Fasle表示使用正常資料
-        trainloader = self.Setting_Adversarial_Attack(start_attack_round, end_attack_round,True,self.client_id)
+        # trainloader = self.Setting_Adversarial_Attack(start_attack_round, end_attack_round,True,self.client_id)
         # trainloader = self.Setting_Adversarial_Attack(start_attack_round, end_attack_round,False,self.client_id)
+        trainloader = self.Setting_Adversarial_Attack(start_attack_round, end_attack_round,set_attack,self.client_id)
         # 紀錄攻擊開始前後的report
         # +1是因為這邊是初始權重剛下載下來還未Local train，攻擊會在Local train後才生效
         if self.global_round == (start_attack_round):
