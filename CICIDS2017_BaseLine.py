@@ -21,6 +21,8 @@ from DoChooseTrainNpfile import ChooseLoadTrainNpArray
 from DoChooseTestNpfile import ChooseLoadTestNpArray
 from collections import Counter
 from colorama import Fore, Back, Style, init
+from featuremapping_test import DoFeatureMapping,DoFeatureMappingAndSavetoCSVfile
+
 ####################################################################################################
 #CICIDS2017
 labelCount = 15
@@ -99,6 +101,14 @@ generatefolder(f"./single_AnalyseReportFolder/CICIDS2017/", today)
 generatefolder(f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/", client_str)
 generatefolder(f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/{client_str}/", Choose_method)
 getStartorEndtime("starttime",start_IDS,f"./single_AnalyseReportFolder/CICIDS2017/{today}/{current_time}/{client_str}/{Choose_method}")
+
+# 進行特徵映射FeatureMapping
+# DoFeatureMappingAndSavetoCSVfile(x_train,y_train, "train")
+# DoFeatureMappingAndSavetoCSVfile(x_test,y_test, "test")
+# print(Fore.RED +Back.BLUE+ Style.BRIGHT+str(x_train.shape[1]))  # 這裡的 x_train_mapped 就是經過網絡層映射後的特徵
+# x_train = DoFeatureMapping(x_train)
+# x_test = DoFeatureMapping(x_test)
+# print(Fore.LIGHTYELLOW_EX +Back.BLUE+ Style.BRIGHT+str(x_train.shape[1]))  # 這裡的 x_train_mapped 就是經過網絡層映射後的特徵
 
 # 印出所選擇Npfile的資料
 print("特徵數",x_train.shape[1])
