@@ -327,6 +327,20 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,bool_doencode):
 
     return afterminmax_dataset
 
+def DoBaselinesplit(df,train_dataframes,test_dataframes):
+    List_train_Label = []
+    List_test_Label = []
+    for i in range(10):
+        train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
+        List_train_Label.append(train_label_split)
+        List_test_Label.append(test_label_split)         
+
+    train_dataframes = pd.concat(List_train_Label)
+    test_dataframes = pd.concat(List_test_Label)
+    
+    return train_dataframes,test_dataframes
+
+
 # do Labelencode and minmax 
 def DoSplitAllfeatureAfterMinMax(df,bool_Noniid):  
     train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
