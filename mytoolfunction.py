@@ -1160,7 +1160,9 @@ def DoReStoreNpFileToCsv(x_train, y_train,x_test,y_test,Str_ChooseDataset):
         # 合併 x 和 y DataFrame
         df_train_combined = pd.concat([df_train_x, df_train_y], axis=1)
         df_test_combined = pd.concat([df_test_x,df_test_y ], axis=1)
-
+        # axis=0 代表按行合併，即將測試集數據加到訓練集的後面。
+        # axis=0：按行合併（默認值），將數據上下拼接
+        # axis=1：按列合併，將數據左右拼接。
         df_combined = pd.concat([df_train_combined, df_test_combined], axis=0)
         df_combined.to_csv(f'./Restore_{Str_ChooseDataset}.csv', index=False)
         df_combined = pd.read_csv(f'./Restore_{Str_ChooseDataset}.csv')
