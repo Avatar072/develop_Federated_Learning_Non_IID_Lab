@@ -125,8 +125,12 @@ class TONIOTTestLoader:
             # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_test_ToN-IoT_20240523.npy", allow_pickle=True)
             # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
             # 20241229 TONIoT after do labelencode and ALLminmax  75 25分
-            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_ToN-IoT_test_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)
-            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_ToN-IoT_test_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)   
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_ToN-IoT_test_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_ToN-IoT_test_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)   
+            
+            # 20250312 TONIoT after do labelencode and all featrue minmax 75 25分 44 feature do feature mapping to 123 feature
+            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_test_featureMapping_20250312.npy", allow_pickle=True)
+            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_test_featureMapping_20250312.npy", allow_pickle=True)   
 
             return x_test, y_test
         elif split_file == 'test' and Choose_Attacktype == 'Evasion_Attack':
@@ -163,9 +167,15 @@ class CICIDS2018TestLoader:
             # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_20250106.npy", allow_pickle=True)
             # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_20250106.npy", allow_pickle=True)
             # 20250113 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do PCA
-            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do labelencode and minmax and PCA")
-            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_AfterPCA79_20250113.npy", allow_pickle=True)
-            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_AfterPCA79_20250113.npy", allow_pickle=True)
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do labelencode and minmax and PCA")
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_AfterPCA79_20250113.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_AfterPCA79_20250113.npy", allow_pickle=True)
+            
+            # 20250113 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do feature mapping to 123 feature
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do labelencode and minmax and feature mapping")
+            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_featureMapping_20250312.npy", allow_pickle=True)
+            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250312.npy", allow_pickle=True)
+            
             return x_test, y_test
         elif split_file == 'test' and Choose_Attacktype == 'Evasion_Attack':
             print("Using CICIDS2018 with Evasion_Attack")
@@ -204,9 +214,15 @@ class CICIDS2017TestLoader:
             # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterPCA79_20250113.npy", allow_pickle=True)
             
            # 20250121 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
-            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do labelencode and minmax and drop feature to 79 feature")
-            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
-            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do labelencode and minmax and drop feature to 79 feature")
+            # x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+            # y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+
+           # 20250311 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+           # 79 feature do feature mapping to 123 feature
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do labelencode and minmax and drop feature to 79 feature do feature mapping to 123 feature")
+            x_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLday_test_featureMapping_20250312.npy", allow_pickle=True)
+            y_test = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLday_test_featureMapping_20250312.npy", allow_pickle=True)
 
             return x_test, y_test
         elif split_file == 'test' and Choose_Attacktype == 'Evasion_Attack':

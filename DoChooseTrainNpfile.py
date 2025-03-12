@@ -189,9 +189,14 @@ class CICIDS2018BaseLine_TrainLoader:
             # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_20250106.npy", allow_pickle=True)
             # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_20250106.npy", allow_pickle=True)
             # 20250113 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do PCA
-            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do labelencode and minmax and PCA")
-            x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_AfterPCA79_20250113.npy", allow_pickle=True)
-            y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_AfterPCA79_20250113.npy", allow_pickle=True)
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do labelencode and minmax and PCA")
+            # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_AfterPCA79_20250113.npy", allow_pickle=True)
+            # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_AfterPCA79_20250113.npy", allow_pickle=True)
+            
+            # 20250312 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 79 feature do feature mapping to 123 feature
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"{split_file} with normal After Do labelencode and minmax and feature mapping")
+            x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_featureMapping_20250312.npy", allow_pickle=True)
+            y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_featureMapping_20250312.npy", allow_pickle=True)
             
             return x_train, y_train,self.client_str
         elif split_file == 'baseLine_train' and Choose_Attacktype == 'Defense':
@@ -242,10 +247,16 @@ class CICIDS2017BaseLine_TrainLoader:
             # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_train_AfterPCA79_20250113.npy", allow_pickle=True)
             
             # 20250121 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
-            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do labelencode and minmax and drop feature to 79 feature")
-            x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_train_Deleted79features_20250121.npy", allow_pickle=True)
-            y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_train_Deleted79features_20250121.npy", allow_pickle=True)
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do labelencode and minmax and drop feature to 79 feature")
+            # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_train_Deleted79features_20250121.npy", allow_pickle=True)
+            # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_train_Deleted79features_20250121.npy", allow_pickle=True)
             
+            # 20250311 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+            # 79 feature do feature mapping to 123 feature
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do labelencode and minmax and drop feature to 79 feature do feature mapping to 123 feature")
+            x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLday_train_featureMapping_20250312.npy", allow_pickle=True)
+            y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLday_train_featureMapping_20250312.npy", allow_pickle=True)
+
             return x_train, y_train,self.client_str
         elif split_file == 'baseLine_train' and Choose_Attacktype == 'Defense':
             print("Using CICIDS2017 with Defense")
@@ -322,8 +333,13 @@ class TONIOTBaseLine_TrainLoader(TONIOTTrainLoaderBase):
                 # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)
                 
                 # 20241229 TONIoT after do labelencode and ALLminmax  75 25分
-                x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_ToN-IoT_train_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)
-                y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_ToN-IoT_train_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)   
+                # x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\x_ToN-IoT_train_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)
+                # y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\y_ToN-IoT_train_dataframes_ALLMinmax_20241229.npy", allow_pickle=True)   
+                
+                # 20250312 TONIoT after do labelencode and all featrue minmax 75 25分 44 feature do feature mapping to 123 feature
+                x_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_train_featureMapping_20250312.npy", allow_pickle=True)
+                y_train = np.load(self.filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250312.npy", allow_pickle=True)   
+
                 print(Fore.GREEN+Style.BRIGHT+"Debug: x_train shape:", x_train.shape if x_train is not None else None)
                 print(Fore.GREEN+Style.BRIGHT+"Debug: y_train shape:", y_train.shape if y_train is not None else None)
                 print(Fore.GREEN+Style.BRIGHT+"Debug: client_str:", self.client_str)
