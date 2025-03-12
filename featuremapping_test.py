@@ -24,12 +24,14 @@ from sklearn.metrics import classification_report
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from sklearn.metrics import confusion_matrix
-from mytoolfunction import generatefolder,ParseCommandLineArgs,SaveDataframeTonpArray
+from mytoolfunction import generatefolder,ParseCommandLineArgs,SaveDataframeTonpArray,SaveDataToCsvfile
 from mytoolfunction import ChooseUseModel, getStartorEndtime,EvaluateVariation
 from IID_ChooseNPfile import CICIDS2017_IID_ChooseLoadNpArray, CICIDS2018_IID_ChooseLoadNpArray, ChooseLoad_class_names
 from collections import Counter
 from Add_ALL_LayerToCount import DoCountModelWeightSum,evaluateWeightDifferences
 from Add_ALL_LayerToCount import Calculate_Weight_Diffs_Distance_OR_Absolute
+
+
 from colorama import Fore, Back, Style, init
 import configparser
 from sklearn.preprocessing import MinMaxScaler
@@ -38,103 +40,21 @@ filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 today = datetime.date.today()
 today = today.strftime("%Y%m%d")
 current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
-# 在D:\\Labtest20230911\\data\\dataset_original產生天日期的資料夾
-generatefolder(filepath + "\\", "dataset_AfterProcessed")
-generatefolder(filepath + "\\dataset_AfterProcessed\\", "CICIDS2017")
-generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\featureMapping\\", today)
-generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\featureMapping\\{today}\\", current_time)
 
-# # 初始化 colorama（Windows 系統中必須）
-# # 初始化 ConfigParser
-# config = configparser.ConfigParser()
-# # 讀取 ini 文件
-# config.read('./config.ini', encoding='utf-8')
-# # 獲取 Datasets 節點下的值
-# choose_dataset = config.get('Datasets', 'choose_dataset')
-# # 獲取 Setting_Adversarial_Attack 節點下的值
-# set_attack = config.getboolean ('Setting_Adversarial_Attack', 'set_attack')
-# # 獲取 Round 節點下的值
-# # 使用 getint 來取得整數類型的值
-# start_attack_round = config.getint('Round', 'start_attack_round')
-# end_attack_round = config.getint('Round', 'end_attack_round')  
-# save_model_round = config.getint('Round', 'save_model_round')
-# # 顯示讀取的配置
-# print(Fore.YELLOW+Style.BRIGHT+f"choose_dataset: {choose_dataset}")
-# print(Fore.YELLOW+Style.BRIGHT+f"set_attack: {set_attack}")
-# print(Fore.YELLOW+Style.BRIGHT+f"start_attack_round: {start_attack_round}")
-# print(Fore.YELLOW+Style.BRIGHT+f"end_attack_round: {end_attack_round}")
-# print(Fore.YELLOW+Style.BRIGHT+f"save_model_round: {save_model_round}")
-
-# # 獲取 Count 節點下的值
-# labelCount = config.getint('Count', 'labelCount')
-# print(f"Count: {labelCount}")
-
-# start_IDS = time.time()
-# # #############################################################################
-# # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
-# # #############################################################################
-
-# warnings.filterwarnings("ignore", category=UserWarning)
-# #  Clear GPU Cache
-# torch.cuda.empty_cache()
-# # DEVICE = torch.device("cpu")
-# DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# # 返回gpu数量；
-# torch.cuda.device_count()
-# # 返回gpu名字，设备索引默认从0开始；
-# torch.cuda.get_device_name(0)
-# # 返回当前设备索引；
-# torch.cuda.current_device()
-# print(f"DEVICE: {DEVICE}")
-# #python client_IID.py --dataset_split client1_train --epochs 50 --method normal
-# #python client_IID.py --dataset_split client2_train --epochs 50 --method normal
-# #python client_IID.py --dataset_split client3_train --epochs 50 --method normal
-# file, num_epochs,Choose_method = ParseCommandLineArgs(["dataset_split", "epochs", "method"])
-# print(f"Dataset: {file}")
-# print(f"Number of epochs: {num_epochs}")
-# print(f"Choose_method: {Choose_method}")
-
+# 初始化 colorama（Windows 系統中必須）
+init(autoreset=True)
 # # 初始化變數為None或空列表
 x_train =  np.array([]) # 預設初始化為一個空陣列
 y_train =  np.array([])  # 預設初始化為一個空陣列
 
-# x_test = np.array([])  # 預設初始化為一個空陣列
-# y_test = np.array([])  # 預設初始化為一個空陣列
-
-# client_str = ""
-# # 預設初始化 class_names
-# class_names_global, class_names_local, labels_to_calculate = None, None, None
-
-# try:
-#     # CICIDS2017
-#     if choose_dataset == "CICIDS2017":
-#         print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
-#         x_train, y_train, x_test, y_test, client_str = CICIDS2017_IID_ChooseLoadNpArray(filepath, file, Choose_method)
-#         class_names_local, labels_to_calculate = ChooseLoad_class_names("CICIDS2017")
-        
-#     # CICIDS2018
-#     if choose_dataset == "CICIDS2018":
-#         print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
-#         x_train, y_train, x_test, y_test, client_str = CICIDS2018_IID_ChooseLoadNpArray(filepath, file, Choose_method)
-#         class_names_local, labels_to_calculate = ChooseLoad_class_names("CICIDS2018")
-# except Exception as e:
-#     print(f"An error occurred: {e}")
-# finally:
-#     # 確保資料加載成功
-#     if y_train is None or len(y_train) == 0:
-#             raise ValueError("Failed to load y_train for "+f"{choose_dataset}")
-#     else:
-#             print("Execution finished.")
-
-# counter = Counter(y_train)
-# print(counter)
 
 # input_dim = 36  # 輸入特徵的維度
-output_dim = 123  # 輸出的維度
+# output_dim = 123  # 輸出的維度
+# 123 = CICIDS2017 & CICIDS2018 79feature + TONIOT 44 feature
 
 ### 特徵映射 ###
 # 定義一個簡單的非線性映射神經網絡
-def FeatureMappingNetwork_instance(x_train):
+def FeatureMappingNetwork_instance(x_train,output_dim):
     class FeatureMappingNetwork(nn.Module):
         def __init__(self):
             super(FeatureMappingNetwork, self).__init__()
@@ -160,11 +80,12 @@ def CheckLoadtrainFiledtype(x_train):
         print("x_train is of unknown type.")
 
 # 直接以npy做FeatureMapping 訓練效果差
-def DoFeatureMapping(x_train):
+def DoFeatureMapping_when_LoadingNpyfile(x_train):
     # 檢查 x_train 的類型，一開始載入時 x_train is a NumPy array.
     CheckLoadtrainFiledtype(x_train)
     # 創建feature mapping模型實例
-    model = FeatureMappingNetwork_instance(x_train)
+    output_dim = 123  # 輸出的維度即要mapping的特徵數量
+    model = FeatureMappingNetwork_instance(x_train,output_dim)
     # 經過網絡層映射後的特徵 轉換為 PyTorch 張量，並確保數據類型是 float32
     # 將 x_train 轉換為 PyTorch Tensor
     x_train = model(torch.tensor(x_train, dtype=torch.float32))
@@ -184,7 +105,8 @@ def DoFeatureMapping(x_train):
 def DoFeatureMappingAndSavetoCSVfile(x_train,y_train,str_train_OR_test):
 
     # 創建模型實例
-    model = FeatureMappingNetwork_instance(x_train)
+    output_dim = 123  # 輸出的維度即要mapping的特徵數量
+    model = FeatureMappingNetwork_instance(x_train,output_dim)
 
     print(model)
 
@@ -236,3 +158,152 @@ def DoFeatureMappingAndSavetoCSVfile(x_train,y_train,str_train_OR_test):
 
 
     print("CSV file has been saved.")
+
+def FeatureMappingAndMinMax(df,output_dim):
+    # 除了Label外的特徵數量
+    print(Fore.YELLOW+Style.BRIGHT+"Before feature Mapping feature count:",df.iloc[:,:-1].shape[1])
+    x_train = df.iloc[:, :-1].values  # 所有特徵
+    y_train = df.iloc[:, -1].values  # 標籤
+    # 創建模型實例
+    # 原本的維度即原特徵數量:x_train
+    # 輸出的維度即要mapping的特徵數量:output_dim  
+    model = FeatureMappingNetwork_instance(x_train,output_dim)
+    # 將 x_train 轉換為 PyTorch 張量
+    x_train_tensor = torch.tensor(x_train, dtype=torch.float32)
+
+    # 進行特徵映射
+    mapped_features = model(x_train_tensor)
+    
+    # 將映射後的特徵轉換為 Pandas DataFrame
+    mapped_df = pd.DataFrame(mapped_features.detach().numpy())
+    
+    print(Fore.YELLOW+Style.BRIGHT+"After feature Mapping feature count:",mapped_df.iloc[:,:-1].shape[1])
+    # 將 y_train 轉換為 Pandas DataFrame
+    y_train_df = pd.DataFrame(y_train, columns=['Label'])
+
+    # 合併 x_train 映射後的特徵與 y_train
+    final_df = pd.concat([mapped_df, y_train_df], axis=1)
+
+    # 對映射後的特徵進行MinMax標準化
+    scaler = MinMaxScaler(feature_range=(0, 1)).fit(final_df.iloc[:, :-1].values)
+    final_df.iloc[:, :-1] = scaler.transform(final_df.iloc[:, :-1])
+
+    return final_df
+
+def CICIDS2017_DoFeatureMappingAfterReadCSV(choose_merge_days):
+    generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\featureMapping\\", today)
+    generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\featureMapping\\{today}\\", current_time)
+    # df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\20250121\\Deleted79features\\10000筆資料\\ALLDay_Deleted79features_20250121.csv") 
+    df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\CICIDS2017_AfterProcessed_DoLabelencode_ALLDay_10000.csv") 
+    
+    # 創建空的 DataFrame
+    train_dataframes = pd.DataFrame()
+    test_dataframes = pd.DataFrame()
+    output_dim = 123  # 輸出的維度即要mapping的特徵數量
+    # 進行FeatureMapping
+    final_df = FeatureMappingAndMinMax(df,output_dim)
+    # 儲存結果為CSV
+    final_df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}/mapped_features_with_labels.csv", index=False)
+
+    print("CSV file has been saved.")
+
+    from CICIDS2017_Preprocess import DoBaselinesplit
+    train_dataframes, test_dataframes= DoBaselinesplit(final_df,train_dataframes,test_dataframes)            
+    # 紀錄資料筆數
+    with open(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}/encode_and_count_Deleted79features.csv", "a+") as file:
+        label_counts = test_dataframes['Label'].value_counts()
+        print("test_dataframes\n", label_counts)
+        file.write("test_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+        
+        label_counts = train_dataframes['Label'].value_counts()
+        print("train_dataframes\n", label_counts)
+        file.write("train_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+
+    SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}", f"{choose_merge_days}_train_dataframes_featureMapping_{today}")
+    SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}", f"{choose_merge_days}_test_dataframes_featureMapping_{today}")
+    SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}", f"{choose_merge_days}_test_featureMapping",today)
+    SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}", f"{choose_merge_days}_train_featureMapping",today)
+
+def CICIDS2018_DoFeatureMappingAfterReadCSV(choose_merge_days):
+    generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\featureMapping\\", today)
+    generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\featureMapping\\{today}\\", current_time)
+    df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\sampled_data_max_10000_per_label.csv")
+    # 創建空的 DataFrame
+    train_dataframes = pd.DataFrame()
+    test_dataframes = pd.DataFrame()
+    output_dim = 123  # 輸出的維度即要mapping的特徵數量
+    # 進行FeatureMapping
+    final_df = FeatureMappingAndMinMax(df,output_dim)
+    # 儲存結果為CSV
+    final_df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2018/{choose_merge_days}/featureMapping/{today}/{current_time}/mapped_features_with_labels.csv", index=False)
+
+    print("CSV file has been saved.")
+
+    from CICIDS2018_Preprocess import DoBaselinesplit
+    train_dataframes, test_dataframes= DoBaselinesplit(final_df,train_dataframes,test_dataframes)            
+    # 紀錄資料筆數
+    with open(f"./data/dataset_AfterProcessed/CICIDS2018/{choose_merge_days}/featureMapping/{today}/{current_time}/encode_and_count_featureMapping.csv", "a+") as file:
+        label_counts = test_dataframes['Label'].value_counts()
+        print("test_dataframes\n", label_counts)
+        file.write("test_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+        
+        label_counts = train_dataframes['Label'].value_counts()
+        print("train_dataframes\n", label_counts)
+        file.write("train_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+
+    SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2018/{choose_merge_days}/featureMapping/{today}/{current_time}", f"{choose_merge_days}_train_dataframes_featureMapping_{today}")
+    SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/CICIDS2018/{choose_merge_days}/featureMapping/{today}/{current_time}", f"{choose_merge_days}_test_dataframes_featureMapping_{today}")
+    SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/CICIDS2018/{choose_merge_days}/featureMapping/{today}/{current_time}", f"{choose_merge_days}_test_featureMapping",today)
+    SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/CICIDS2018/{choose_merge_days}/featureMapping/{today}/{current_time}", f"{choose_merge_days}_train_featureMapping",today)
+
+def TONIOT_DoFeatureMappingAfterReadCSV():
+    generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT\\featureMapping\\", today)
+    generatefolder(filepath + f"\\dataset_AfterProcessed\\TONIOT\\featureMapping\\{today}\\", current_time)
+    df= pd.read_csv(f'./data/dataset_AfterProcessed/TONIOT/20250312/Train_Test_Network_AfterProcessed_updated_10000_ALLMinmax_and_Labelencode.csv')
+    # 創建空的 DataFrame
+    train_dataframes = pd.DataFrame()
+    test_dataframes = pd.DataFrame()
+    output_dim = 123  # 輸出的維度即要mapping的特徵數量
+    # 進行FeatureMapping
+    final_df = FeatureMappingAndMinMax(df,output_dim)
+    # 儲存結果為CSV
+    final_df.to_csv(f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}/mapped_features_with_labels.csv", index=False)
+
+    print("CSV file has been saved.")
+
+    from TONIOT_Preprocess import DoBaselinesplit
+    train_dataframes, test_dataframes= DoBaselinesplit(final_df,train_dataframes,test_dataframes)            
+    # 紀錄資料筆數
+    with open(f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}/encode_and_count_featureMapping.csv", "a+") as file:
+        label_counts = test_dataframes['Label'].value_counts()
+        print("test_dataframes\n", label_counts)
+        file.write("test_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+        
+        label_counts = train_dataframes['Label'].value_counts()
+        print("train_dataframes\n", label_counts)
+        file.write("train_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+
+    SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}", f"TONIOT_train_dataframes_featureMapping_{today}")
+    SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}", f"TONIOT_test_dataframes_featureMapping_{today}")
+    SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}", f"TONIOT_test_featureMapping",today)
+    SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}", f"TONIOT_train_featureMapping",today)
+
+
+# 強制以npyfile進行特徵映射FeatureMapping
+# DoFeatureMappingAndSavetoCSVfile(x_train,y_train, "train")
+# DoFeatureMappingAndSavetoCSVfile(x_test,y_test, "test")
+# print(Fore.RED +Back.BLUE+ Style.BRIGHT+str(x_train.shape[1]))  # 這裡的 x_train_mapped 就是經過網絡層映射後的特徵
+# x_train = DoFeatureMapping(x_train)
+# x_test = DoFeatureMapping(x_test)
+# print(Fore.LIGHTYELLOW_EX +Back.BLUE+ Style.BRIGHT+str(x_train.shape[1]))  # 這裡的 x_train_mapped 就是經過網絡層映射後的特徵
+
+# CICIDS2017_DoFeatureMappingAfterReadCSV("ALLday")
+
+# CICIDS2018_DoFeatureMappingAfterReadCSV("csv_data")
+TONIOT_DoFeatureMappingAfterReadCSV()
