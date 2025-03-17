@@ -352,8 +352,13 @@ def ChooseLoadNpArray(filepath,split_file, Choose_method):
             # 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 do PCA Non-iid 
             # 20250121 CIC-IDS2017 after do labelencode and all featrue minmax 75 25分 do Do feature drop to 79 feature 
             # Non-iid
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_x.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_y.npy", allow_pickle=True)
+
+            # 20250317 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+            # 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_y.npy", allow_pickle=True)
 
         elif (Choose_method == 'SMOTE'):
             # # # # 20240317 Chi-square 45 SMOTE  K=5         
@@ -448,9 +453,13 @@ def ChooseLoadNpArray(filepath,split_file, Choose_method):
             # 20250113 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do PCA Non-iid
             # 20250121 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do Do feature drop to 79 feature 
             # Non-iid
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_x.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_y.npy", allow_pickle=True)
-            
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            # 20250317 CIC-IDS2018 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+            # 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_featureMapping_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_featureMapping_y.npy", allow_pickle=True)
+
         elif (Choose_method == 'SMOTE'):
             # # # 20240317 Chi-square 45 SMOTE  K=5          
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_train_half2_SMOTE_Tuesday_and_Wednesday_and_Thursday_ALL_Label_20240317.npy", allow_pickle=True)
@@ -545,10 +554,13 @@ def ChooseLoadNpArray(filepath,split_file, Choose_method):
             
             # 20250121 01-12 and 03-11 merge ALLDay CIC-IDS2019 after do labelencode  and all featrue minmax 75 25分 Do feature drop to 79 feature 
             # Non-iid
-            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do feature drop" +f"{split_file} with normal attack type")
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_x.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_y.npy", allow_pickle=True)
-            
+            # print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do feature drop" +f"{split_file} with normal attack type")
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            # 20250317 CIC-IDS2018 after do labelencode and 44 feature and all featrue minmax 75 25分
+            # 44 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\Noniid\\TONIIOT_AddedLabel_featureMapping_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\Noniid\\TONIIOT_AddedLabel_featureMapping_y.npy", allow_pickle=True)
 
         elif (Choose_method == 'SMOTE'):
             # # 20240324 Chi-square 45 SMOTE  K=5          
@@ -760,9 +772,13 @@ def splitdatasetbalancehalf(train_dataframes, label):
 
     return df1,df2
 
-def splitweakLabelbalance(weakLabel,original_dataset,size):
-    # label_data = original_dataset[original_dataset['type'] == weakLabel]
-    label_data = original_dataset[original_dataset['Label'] == weakLabel]
+def splitweakLabelbalance(weakLabel,original_dataset,size, bool_TONIOT=False):
+    print(f"bool_TONIOT is: {bool_TONIOT}")  # 打印檢查
+    # TONIOT用type那句
+    if bool_TONIOT:
+        label_data = original_dataset[original_dataset['type'] == weakLabel]
+    else:
+        label_data = original_dataset[original_dataset['Label'] == weakLabel]
     # 使用train_test_split分別劃分取Label相等8、9、13、14的數據
     train_label, test_label = train_test_split(label_data, test_size=size, random_state=42)
     return train_label, test_label

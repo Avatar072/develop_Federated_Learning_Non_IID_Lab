@@ -190,25 +190,54 @@ def FeatureMappingAndMinMax(df,output_dim):
 
     return final_df
 
+def cropdatasetforStringtypeFeature(df,columns_to_exclude):
+    # 除'dst_port', 'proto', 'ts', 'duration'外的特徵 for TONIOT
+    # ['DestinationPort', 'Protocol', 'Timestamp', 'FlowDuration'] for CICIDS2017
+    # ['DestinationPort', 'Protocol', 'Timestamp', 'FlowDuration'] for CICIDS2018
+    dofeatureMappingdataset = df[[col for col in df.columns if col not in columns_to_exclude]]
+    # 'dst_port', 'proto', 'ts', 'duration'
+    undofeatureMappingdataset = df[[col for col in df.columns if col in columns_to_exclude]]
+    print(dofeatureMappingdataset.info())
+    print(undofeatureMappingdataset.info())
+
+    return undofeatureMappingdataset, dofeatureMappingdataset
+
+def Do_FeatureMapping_After_AlignmentStringTypeFeature(df, columns_to_exclude, output_dim):
+    undofeatureMappingdataset,dofeatureMappingdataset = cropdatasetforStringtypeFeature(df,columns_to_exclude)
+    output_dim = 116  # 輸出的維度即要mapping的特徵數量
+    # CICIDS2017/2018 feature:79，79 = 75 + 4 string(要對齊的特徵)
+    # TONIOT feature:41，41 = 37 + 4 string(要對齊的特徵)
+    # 輸出的維度:79+41=120
+    # 120-4string = 要mapping的特徵為116
+    dofeatureMappingdataset = FeatureMappingAndMinMax(dofeatureMappingdataset,output_dim)
+    # 將'DestinationPort', 'Protocol', 'Timestamp', 'FlowDuration'和mapping後的特徵和 Label 合並為新的 DataFrame
+    final_df = pd.concat([undofeatureMappingdataset,dofeatureMappingdataset], axis = 1)
+    return final_df
+
 def CICIDS2017_DoFeatureMappingAfterReadCSV(choose_merge_days):
     generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\featureMapping\\", today)
     generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\featureMapping\\{today}\\", current_time)
+    # 79 feature
     # df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\20250121\\Deleted79features\\10000筆資料\\ALLDay_Deleted79features_20250121.csv") 
-    df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\CICIDS2017_AfterProcessed_DoLabelencode_ALLDay_10000.csv") 
-    
+    # 83 feature
+    # df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\CICIDS2017_AfterProcessed_DoLabelencode_ALLDay_10000.csv") 
+    # 79 feature and Label merged 
+    df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\featureMapping\\20250314\\rename_Label實驗\\Label_merge.csv") 
+
     # 創建空的 DataFrame
     train_dataframes = pd.DataFrame()
     test_dataframes = pd.DataFrame()
-    output_dim = 123  # 輸出的維度即要mapping的特徵數量
-    # 進行FeatureMapping
+    output_dim = 123  # 不對齊直接進行FeatureMapping 輸出的維度即要mapping的特徵數量(CICIDS feature:79+TONIOT feature:44)
+    # 不對齊直接進行FeatureMapping
     final_df = FeatureMappingAndMinMax(df,output_dim)
+    # 對齊string特徵後再進行FeatureMapping
+    # columns_to_exclude = ['DestinationPort', 'Protocol', 'Timestamp', 'FlowDuration']
+    # final_df  = Do_FeatureMapping_After_AlignmentStringTypeFeature(df, columns_to_exclude, output_dim)
     # 儲存結果為CSV
     final_df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}/mapped_features_with_labels.csv", index=False)
-
     print("CSV file has been saved.")
-
-    from CICIDS2017_Preprocess import DoBaselinesplit
-    train_dataframes, test_dataframes= DoBaselinesplit(final_df,train_dataframes,test_dataframes)            
+    from CICIDS2017_Preprocess import DoBaselinesplitAfter_LabelMerge
+    train_dataframes, test_dataframes= DoBaselinesplitAfter_LabelMerge(final_df,train_dataframes,test_dataframes)            
     # 紀錄資料筆數
     with open(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}/encode_and_count_Deleted79features.csv", "a+") as file:
         label_counts = test_dataframes['Label'].value_counts()
@@ -229,20 +258,26 @@ def CICIDS2017_DoFeatureMappingAfterReadCSV(choose_merge_days):
 def CICIDS2018_DoFeatureMappingAfterReadCSV(choose_merge_days):
     generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\featureMapping\\", today)
     generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\featureMapping\\{today}\\", current_time)
-    df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\sampled_data_max_10000_per_label.csv")
+    # df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\sampled_data_max_10000_per_label.csv")
+    # 79 feature and Label merged 
+    df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\featureMapping\\20250314\\rename_Label實驗\\Label_merge.csv")
+    
     # 創建空的 DataFrame
     train_dataframes = pd.DataFrame()
     test_dataframes = pd.DataFrame()
-    output_dim = 123  # 輸出的維度即要mapping的特徵數量
-    # 進行FeatureMapping
+    output_dim = 123  # 不對齊直接進行FeatureMapping 輸出的維度即要mapping的特徵數量(CICIDS feature:79+TONIOT feature:44)
+    # 不對齊直接進行FeatureMapping
     final_df = FeatureMappingAndMinMax(df,output_dim)
+    # 對齊string特徵後再進行FeatureMapping
+    # columns_to_exclude = ['Dst Port', 'Protocol', 'Timestamp', 'Flow Duration']
+    # final_df  = Do_FeatureMapping_After_AlignmentStringTypeFeature(df, columns_to_exclude, output_dim)
     # 儲存結果為CSV
     final_df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2018/{choose_merge_days}/featureMapping/{today}/{current_time}/mapped_features_with_labels.csv", index=False)
 
     print("CSV file has been saved.")
 
-    from CICIDS2018_Preprocess import DoBaselinesplit
-    train_dataframes, test_dataframes= DoBaselinesplit(final_df,train_dataframes,test_dataframes)            
+    from CICIDS2018_Preprocess import DoBaselinesplitAfter_LabelMerge
+    train_dataframes, test_dataframes= DoBaselinesplitAfter_LabelMerge(final_df,train_dataframes,test_dataframes)     
     # 紀錄資料筆數
     with open(f"./data/dataset_AfterProcessed/CICIDS2018/{choose_merge_days}/featureMapping/{today}/{current_time}/encode_and_count_featureMapping.csv", "a+") as file:
         label_counts = test_dataframes['Label'].value_counts()
@@ -263,28 +298,45 @@ def CICIDS2018_DoFeatureMappingAfterReadCSV(choose_merge_days):
 def TONIOT_DoFeatureMappingAfterReadCSV():
     generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT\\featureMapping\\", today)
     generatefolder(filepath + f"\\dataset_AfterProcessed\\TONIOT\\featureMapping\\{today}\\", current_time)
-    df= pd.read_csv(f'./data/dataset_AfterProcessed/TONIOT/20250312/Train_Test_Network_AfterProcessed_updated_10000_ALLMinmax_and_Labelencode.csv')
+    
+    # 44 feature版本
+    # df= pd.read_csv(f'./data/dataset_AfterProcessed/TONIOT/20250312/Train_Test_Network_AfterProcessed_updated_10000_ALLMinmax_and_Labelencode.csv')
+    
+    # 留['dst_port', 'proto', 'ts', 'duration']41 feature版本
+    # df= pd.read_csv(f'./data/dataset_AfterProcessed/TONIOT/DeleteFeature/TONIOT_Deletedfeatures_20250313_new.csv')
+    
+    # 44 feature and 把backdoor和ddos互相更換encode值
+    df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\TONIOT\\featureMapping\\20250314\\rename_Label實驗\\Label_merge.csv")
+
+
     # 創建空的 DataFrame
     train_dataframes = pd.DataFrame()
     test_dataframes = pd.DataFrame()
-    output_dim = 123  # 輸出的維度即要mapping的特徵數量
-    # 進行FeatureMapping
+    output_dim = 123  # 不對齊直接進行FeatureMapping 輸出的維度即要mapping的特徵數量(CICIDS feature:79+TONIOT feature:44)
+    # 不對齊直接進行FeatureMapping
     final_df = FeatureMappingAndMinMax(df,output_dim)
+    # 對齊string特徵後再進行FeatureMapping
+    # columns_to_exclude = ['dst_port', 'proto', 'ts', 'duration']
+    # final_df  = Do_FeatureMapping_After_AlignmentStringTypeFeature(df, columns_to_exclude, output_dim)
+
     # 儲存結果為CSV
     final_df.to_csv(f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}/mapped_features_with_labels.csv", index=False)
 
     print("CSV file has been saved.")
 
     from TONIOT_Preprocess import DoBaselinesplit
-    train_dataframes, test_dataframes= DoBaselinesplit(final_df,train_dataframes,test_dataframes)            
+    train_dataframes, test_dataframes= DoBaselinesplit(final_df,train_dataframes,test_dataframes,False)  
+               
     # 紀錄資料筆數
     with open(f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}/encode_and_count_featureMapping.csv", "a+") as file:
         label_counts = test_dataframes['Label'].value_counts()
+        # label_counts = test_dataframes['type'].value_counts()
         print("test_dataframes\n", label_counts)
         file.write("test_dataframes_label_counts\n")
         file.write(str(label_counts) + "\n")
         
         label_counts = train_dataframes['Label'].value_counts()
+        # label_counts = train_dataframes['type'].value_counts()
         print("train_dataframes\n", label_counts)
         file.write("train_dataframes_label_counts\n")
         file.write(str(label_counts) + "\n")
@@ -294,7 +346,105 @@ def TONIOT_DoFeatureMappingAfterReadCSV():
     SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}", f"TONIOT_test_featureMapping",today)
     SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}", f"TONIOT_train_featureMapping",today)
 
+# 用於刪除特定特徵跟設置新順序
+def TONIOTdropStringtypeAfterReadCSV_():
+    # 44 feature版本
+    df= pd.read_csv(f'./data/dataset_AfterProcessed/TONIOT/20250312/Train_Test_Network_AfterProcessed_updated_10000_ALLMinmax_and_Labelencode.csv')
+    generatefolder(filepath + f"\\dataset_AfterProcessed\\TONIOT\\DeleteFeature\\{today}\\", current_time)
+    # 刪除特定特徵for feauture mapping 將特徵44刪至41個
+    # df.drop(columns=['ts','src_ip','src_port', 'dst_ip', 'dst_port', 'proto'], inplace=True)
+    df.drop(columns=['src_ip','src_port', 'dst_ip'], inplace=True)
+    # 設置新順序
+    new_column_order = ['dst_port', 'proto', 'ts', 'duration']
+    df_new_order = df[new_column_order]  
+    # 特徵列
+    crop_dataset=df.iloc[:,:-1]
+    columns_to_exclude = ['ts', 'src_ip', 'src_port', 'dst_ip', 'dst_port', 'proto', 'duration']
+    # 除columns_to_exclude外的特徵
+    doScalerdataset = crop_dataset[[col for col in crop_dataset.columns if col not in columns_to_exclude]]
+    
+    # 將除columns_to_exclude外的特徵和設置新順序的特徵和 Label 合並為新的 DataFrame
+    afterminmax_dataset = pd.concat([df_new_order,doScalerdataset,df['type']], axis = 1)
+    SaveDataToCsvfile(afterminmax_dataset, f"./data/dataset_AfterProcessed/TONIOT/DeleteFeature", f"TONIOT_Deletedfeatures_{today}_new") 
+    print(afterminmax_dataset.info())
 
+    # 41 feature版本
+    df= pd.read_csv(f'./data/dataset_AfterProcessed/TONIOT/DeleteFeature/TONIOT_Deletedfeatures_20250313_new.csv')
+    generatefolder(filepath + f"\\dataset_AfterProcessed\\TONIOT\\DeleteFeature\\{today}\\", current_time)
+
+    # 創建空的 DataFrame
+    train_dataframes = pd.DataFrame()
+    test_dataframes = pd.DataFrame()
+    from TONIOT_Preprocess import DoBaselinesplit
+    train_dataframes, test_dataframes= DoBaselinesplit(df,train_dataframes,test_dataframes)            
+    # 紀錄資料筆數
+    with open(f"./data/dataset_AfterProcessed/TONIOT/DeleteFeature/{today}/{current_time}/encode_and_count_featureMapping.csv", "a+") as file:
+        label_counts = test_dataframes['type'].value_counts()
+        print("test_dataframes\n", label_counts)
+        file.write("test_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+        
+        label_counts = train_dataframes['type'].value_counts()
+        print("train_dataframes\n", label_counts)
+        file.write("train_dataframes_label_counts\n")
+        file.write(str(label_counts) + "\n")
+
+    SaveDataToCsvfile(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/DeleteFeature/{today}/{current_time}/", f"TONIOT_train_dataframes_DeleteFeature41_{today}")
+    SaveDataToCsvfile(test_dataframes,  f"./data/dataset_AfterProcessed/TONIOT/DeleteFeature/{today}/{current_time}/", f"TONIOT_test_dataframes_DeleteFeature41_{today}")
+    SaveDataframeTonpArray(test_dataframes, f"./data/dataset_AfterProcessed/TONIOT/DeleteFeature/{today}/{current_time}/", f"TONIOT_test_DeleteFeature41",today)
+    SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/DeleteFeature/{today}/{current_time}/", f"TONIOT_train_DeleteFeature41",today)
+
+# 　把label 分為大類 並取上限隨機10000
+def CICIDS2017_DorenameLabel(choose_merge_days):
+    generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\featureMapping\\", today)
+    generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\featureMapping\\{today}\\", current_time)
+    df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\20250121\\Deleted79features\\10000筆資料\\ALLDay_Deleted79features_20250121.csv") 
+    # df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}/Label_rename.csv", index=False)
+    from CICIDS2017_Preprocess import ReplaceMorethanTenthousandQuantity
+    # 把WEB Attack算一類 ; Dos算一類
+    df['Label'] = df['Label'].replace({4: 3,  5: 3,  6: 3, 9: 4, 12: 5, 13: 5, 14: 5, 7: 6, 11: 7, 10: 9})
+    df = ReplaceMorethanTenthousandQuantity(df)
+    # 檢查結果
+    print(df['Label'].value_counts())
+    df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}/Label_merge.csv", index=False)
+
+def CICIDS2018_DorenameLabel(choose_merge_days):
+    generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\featureMapping\\", today)
+    generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\featureMapping\\{today}\\", current_time)
+    df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\sampled_data_max_10000_per_label.csv")
+    from CICIDS2017_Preprocess import ReplaceMorethanTenthousandQuantity
+    # 把WEB Attack算一類 ; Dos算一類; DDos算一類
+    df['Label'] = df['Label'].replace({2: 5, 3: 5, 13: 5, 4: 2, 5: 2, 6: 2, 7: 3, 8: 3, 9: 3, 10: 3, 11: 6, 12: 4, 14: 7})
+    df = ReplaceMorethanTenthousandQuantity(df)
+    # 檢查結果
+    print(df['Label'].value_counts())
+    df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2018/{choose_merge_days}/featureMapping/{today}/{current_time}/Label_merge.csv", index=False)
+
+def TONIOT_DorenameLabel():
+    generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT\\featureMapping\\", today)
+    generatefolder(filepath + f"\\dataset_AfterProcessed\\TONIOT\\featureMapping\\{today}\\", current_time)
+    
+    # 44 feature版本
+    df= pd.read_csv(f'./data/dataset_AfterProcessed/TONIOT/20250312/Train_Test_Network_AfterProcessed_updated_10000_ALLMinmax_and_Labelencode.csv')
+    # 查找原本 'type' 為 1 的行
+    print(df[df['type'] == 1].head())
+
+    # 查找原本 'type' 為 2 的行
+    print(df[df['type'] == 2].head())
+    # 把ddos跟backdoor互調位置
+    df['type'] = df['type'].replace({2: 1, 1: 2})
+    # from TONIOT_Preprocess import ReplaceMorethanTenthousandQuantity
+    # 查找更換後 'type' 為 1 的行
+    print(df[df['type'] == 1].head())
+
+    # 查找更換後 'type' 為 2 的行
+    print(df[df['type'] == 2].head())
+    # df = ReplaceMorethanTenthousandQuantity(df)
+    # 檢查結果
+    print(df['type'].value_counts())
+    df.to_csv(f"./data/dataset_AfterProcessed/TONIOT/featureMapping/{today}/{current_time}/Label_merge.csv", index=False)
+
+    
 # 強制以npyfile進行特徵映射FeatureMapping
 # DoFeatureMappingAndSavetoCSVfile(x_train,y_train, "train")
 # DoFeatureMappingAndSavetoCSVfile(x_test,y_test, "test")
@@ -304,6 +454,8 @@ def TONIOT_DoFeatureMappingAfterReadCSV():
 # print(Fore.LIGHTYELLOW_EX +Back.BLUE+ Style.BRIGHT+str(x_train.shape[1]))  # 這裡的 x_train_mapped 就是經過網絡層映射後的特徵
 
 # CICIDS2017_DoFeatureMappingAfterReadCSV("ALLday")
-
 # CICIDS2018_DoFeatureMappingAfterReadCSV("csv_data")
 TONIOT_DoFeatureMappingAfterReadCSV()
+# CICIDS2017_DorenameLabel("ALLday")
+# CICIDS2018_DorenameLabel("csv_data")
+# TONIOT_DorenameLabel()
