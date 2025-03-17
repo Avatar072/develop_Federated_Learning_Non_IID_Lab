@@ -23,7 +23,9 @@ from collections import Counter
 from colorama import Fore, Back, Style, init
 ####################################################################################################
 #CICIDS2018
-labelCount = 15
+# labelCount = 15
+# merged Label ver
+labelCount = 8
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -198,6 +200,12 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
 
             # 標誌來跟踪是否已經添加了標題行
             header_written = False
+            with open(f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/{client_str}/{Choose_method}/loss-baseline_{client_str}.csv", "a+") as file:
+                if not header_written:
+                    # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
+                    header_written = True
+                file.write(str(ave_loss) + "\n")
+            
             with open(f"./single_AnalyseReportFolder/CICIDS2018/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
                 if not header_written:
                     # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
@@ -234,22 +242,33 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         # class_names：同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，如果不提供這個參數，將使用行索引的標籤作為列索引
         arr = confusion_matrix(y_true, y_pred)
         # # CICIDS2018
+        # class_names = {
+        #                 0: '0_BENIGN', 
+        #                 1: '1_Bot', 
+        #                 2: '2_Brute Force-Web', 
+        #                 3: '3_Brute Force-XSS',
+        #                 4: '4_DDOS attack-HOIC', 
+        #                 5: '5_DDOS attack-LOIC-UDP', 
+        #                 6: '6_DDoS attacks-LOIC-HTTP', 
+        #                 7: '7_DoS attacks-GoldenEye', 
+        #                 8: '8_DoS attacks-Hulk', 
+        #                 9: '9_DoS attacks-SlowHTTPTest', 
+        #                 10: '10_DoS attacks-Slowloris', 
+        #                 11: '11_FTP-BruteForce', 
+        #                 12: '12_Infilteration',
+        #                 13: '13_SQL Injection', 
+        #                 14: '14_SSH-Bruteforce'
+        #                 } 
+        # merged Label ver
         class_names = {
-                        0: '0_BENIGN', 
-                        1: '1_Bot', 
-                        2: '2_Brute Force-Web', 
-                        3: '3_Brute Force-XSS',
-                        4: '4_DDOS attack-HOIC', 
-                        5: '5_DDOS attack-LOIC-UDP', 
-                        6: '6_DDoS attacks-LOIC-HTTP', 
-                        7: '7_DoS attacks-GoldenEye', 
-                        8: '8_DoS attacks-Hulk', 
-                        9: '9_DoS attacks-SlowHTTPTest', 
-                        10: '10_DoS attacks-Slowloris', 
-                        11: '11_FTP-BruteForce', 
-                        12: '12_Infilteration',
-                        13: '13_SQL Injection', 
-                        14: '14_SSH-Bruteforce'
+                        0: 'Benign', 
+                        1: 'Bot', 
+                        2: 'DDoS', 
+                        3: 'DoS',
+                        4: 'Infiltration', 
+                        5: 'Web Attack', 
+                        6: 'FTP-BruteForce', 
+                        7: 'SSH-Bruteforce'
                         } 
         # df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names.values())

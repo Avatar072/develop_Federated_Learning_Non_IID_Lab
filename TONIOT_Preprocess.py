@@ -327,11 +327,11 @@ def DoMinMaxAndLabelEncoding(afterprocess_dataset,bool_doencode):
 
     return afterminmax_dataset
 
-def DoBaselinesplit(df,train_dataframes,test_dataframes):
+def DoBaselinesplit(df,train_dataframes,test_dataframes,bool_label_or_type):
     List_train_Label = []
     List_test_Label = []
     for i in range(10):
-        train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
+        train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25,bool_label_or_type)
         List_train_Label.append(train_label_split)
         List_test_Label.append(test_label_split)         
 
@@ -361,7 +361,7 @@ def DoSplitAllfeatureAfterMinMax(df,bool_Noniid):
             List_train_Label = []
             List_test_Label = []
             for i in range(10):
-                train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
+                train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25,True)
                 List_train_Label.append(train_label_split)
                 List_test_Label.append(test_label_split)         
 
@@ -439,7 +439,7 @@ def DoSplitAfterDoPCA(df,number_of_components,bool_Noniid,bool_add_cicids2017fea
     List_train_Label = []
     List_test_Label = []
     for i in range(10):
-        train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
+        train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25,True)
         List_train_Label.append(train_label_split)
         List_test_Label.append(test_label_split)         
 
@@ -484,9 +484,9 @@ def DoSplitthrildClientForiid():
 
         for i in range(10):
             # 第一次拆分：将数据拆分成 33.3% 和 66.7%
-            train_half1_label_split, train_half2_label_split = splitweakLabelbalance(i,df_ALLtrain,0.3333)
+            train_half1_label_split, train_half2_label_split = splitweakLabelbalance(i,df_ALLtrain,0.3333,True)
             # 第二次拆分：将 66.7% 的数据再拆分成 50% 和 50%（即 33.3% 和 33.3%）
-            train_half1_label_split_half1,train_half1_label_split_half2 = splitweakLabelbalance(i,train_half1_label_split,0.5)
+            train_half1_label_split_half1,train_half1_label_split_half2 = splitweakLabelbalance(i,train_half1_label_split,0.5,True)
 
             List_train_half1_Label.append(train_half1_label_split_half1)
             List_train_half2_Label.append(train_half2_label_split)    
@@ -568,9 +568,9 @@ def DoRandomSplitthrildClientForiid():
             print("Second Random Size Dict:", total_second_random_size)
 
             # 第一次拆分
-            train_half1_label_split, train_half2_label_split = splitweakLabelbalance(i, df_ALLtrain, first_random_size)
+            train_half1_label_split, train_half2_label_split = splitweakLabelbalance(i, df_ALLtrain, first_random_size,True)
             # 第二次拆分
-            train_half1_label_split_half1, train_half1_label_split_half2 = splitweakLabelbalance(i, train_half1_label_split, first_random_size)
+            train_half1_label_split_half1, train_half1_label_split_half2 = splitweakLabelbalance(i, train_half1_label_split, first_random_size,True)
 
             # 保存到相应的列表中
             List_train_half1_Label.append(train_half1_label_split_half1)
