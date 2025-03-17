@@ -24,15 +24,15 @@ def CICIDS2017_IID_ChooseLoadNpArray(filepath,split_file, Choose_method):
         if (Choose_method == 'normal'):
             # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\CICIDS2017\ALLday\Dirichlet\20250205
             # 20250305使用是a=0.5
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250205\\x_Dirichlet_client1_20250205.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250205\\y_Dirichlet_client1_20250205.npy", allow_pickle=True)
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250205\\x_Dirichlet_client1_20250205.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250205\\y_Dirichlet_client1_20250205.npy", allow_pickle=True)
             # 20250305使用是a=0.1
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250305\\x_Dirichlet_client1_20250305.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250305\\y_Dirichlet_client1_20250305.npy", allow_pickle=True)
 
             # 20250306使用是a=0.1
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250306\\x_Dirichlet_client1_20250306.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250306\\y_Dirichlet_client1_20250306.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250306\\x_Dirichlet_client1_20250306.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250306\\y_Dirichlet_client1_20250306.npy", allow_pickle=True)
 
         print("train_half1 x_train 的形狀:", x_train.shape)
         print("train_half1 y_train 的形狀:", y_train.shape)
@@ -41,15 +41,15 @@ def CICIDS2017_IID_ChooseLoadNpArray(filepath,split_file, Choose_method):
     elif split_file == 'client2_train':
         if (Choose_method == 'normal'):
             # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\CICIDS2017\ALLday\Dirichlet\20250205
-            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250205\\x_Dirichlet_client2_20250205.npy", allow_pickle=True)
-            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250205\\y_Dirichlet_client2_20250205.npy", allow_pickle=True)
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250205\\x_Dirichlet_client2_20250205.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250205\\y_Dirichlet_client2_20250205.npy", allow_pickle=True)
             # 20250305使用是a=0.1
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250305\\x_Dirichlet_client2_20250305.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250305\\y_Dirichlet_client2_20250305.npy", allow_pickle=True)
             
             # 20250306使用是a=0.1
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250306\\x_Dirichlet_client2_20250306.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250306\\y_Dirichlet_client2_20250306.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250306\\x_Dirichlet_client2_20250306.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250306\\y_Dirichlet_client2_20250306.npy", allow_pickle=True)
 
         print("train_half2 x_train 的形狀:", x_train.shape)
         print("train_half2 y_train 的形狀:", y_train.shape)
@@ -140,23 +140,31 @@ def CICIDS2018_IID_ChooseLoadNpArray(filepath,split_file, Choose_method):
 def ChooseLoad_class_names(str_choose_dataset):
 
     if str_choose_dataset == 'CICIDS2017':
-        class_names_local = {0: '0_BENIGN', 1: '1_Bot', 2: '2_DDoS', 3: '3_DoS GoldenEye', 4: '4_DoS Hulk', 5: '5_DoS Slowhttptest', 6: '6_DoS slowloris', 
-                            7: '7_Infilteration', 8: '8_Web Attack', 9: '9_Heartbleed', 10: '10_PortScan', 11: '11_FTP-BruteForce', 12: '12_FTP-Patator', 
-                            13: '13_SSH-Bruteforce', 14: '14_SSH-Patator'
+        # 15個Label ver
+        # class_names_local = {0: '0_BENIGN', 1: '1_Bot', 2: '2_DDoS', 3: '3_DoS GoldenEye', 4: '4_DoS Hulk', 5: '5_DoS Slowhttptest', 6: '6_DoS slowloris', 
+        #                     7: '7_Infilteration', 8: '8_Web Attack', 9: '9_Heartbleed', 10: '10_PortScan', 11: '11_FTP-BruteForce', 12: '12_FTP-Patator', 
+        #                     13: '13_SSH-Bruteforce', 14: '14_SSH-Patator'
+        #                     }  
+        class_names_local = {0: 'Benign', 1: 'Bot', 2: 'DDoS', 3: 'DoS', 4: 'Infilteration', 5: 'Web Attack', 
+                             6: 'FTP-Patator', 7: 'SSH-Patator', 8: 'Heartbleed', 9: 'PortScan'
                             }  
-        labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     
     elif str_choose_dataset == 'CICIDS2018':
-        class_names_local = {0: '0_BENIGN', 1: '1_Bot', 2: '2_Brute Force-Web', 3: '3_Brute Force-XSS', 4: '4_DDOS attack-HOIC', 5: '5_DDOS attack-LOIC-UDP', 
-                             6: '6_DDoS attacks-LOIC-HTTP', 7: '7_DoS attacks-GoldenEye', 8: '8_DoS attacks-Hulk', 9: '9_DoS attacks-SlowHTTPTest', 
-                            10: '10_DoS attacks-Slowloris', 11: '11_FTP-BruteForce', 12: '12_Infilteration', 
-                            13: '13_SQL Injection', 14: '14_SSH-Bruteforce'
+        class_names_local = {0: 'Benign', 1: 'Bot', 2: 'DDoS', 3: 'DoS', 
+                             4: 'Infilteration', 5: 'Web Attack',
+                             6: 'FTP-BruteForce', 7: 'SSH-Bruteforce'
                             }  
-        labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7]
 
 
-    # elif str_choose_dataset == 'TONIOT':
+    elif str_choose_dataset == 'TONIOT':
+        class_names_local = {0: 'Normal', 1: 'Backdoor', 2: 'DDoS', 3: 'DoS', 
+                             4: 'Injection', 5: 'Mitm',6: 'Password', 
+                             7: 'Ransomware',8: 'Scanning', 9: 'XSS'
+                            }  
+        labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
     return class_names_local, labels_to_calculate

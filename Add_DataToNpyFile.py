@@ -18,8 +18,8 @@ today = today.strftime("%Y%m%d")
 # TONIOT和EdgeIIOT用baseline的Np file先將轉原Label encode的值轉換調，使用下面這兩個function
 # EdgeIIOTNpfileChangeLabelEncodeValue和TONIoTNpfileChangeLabelEncodeValue
 
-# 在用轉換掉Label encode值得npfile去add label，
-# 使用DoAddLabelToTrainData
+# 先將轉原Label encode的值換調
+# 再使用DoAddLabelToTrainData由npfile去add uinon label
 #########
 
 
@@ -46,25 +46,32 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
    
         # 20250122 CIC-IDS2017 after do labelencode  all featrue minmax 75 25分 do feature drop to 79 feature DO FGSM esp0.05
         # D:\develop_Federated_Learning_Non_IID_Lab\Adversarial_Attack_Test\CICIDS2017\FGSM_Attack\Npfile
-        x_train = np.load(f"./\\Adversarial_Attack_Test\\CICIDS2017\\FGSM_Attack\\Npfile\\x_train_CICIDS2017_eps0.05.npy", allow_pickle=True)
-        # y_train = np.load(filepath + "\\Adversarial_Attack_Test\\CICIDS2017\\FGSM_Attack\\Npfile\\y_train_CICIDS2017_eps0.05.npy", allow_pickle=True)
-        y_train = np.load(f"./\\Adversarial_Attack_Test\\CICIDS2017\\FGSM_Attack\\Npfile\\y_ALLDay_train_AfterFGSM_eps.05_20250122_ChangeLabelencode.npy", allow_pickle=True)
+        # x_train = np.load(f"./\\Adversarial_Attack_Test\\CICIDS2017\\FGSM_Attack\\Npfile\\x_train_CICIDS2017_eps0.05.npy", allow_pickle=True)
+        # # y_train = np.load(filepath + "\\Adversarial_Attack_Test\\CICIDS2017\\FGSM_Attack\\Npfile\\y_train_CICIDS2017_eps0.05.npy", allow_pickle=True)
+        # y_train = np.load(f"./\\Adversarial_Attack_Test\\CICIDS2017\\FGSM_Attack\\Npfile\\y_ALLDay_train_AfterFGSM_eps.05_20250122_ChangeLabelencode.npy", allow_pickle=True)
    
+        # 20250317 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+        # 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+        print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"with normal After Do labelencode and minmax and drop feature to 79 feature do feature mapping to 123 feature")
+        x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLday_train_featureMapping_20250317.npy", allow_pickle=True)
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLday_train_featureMapping_20250317.npy", allow_pickle=True)
+
         print(generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Npfile\\", "Noniid"))
         print(generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Npfile\\Noniid\\", today))
 
-        # save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Npfile\\Noniid\\" + today + "\\CICIDS2017_AddedLabel_Noniid"
+        save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Npfile\\Noniid\\" + today + "\\CICIDS2017_AddedLabel_Noniid_featureMapping"
         
         # do FGSM
-        save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Npfile\\Noniid\\" + today + "\\CICIDS2017_AddedLabel_Noniid_FGSM"
+        # save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Npfile\\Noniid\\" + today + "\\CICIDS2017_AddedLabel_Noniid_FGSM"
         # Add TONIOT CICIDS2019
         # add_Labels = np.array([15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34])
         # Add TONIOT EdgeIIoT
         # add_Labels = np.array([15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30])
         # add_Labels = np.array([23,24,25,26,27,28,29,30,31,32,33,34])
         # Add CICIDS2018 CICIDS2019
-        add_Labels = np.array([11,13,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31])
-  
+        # add_Labels = np.array([11,13,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31])
+        # Add CICIDS2018、TONIOT
+        add_Labels = np.array([10,11,12,13,14,15,16,17,18])
 
     elif Str_ChooseDataset == "TONIOT":
         # # 20240323 non iid client2 use TONIOT change ts change ip encode
@@ -76,29 +83,37 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
 
         # 20240523 non iid us BaseLine npfile TONIoT after do labelencode and minmax  75 25分
         #因non iid所以 y_train要使用ChangeLabelEncode
-        x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
-        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
-        y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
+        # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\x_train_ToN-IoT_20240523.npy", allow_pickle=True)
+        # # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
+        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
+        
+        # 20250317 TONIoT after do labelencode and all featrue minmax 75 25分 44 feature do backdoor和ddos互相更換encode值 feature mapping to 123 feature
+        x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)
+        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)   
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)   
 
-        generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT\\", today)
-        save_filename = filepath + "\\dataset_AfterProcessed\\TONIOT\\" + today + "\\TONIIOT_AddedLabel"
+        print(generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\", "Noniid"))
+        print(generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\Noniid\\", today))
+        save_filename = filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\Noniid\\" + today + "\\TONIIOT_AddedLabel_featureMapping"
         # Add CICIDS2017 CICIDS2019
         # add_Labels = np.array([1,3,4,5,6,7,8,9,10,11,12,13,14,23,24,25,26,27,28,29,30,31,32,33,34])
         # Add CICIDS2019
         # add_Labels = np.array([23,24,25,26,27,28,29,30,31,32,33,34])
         # Add EdgeIIoT  
-        add_Labels = np.array([23,24,25,26,27,28,29,30])  
+        # add_Labels = np.array([23,24,25,26,27,28,29,30])  
         # Add CICIDS2017 EdgeIIoT
-        add_Labels = np.array([1,3,4,5,6,7,8,9,10,11,12,13,14,23,24,25,26,27,28,29,30])
+        # add_Labels = np.array([1,3,4,5,6,7,8,9,10,11,12,13,14,23,24,25,26,27,28,29,30])
+        # Add CICIDS2017 CICIDS2018
+        add_Labels = np.array([1,4,5,6,7,8,9,10,11])
 
 
     elif Str_ChooseDataset == "CICIDS2018":
 
         # 20250121 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分
-        print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f" with normal After Do labelencode and minmax")
-        x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_20250106.npy", allow_pickle=True)    
-        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_20250106.npy", allow_pickle=True)
-        y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_After_20250121_ChangeLabelencode.npy", allow_pickle=True)
+        # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f" with normal After Do labelencode and minmax")
+        # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_20250106.npy", allow_pickle=True)    
+        # # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_20250106.npy", allow_pickle=True)
+        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_After_20250121_ChangeLabelencode.npy", allow_pickle=True)
     
         # # 20250113 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 Do PCA
         # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f" with normal After Do labelencode and minmax and PCA")
@@ -106,11 +121,21 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
         # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_AfterPCA79_20250113.npy", allow_pickle=True)
         # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
     
+        # 20250317 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 79 feature do feature mapping to 123 feature
+        # 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+        print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f" with normal After Do labelencode and minmax do Label meraged and feature mapping")
+        x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_featureMapping_20250317.npy", allow_pickle=True)
+        # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_featureMapping_20250317.npy", allow_pickle=True)
+        y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_featureMapping_20250317_ChangeLabelencode.npy", allow_pickle=True)
+
         print(generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\", "Noniid"))
         print(generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\", today))
-        save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\" + today + "\\CICIDS2018_AddedLabel_Noniid"
+        save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\" + today + "\\CICIDS2018_AddedLabel_Noniid_featureMapping"
         # Add CICIDS2017 CICIDS2019
-        add_Labels = np.array([9,10,11,12,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31])
+        # add_Labels = np.array([9,10,11,12,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31])
+        # Add CICIDS2017
+        add_Labels = np.array([6,7,8,9,12,13,14,15,16,17,18])
+
     elif Str_ChooseDataset == "CICIDS2019":
         # 20240506 non iid client3 use CICIDS2019 mimmax 75 25 分
         # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\x_01_12_Resplit_train_20240506.npy", allow_pickle=True)
@@ -315,45 +340,38 @@ def EdgeIIOTNpfileChangeLabelEncodeValue():
     print("唯一值:", y_test_unique_values)
 
 def TONIoTNpfileChangeLabelEncodeValue():
-    y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
-
-    #  0: 'BENIGN',           改encode	    0: 'BENIGN', 
-    #  1: 'DDoS',             改encode		2: 'DDoS', 
-    #  2: 'backdoor',         改encode		15: 'backdoor', 
-    #  3: 'dos',              改encode		16: 'dos', 
-    #  4: 'injection',        改encode		17: 'injection', 
-    #  5: 'mitm',             改encode		18: 'mitm', 
-    #  6: 'password',         改encode		19: 'password', 
-    #  7: 'ransomware',       改encode		20: 'ransomware',
-    #  8: 'scanning',         改encode		21: 'scanning', 
-    #  9: 'xss',              改encode 	    22: 'xss', 
-
-    y_train_After_Change = np.where(y_train == 1, 2,
-                                    np.where(y_train == 2, 15,
-                                    np.where(y_train == 3, 16,
-                                    np.where(y_train == 4, 17,
-                                    np.where(y_train == 5, 18,
-                                    np.where(y_train == 6, 19,
-                                    np.where(y_train == 7, 20,
-                                    np.where(y_train == 8, 21,
-                                    np.where(y_train == 9, 22,
-                                    y_train)))))))))
+    # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_train_ToN-IoT_20240523.npy", allow_pickle=True)  
+    # y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\y_test_ToN-IoT_20240523.npy", allow_pickle=True)   
     
-    y_test_After_Change = np.where(y_test == 1, 2,
-									np.where(y_test == 2, 15,
-                                    np.where(y_test == 3, 16,
-                                    np.where(y_test == 4, 17,
-                                    np.where(y_test == 5, 18,
-                                    np.where(y_test == 6, 19,
-                                    np.where(y_test == 7, 20,
-                                    np.where(y_test == 8, 21,
-                                    np.where(y_test == 9, 22,
-                                    y_test)))))))))
+    # After feature mapping 123
+    y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)   
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)   
+
+
+    y_train_After_Change = np.where(y_train == 1, 12,
+                                    np.where(y_train == 4, 13,
+                                    np.where(y_train == 5, 14,
+                                    np.where(y_train == 6, 15,
+                                    np.where(y_train == 7, 16,
+                                    np.where(y_train == 8, 17,
+                                    np.where(y_train == 9, 18,
+                                    y_train)))))))
+    
+    y_test_After_Change = np.where(y_test == 1, 12,
+                                    np.where(y_test == 4, 13,
+                                    np.where(y_test == 5, 14,
+                                    np.where(y_test == 6, 15,
+                                    np.where(y_test == 7, 16,
+                                    np.where(y_test == 8, 17,
+                                    np.where(y_test == 9, 18,
+                                    y_test)))))))
 
     #np.save
-    np.save(f"{filepath}\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_After_ChangeLabelEncode_for_Noniid.npy", y_train_After_Change)
-    np.save(f"{filepath}\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_test_After_ChangeLabelEncode_for_Noniid.npy", y_test_After_Change)
+    # np.save(f"{filepath}\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_train_After_ChangeLabelEncode_for_Noniid.npy", y_train_After_Change)
+    # np.save(f"{filepath}\\dataset_AfterProcessed\\TONIOT\\y_TONIOT_test_After_ChangeLabelEncode_for_Noniid.npy", y_test_After_Change)
+
+    np.save(f"{filepath}\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317_ChangeLabelEncode_for_Noniid.npy", y_train_After_Change)
+    np.save(f"{filepath}\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_test_featureMapping_20250317_ChangeLabelEncode_for_Noniid.npy", y_test_After_Change)
 
     y_train_unique_values = np.unique(y_train_After_Change)
     print("唯一值数量:", len(y_train_unique_values))
@@ -458,80 +476,36 @@ def CICIDS2017NpfileChangeLabelEncodeValue():
 
 def CICIDS2018NpfileChangeLabelEncodeValue():
     # 20250121 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分
-    y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_20250106.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_20250106.npy", allow_pickle=True)
+    # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_20250106.npy", allow_pickle=True)
+    # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_20250106.npy", allow_pickle=True)
     
     # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_AfterPCA79_20250113.npy", allow_pickle=True)
     # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_AfterPCA79_20250113.npy", allow_pickle=True)
     
-    # EdgeIIOT将 y_train和y_test進行Label encode值替換 for Noniid實驗
-    # 0: BENIGN                        改encode	BENIGN              0	
-    # 1: Bot                           改encode	Bot                 1	
-    # 2: Brute Force -Web              改encode	DDoS                2	
-    # 3: Brute Force -XSS              改encode	DoS GoldenEye       3	
-    # 4: DDOS attack-HOIC              改encode	DoS Hulk            4	
-    # 5: DDOS attack-LOIC-UDP          改encode	DoS Slowhttptest    5	
-    # 6: DDoS attacks-LOIC-HTTP        改encode	DoS slowloris       6	
-    # 7: DoS attacks-GoldenEye         改encode	Infilteration		7	
-    # 8: DoS attacks-Hulk              改encode	Web Attack			8	
-    # 9: DoS attacks-SlowHTTPTest      改encode Heartbleed          9	
-    # 10:DoS attacks-Slowloris         改encode	PortScan            10	
-    # 11:FTP-BruteForce                改encode	FTP-BruteForce		11	
-    # 12:Infilteration                 改encode	FTP-Patator         12	
-    # 13:SQL Injection                 改encode	SSH-Bruteforce		13	
-    # 14:SSH-Bruteforce                改encode	SSH-Patator         14	
-                                                # DrDoS_DNS			15
-                                                # DrDoS_LDAP		16
-                                                # DrDoS_MSSQL		17
-                                                # DrDoS_NTP			18
-                                                # DrDoS_NetBIOS		19
-                                                # DrDoS_SNMP		20
-                                                # DrDoS_SSDP		21
-                                                # DrDoS_UDP			22
-                                                # Syn				23
-                                                # TFTP				24
-                                                # UDPlag			25
-                                                # WebDDoS			26
+    # After do feature mapping 123 feature   
+    y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_featureMapping_20250317.npy", allow_pickle=True)  
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250317.npy", allow_pickle=True)
 
-    y_train_After_Change = np.where(y_train == 1, 1,
-                                    np.where(y_train == 2, 8,
-                                    np.where(y_train == 3, 8,
-                                    np.where(y_train == 4, 2,
-                                    np.where(y_train == 5, 2,
-                                    np.where(y_train == 6, 2,
-                                    np.where(y_train == 7, 3,
-                                    np.where(y_train == 8, 4,
-                                    np.where(y_train == 9, 5,
-                                    np.where(y_train == 10,6,
-                                    np.where(y_train == 11,11,
-                                    np.where(y_train == 12,7,
-                                    np.where(y_train == 13,8,
-                                    np.where(y_train == 14,13,
-                                    y_train))))))))))))))
+    # 将 y_train和y_test進行Label encode值替換 for Noniid實驗
+    y_train_After_Change = np.where(y_train == 6, 10,
+                                    np.where(y_train == 7, 11,
+                                    y_train))
     
-    y_test_After_Change = np.where(y_test == 1, 1,
-                                    np.where(y_test == 2, 8,
-                                    np.where(y_test == 3, 8,
-                                    np.where(y_test == 4, 2,
-                                    np.where(y_test == 5, 2,
-                                    np.where(y_test == 6, 2,
-                                    np.where(y_test == 7, 3,
-                                    np.where(y_test == 8, 4,
-                                    np.where(y_test == 9, 5,
-                                    np.where(y_test == 10,6,
-                                    np.where(y_test == 11,11,
-                                    np.where(y_test == 12,7,
-                                    np.where(y_test == 13,8,
-                                    np.where(y_test == 14,13,
-                                    y_test))))))))))))))
+    y_test_After_Change = np.where(y_test == 6, 10,
+                                    np.where(y_test == 7, 11,
+                                    y_test))
 
     #np.savey_csv_data_train_AfterDo minmax_20250121
-    np.save(f"{filepath}\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_After_20250121_ChangeLabelencode.npy", y_train_After_Change)
-    np.save(f"{filepath}\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_After_20250121_ChangeLabelencode.npy", y_test_After_Change)
+    # np.save(f"{filepath}\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_After_20250121_ChangeLabelencode.npy", y_train_After_Change)
+    # np.save(f"{filepath}\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_After_20250121_ChangeLabelencode.npy", y_test_After_Change)
 
     #np.savey_csv_data_train_AfterPCA79_20250113
     # np.save(f"{filepath}\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_AfterPCA79_20250113_ChangeLabelencode.npy", y_train_After_Change)
     # np.save(f"{filepath}\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_AfterPCA79_20250113_ChangeLabelencode.npy", y_test_After_Change)
+
+    #np.savey_csv_data_train After do feature mapping 
+    np.save(f"{filepath}\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_featureMapping_20250317_ChangeLabelencode.npy", y_train_After_Change)
+    np.save(f"{filepath}\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250317_ChangeLabelencode.npy", y_test_After_Change)
 
     y_train_unique_values = np.unique(y_train_After_Change)
     print("唯一值数量:", len(y_train_unique_values))
@@ -640,7 +614,9 @@ def CICIDS2019NpfileChangeLabelEncodeValue():
 
 # CICIDS2017NpfileChangeLabelEncodeValue()
 # CICIDS2018NpfileChangeLabelEncodeValue()
+# TONIoTNpfileChangeLabelEncodeValue()
 # CICIDS2019NpfileChangeLabelEncodeValue()
-DoAddLabelToTrainData("CICIDS2017")
+# DoAddLabelToTrainData("CICIDS2017")
 # DoAddLabelToTrainData("CICIDS2018")
 # DoAddLabelToTrainData("CICIDS2019")
+DoAddLabelToTrainData("TONIOT")

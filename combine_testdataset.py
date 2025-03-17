@@ -26,8 +26,10 @@ generatefolder(filepath + "\\", "dataset_AfterProcessed")
 # generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_combine\\", today)
 # generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT_test_and_CICIDS2017_test_and_EdgeIIoT_test_combine\\", today)
 
-generatefolder(filepath + "\\dataset_AfterProcessed\\", "CICIDS2017_and_CICIDS2018_CICIDS2019_test")
-generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\", today)
+# generatefolder(filepath + "\\dataset_AfterProcessed\\", "CICIDS2017_and_CICIDS2018_CICIDS2019_test")
+# generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_CICIDS2019_test\\", today)
+generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_TONIOT_test\\", today)
+
 
 def clearDirtyData(df):
     # 将每个列中的 "-" 替换为 NaN
@@ -104,32 +106,44 @@ def ReplaceMorethanTenthousandQuantity(df):
 
 # 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Non-iid Do PCA
 # 20250121 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Non-iid Do feature to 79
-print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"test with normal After Do labelencode and minmax")
+# print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"test with normal After Do labelencode and minmax")
 # cicids2017_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_AfterPCA79_20250113.npy", allow_pickle=True)
 # cicids2017_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
 
-cicids2017_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
-cicids2017_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
+# cicids2017_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLDay_test_Deleted79features_20250121.npy", allow_pickle=True)
+# cicids2017_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLDay_test_AfterDeleted79features_20250121_ChangeLabelencode.npy", allow_pickle=True)
+
+# 20250317 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+# 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+
+print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"test with normal After Do labelencode and minmax and feature mapping")
+cicids2017_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLday_test_featureMapping_20250317.npy", allow_pickle=True)
+cicids2017_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLday_test_featureMapping_20250317.npy", allow_pickle=True)
 
 # 20250113 CIC-IDS2018 after do labelencode all featrue minmax 75 25分 Non-iid Do PCA
 # 20250121 CIC-IDS2018 after do labelencode all featrue minmax 75 25分 Non-iid Do feature to 79
-print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"test with normal After Do labelencode and minmax")
+# print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"test with normal After Do labelencode and minmax")
 # cicids2018_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_AfterPCA79_20250113.npy", allow_pickle=True)
 # cicids2018_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_AfterPCA79_20250113_ChangeLabelencode.npy", allow_pickle=True)
 
-cicids2018_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_20250106.npy", allow_pickle=True)
-cicids2018_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_After_20250121_ChangeLabelencode.npy", allow_pickle=True)
+# cicids2018_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_20250106.npy", allow_pickle=True)
+# cicids2018_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250317_ChangeLabelencode.npy", allow_pickle=True)
+# 20250317 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+# 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f"test with normal After Do labelencode and minmax and feature mapping")
+cicids2018_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_featureMapping_20250317.npy", allow_pickle=True)
+cicids2018_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250317_ChangeLabelencode.npy", allow_pickle=True)
 
 # 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Non-iid Do PCA
 # 20250121 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 Non-iid Do feature to 79
-print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"test with normal After Do labelencode and minmax")
+# print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2019" +f"test with normal After Do labelencode and minmax")
 # cicids2019_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\x_01_12_test_AfterPCA79_20250113.npy", allow_pickle=True)
 # cicids2019_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\01_12\\Npfile\\y_01_12_test_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
-                      
-cicids2019_ALLDay_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\x_ALLDay_test_Deleted79features_20250120.npy", allow_pickle=True)
-cicids2019_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\y_01_12_test_After_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
-                      
 
+print(Fore.BLUE+Style.BRIGHT+"Loading TONIOT" +f"test with normal After Do labelencode and minmax and feature mapping")                   
+TONIOT_x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)
+TONIOT_y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_test_featureMapping_20250317_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
+                      
 # # 载入Monday_and_Firday test chi-square
 # cicids2017_Monday_and_Firday_x_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/x_Monday_and_Firday_test_AfterPCA77_20240317.npy")
 # cicids2017_Monday_and_Firday_y_test = np.load(f"./data/dataset_AfterProcessed/CICIDS2017/Monday_and_Firday/y_Monday_and_Firday_test_AfterPCA77_20240317.npy")
@@ -215,12 +229,14 @@ cicids2019_ALLDay_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2
 
 merged_x = np.concatenate((cicids2017_ALLDay_x_test,
                            cicids2018_ALLDay_x_test,
-                           cicids2019_ALLDay_x_test), axis=0)
+                           TONIOT_x_test), axis=0)
+
 
 # 合并 y_test 和 y1_test
 merged_y = np.concatenate((cicids2017_ALLDay_y_test,
                            cicids2018_ALLDay_y_test,
-                           cicids2019_ALLDay_y_test), axis=0)
+                           TONIOT_y_test), axis=0)
+
 # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\TONIOT_test_and_CICIDS2017_test_combine\20240110
 # 保存合并后的数组
 # np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_x_add_toniot.npy", merged_x)
@@ -237,8 +253,11 @@ merged_y = np.concatenate((cicids2017_ALLDay_y_test,
 # np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_x_cicids2017_toniot_Chi_square_45_change_ts.npy", merged_x)
 # np.save(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/merged_y_cicids2017_toniot_Chi_square_45_change_ts.npy", merged_y)
 
-np.save(f"./data/dataset_AfterProcessed/CICIDS2017_and_CICIDS2018_CICIDS2019_test/{today}/merged_x_Non_IID_ALL_test.npy", merged_x)
-np.save(f"./data/dataset_AfterProcessed/CICIDS2017_and_CICIDS2018_CICIDS2019_test/{today}/merged_y_Non_IID_ALL_test.npy", merged_y)
+np.save(f"./data/dataset_AfterProcessed/CICIDS2017_and_CICIDS2018_TONIOT_test/{today}/merged_x_Non_IID_ALL_test.npy", merged_x)
+np.save(f"./data/dataset_AfterProcessed/CICIDS2017_and_CICIDS2018_TONIOT_test/{today}/merged_y_Non_IID_ALL_test.npy", merged_y)
+
+print(merged_x.shape)
+print(merged_y.shape)
 
 print("按行合并 x 的结果：")
 print(merged_x)
@@ -255,7 +274,7 @@ merged_df = pd.DataFrame(data=np.column_stack((merged_x, merged_y)), columns=[f'
 # merged_df.to_csv(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/TONIOT_test_and_CICIDS2017_test_merged_change_ip.csv", index=False)
 # merged_df.to_csv(f"./data/dataset_AfterProcessed/TONIOT_test_and_CICIDS2017_test_combine/{today}/TONIOT_test_and_CICIDS2017_and_CICIDS2019_test_merged.csv", index=False)
 
-merged_df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017_and_CICIDS2018_CICIDS2019_test/{today}/CICIDS2017_and_CICIDS2018_CICIDS2019_test_merged.csv", index=False)
+merged_df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017_and_CICIDS2018_TONIOT_test/{today}/CICIDS2017_and_CICIDS2018_TONIOT_test_merged.csv", index=False)
 
 # # 将 NumPy 数组转换为 Pandas DataFrame
 # merged_df = pd.DataFrame(data=np.column_stack((merged_x, merged_y)), columns=[f'feature_{i}' for i in range(merged_x.shape[1])] + ['Label'])
