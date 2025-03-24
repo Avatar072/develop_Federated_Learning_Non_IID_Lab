@@ -30,11 +30,13 @@ from IID_ChooseNPfile import CICIDS2017_IID_ChooseLoadNpArray, CICIDS2018_IID_Ch
 from collections import Counter
 from Add_ALL_LayerToCount import DoCountModelWeightSum,evaluateWeightDifferences
 from Add_ALL_LayerToCount import Calculate_Weight_Diffs_Distance_OR_Absolute
+from Variance_Analysis import EvaluateVariance
 from colorama import Fore, Back, Style, init
 import configparser
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 # 初始化 colorama（Windows 系統中必須）
+init(autoreset=True)
 # 初始化 ConfigParser
 config = configparser.ConfigParser()
 # 讀取 ini 文件
@@ -69,11 +71,11 @@ warnings.filterwarnings("ignore", category=UserWarning)
 torch.cuda.empty_cache()
 # DEVICE = torch.device("cpu")
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# 返回gpu数量；
+# 返回gpu數量；
 torch.cuda.device_count()
-# 返回gpu名字，设备索引默认从0开始；
+# 返回gpu名字，設備索引默認從0開始；
 torch.cuda.get_device_name(0)
-# 返回当前设备索引；
+# 返回當前設備索引；
 torch.cuda.current_device()
 print(f"DEVICE: {DEVICE}")
 #python client_IID.py --dataset_split client1_train --epochs 50 --method normal
@@ -86,7 +88,7 @@ print(f"Choose_method: {Choose_method}")
 
 # 初始化變數為None或空列表
 x_train =  np.array([]) # 預設初始化為一個空陣列
-y_train =  np.array([])  # 預設初始化為一個空陣列
+y_train =  np.array([]) # 預設初始化為一個空陣列
 
 x_test = np.array([])  # 預設初始化為一個空陣列
 y_test = np.array([])  # 預設初始化為一個空陣列
@@ -95,22 +97,26 @@ client_str = ""
 # 預設初始化 class_names
 class_names_global, class_names_local, labels_to_calculate = None, None, None
 
-# CICIDS2017
-if choose_dataset == "CICIDS2017":
-    print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
-    x_train, y_train, x_test, y_test, client_str = CICIDS2017_IID_ChooseLoadNpArray(filepath, file, Choose_method)
-    class_names_local, labels_to_calculate = ChooseLoad_class_names("CICIDS2017")
+try:
+    # CICIDS2017
+    if choose_dataset == "CICIDS2017":
+        print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
+        x_train, y_train, x_test, y_test, client_str = CICIDS2017_IID_ChooseLoadNpArray(filepath, file, Choose_method)
+        class_names_local, labels_to_calculate = ChooseLoad_class_names("CICIDS2017")
+        
+    # CICIDS2018
+    if choose_dataset == "CICIDS2018":
+        print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
+        x_train, y_train, x_test, y_test, client_str = CICIDS2018_IID_ChooseLoadNpArray(filepath, file, Choose_method)
+        class_names_local, labels_to_calculate = ChooseLoad_class_names("CICIDS2018")
+except Exception as e:
+    print(f"An error occurred: {e}")
+finally:
     # 確保資料加載成功
     if y_train is None or len(y_train) == 0:
-        raise ValueError("Failed to load y_train for CICIDS2017")
-# CICIDS2018
-if choose_dataset == "CICIDS2018":
-    print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
-    x_train, y_train, x_test, y_test, client_str = CICIDS2018_IID_ChooseLoadNpArray(filepath, file, Choose_method)
-    class_names_local, labels_to_calculate = ChooseLoad_class_names("CICIDS2018")
-    # 確保資料加載成功
-    if y_train is None or len(y_train) == 0:
-        raise ValueError("Failed to load y_train for CICIDS2018")
+            raise ValueError("Failed to load y_train for "+f"{choose_dataset}")
+    else:
+            print("Execution finished.")
 
 
 counter = Counter(y_train)
@@ -293,6 +299,9 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal, bool_plot_c
 
             # 標誌來追蹤是否已經添加了標題行
             header_written = False
+            with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/loss-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
+                file.write(f"{ave_loss}\n")
+
             with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
                 file.write(f"{RecordRecall}\n")
         
@@ -462,6 +471,8 @@ class FlowerClient(fl.client.NumPyClient):
         self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = 0
         self.dis_smooth_Inital_Local = 0
         self.dis_variation_Inital_Local = 0
+        self.dis_variance_Inital_Local = 0
+        self.threshold_variance_List = []
         self.UnAttack_dis_variation_Inital_Local = 0
         self.threshold_List = []
         self.each_ten_round_sum = 0
@@ -687,6 +698,8 @@ class FlowerClient(fl.client.NumPyClient):
                                                                                                                      "distance",
                                                                                                                      False)
         
+        # 增加以變化量計算變異數
+        dis_variance_Inital_Local_file_path = f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/dis_variance_Initial_Local_{client_str}"
         # UnAttack_weights_after_Localtrain = weights_after_Localtrain
         # if (not self.bool_Unattack_Judage):
         #     UnAttack_weights_after_Localtrain = torch.load(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/Unattack_AfterLocaltrain.pth")
@@ -701,18 +714,27 @@ class FlowerClient(fl.client.NumPyClient):
         # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
         self.dis_smooth_Inital_Local = self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis*0.2 + self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis*0.8
 
-        #  算每一回合權重距離變化的百分比  
-            # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100%  
+        #  算每一回合權重距離變化
+        # 變化量=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )
         if (not self.bool_Unattack_Judage):
             #  self.UnAttack_dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
             #                                                     self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
             self.dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
                                                                 self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
 
+            # 增加以變化量計算變異數
+            self.dis_variance_Inital_Local = EvaluateVariance(self.dis_variation_Inital_Local,dis_variance_Inital_Local_file_path)
+            print(Fore.RESET+Back.GREEN+Style.BRIGHT+f"self.dis_variance_Inital_Local:\t+{str(self.dis_variance_Inital_Local)}")
+
         else:
             self.dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
                                                                 self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
             
+            # 增加以變化量計算變異數
+            self.threshold_variance_List.append(self.dis_variation_Inital_Local)
+            self.dis_variance_Inital_Local = EvaluateVariance(self.threshold_variance_List,dis_variance_Inital_Local_file_path)
+            print(Fore.RESET+Back.GREEN+Style.BRIGHT+f"self.dis_variance_Inital_Local:\t+{str(self.dis_variance_Inital_Local)}")
+           
             
         
         # 計算平均10 round的門檻值
@@ -818,29 +840,38 @@ class FlowerClient(fl.client.NumPyClient):
                 # print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2017 after do labelencode do Drop feature" +f"cicids2017 with normal attack type")
                 # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_x.npy", allow_pickle=True)
                 # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_y.npy", allow_pickle=True)
-                # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.01
+                # # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.01
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
                 # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.05
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
-                 # CICIDS2017 iid Dirichlet 0.1 c1 to FGSM eps 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_a=0.1_client1_eps0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_a=0.1_client1_eps0.05.npy", allow_pickle=True)
+                
+                # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.05 use 123 feature mapping normal model
+                x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/x_train_Dirichlet_a0.5_client1_eps0.05.npy", allow_pickle=True)
+                y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/y_train_Dirichlet_a0.5_client1_eps0.05.npy", allow_pickle=True)
+                # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.05 by genrate by 79_feature Label merge BaseLine normal model")
+                # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.05 use 79 feature Label merge normal model
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/79_feature/x_train_Dirichlet_a0.5_client1_eps0.05_79feature.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/79_feature/y_train_Dirichlet_a0.5_client1_eps0.05_79feature.npy", allow_pickle=True)
 
-                # CICIDS2017 iid Dirichlet 0.1 c1 to PGD eps 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
+                # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.05 by genrate by 123_feature Label merge BaseLine normal model")
+                # # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.05 use 123 feature Label merge normal model
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/x_train_Dirichlet_a0.5_client1_eps0.05_by20250305.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/y_train_Dirichlet_a0.5_client1_eps0.05_by20250305.npy", allow_pickle=True)
 
-                # CICIDS2017 iid Dirichlet 0.1 c1 to JSMA theta 0.05 gamma 0.05
-                x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.1_theta0.05_gamma_0.05.npy", allow_pickle=True)
-                y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.1_theta0.05_gamma_0.05.npy", allow_pickle=True)
-
+                # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.05 use c1 normal model
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05_c1.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05_c1.npy", allow_pickle=True)
 
                 # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.1
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.1.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.1.npy", allow_pickle=True)
 
+                # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.5
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.5.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.5.npy", allow_pickle=True)
+                
                 # CICIDS2017 iid Dirichlet 0.5 c1 to PGD eps 0.05
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
@@ -853,9 +884,30 @@ class FlowerClient(fl.client.NumPyClient):
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_theta0.05_gamma_0.05.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_theta0.05_gamma_0.05.npy", allow_pickle=True)
 
+                
+                # CICIDS2017 iid Dirichlet 0.1 c1 to FGSM eps 0.05
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_a=0.1_client1_eps0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_a=0.1_client1_eps0.05.npy", allow_pickle=True)
+
+                # CICIDS2017 iid Dirichlet 0.1 c1 to PGD eps 0.05
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
+
+                # CICIDS2017 iid Dirichlet 0.1 c1 to JSMA theta 0.05 gamma 0.05
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.1_theta0.05_gamma_0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.1_theta0.05_gamma_0.05.npy", allow_pickle=True)
+
                 # CICIDS2018 iid Dirichlet 0.5 c1 to FGSM eps 0.05
                 # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_a_0.5_client1_eps0.05.npy", allow_pickle=True)
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_a_0.5_client1_eps0.05.npy", allow_pickle=True)
+
+                # CICIDS2018 iid Dirichlet 0.5 c1 to PGD eps 0.05
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.5_eps0.05_step_eps_0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.5_eps0.05_step_eps_0.05.npy", allow_pickle=True)
+
+                # CICIDS2018 iid Dirichlet 0.5 c1 to JSMA theta 0.05 gamma 0.05
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.5_theta0.05_gamma_0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.5_theta0.05_gamma_0.05.npy", allow_pickle=True)
 
                 x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
                 y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
@@ -1147,7 +1199,9 @@ class FlowerClient(fl.client.NumPyClient):
 
         
         # 若accuracy大於0.9表示攻擊結束
-        if self.Local_train_accuracy >= 0.9:
+        # if self.Local_train_accuracy >= 0.9:
+        # 不行用accuracy來判斷攻擊是否結束因為 當節點資料量很少並發生攻擊時accuracy也是在0.9左右並持續下降
+        if self.dis_variation_Inital_Local < 1:# 不超過原本距離的變化之1倍表示攻擊結束
             self.bool_Unattack_Judage = True
             self.Record_UnAttack_counter = 0
 

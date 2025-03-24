@@ -62,7 +62,7 @@ class MLP(nn.Module):
 # 初始化模型和優化器
 # model = MLP()
 
-model = ChooseUseModel("MLP", 79, labelCount)
+model = ChooseUseModel("MLP", 123, labelCount)
 
 optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001)
 

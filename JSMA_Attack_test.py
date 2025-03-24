@@ -29,9 +29,9 @@ start_IDS = time.time()
 client_str = "baseline_train"
 Choose_method = "normal"
 num_epochs = 1
-choose_dataset = "CICIDS2017"
+# choose_dataset = "CICIDS2017"
 # choose_dataset = "TONIOT"
-# choose_dataset = "CICIDS2019"
+choose_dataset = "CICIDS2018"
 
 # 設定設備
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
