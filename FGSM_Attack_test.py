@@ -129,7 +129,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon 
         else:
             str_epsilon = f"epsilon_{epsilon}"
             plt.savefig(f"{save_filepath}/{str_epsilon}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
-        plt.show()
+        # plt.show()
 
 def save_to_csv(data, filepath):
     df = pd.DataFrame(data)
