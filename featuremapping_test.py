@@ -395,7 +395,7 @@ def TONIOTdropStringtypeAfterReadCSV_():
     SaveDataframeTonpArray(train_dataframes, f"./data/dataset_AfterProcessed/TONIOT/DeleteFeature/{today}/{current_time}/", f"TONIOT_train_DeleteFeature41",today)
 
 # 　把label 分為大類 並取上限隨機10000
-def CICIDS2017_DorenameLabel(choose_merge_days):
+def CICIDS2017_DorenameLabelandmerge(choose_merge_days):
     generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\featureMapping\\", today)
     generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\featureMapping\\{today}\\", current_time)
     df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\20250121\\Deleted79features\\10000筆資料\\ALLDay_Deleted79features_20250121.csv") 
@@ -407,6 +407,52 @@ def CICIDS2017_DorenameLabel(choose_merge_days):
     # 檢查結果
     print(df['Label'].value_counts())
     df.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/featureMapping/{today}/{current_time}/Label_merge.csv", index=False)
+
+def CICIDS2017_DorenameLabel_use_20250305data(choose_merge_days):
+    generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\", today)
+    generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\", current_time)
+    # df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\20250121\\Deleted79features\\10000筆資料\\ALLDay_Deleted79features_20250121.csv") 
+    # 2025 Dirichlet a=0.5資料
+    df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250205\\client1.csv") 
+    # df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250205\\client2.csv") 
+    # df = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\20250121\\Deleted79features\\10000筆資料\\ALLDay_test_dataframes_Deleted79features_20250121.csv") 
+    
+    # do Label group 
+    df['Label'] = df['Label'].replace({4: 3,  5: 3,  6: 3,  13: 12, 14: 12})
+    df['Label'] = df['Label'].replace({9: 4, 12: 5, 7: 6, 11: 7, 10: 9})
+    
+        # 檢查結果
+    print(df['Label'].value_counts())
+
+    SaveDataframeTonpArray(df, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/Dirichlet/{today}/{current_time}", f"client1",today)
+    # SaveDataframeTonpArray(df, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/Dirichlet/{today}/{current_time}", f"client2",today)
+    # SaveDataframeTonpArray(df, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/Dirichlet/{today}/{current_time}", f"test",today)
+
+def CICIDS2017_DofeatureMapping_use_20250305data(choose_merge_days):
+    generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\", today)
+    generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\", current_time)
+    # use 2025 Dirichlet a=0.5資料 do Label group後資料 
+    df_client1 = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\alpha_0.5\\20250319\\Dirichlet_client1.csv") 
+    df_client2 = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\alpha_0.5\\20250319\\Dirichlet_client2.csv") 
+    df_test = pd.read_csv(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\alpha_0.5\\20250319\\test.csv") 
+
+    output_dim = 123  # 不對齊直接進行FeatureMapping 輸出的維度即要mapping的特徵數量(CICIDS feature:79+TONIOT feature:44)
+    # 不對齊直接進行FeatureMapping
+    df_client1 = FeatureMappingAndMinMax(df_client1,output_dim)
+    df_client2 = FeatureMappingAndMinMax(df_client2,output_dim)
+    df_test = FeatureMappingAndMinMax(df_test,output_dim)
+    
+    # 檢查結果
+    print(df_client1['Label'].value_counts())
+    print(df_client2['Label'].value_counts())
+    print(df_test['Label'].value_counts())
+
+    df_client1.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/Dirichlet/{today}/{current_time}/Dirichlet_client1_feature_123.csv", index=False)
+    df_client2.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/Dirichlet/{today}/{current_time}/Dirichlet_client2_feature_123.csv", index=False)
+    df_test.to_csv(f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/Dirichlet/{today}/{current_time}/test_feature_123.csv", index=False)
+    SaveDataframeTonpArray(df_client1, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/Dirichlet/{today}/{current_time}", f"Dirichlet_client1_feature_123",today)
+    SaveDataframeTonpArray(df_client2, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/Dirichlet/{today}/{current_time}", f"Dirichlet_client2_feature_123",today)
+    SaveDataframeTonpArray(df_test, f"./data/dataset_AfterProcessed/CICIDS2017/{choose_merge_days}/Dirichlet/{today}/{current_time}", f"test_feature_123",today)
 
 def CICIDS2018_DorenameLabel(choose_merge_days):
     generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\featureMapping\\", today)
@@ -455,7 +501,10 @@ def TONIOT_DorenameLabel():
 
 # CICIDS2017_DoFeatureMappingAfterReadCSV("ALLday")
 # CICIDS2018_DoFeatureMappingAfterReadCSV("csv_data")
-TONIOT_DoFeatureMappingAfterReadCSV()
+# TONIOT_DoFeatureMappingAfterReadCSV()
 # CICIDS2017_DorenameLabel("ALLday")
 # CICIDS2018_DorenameLabel("csv_data")
 # TONIOT_DorenameLabel()
+
+# CICIDS2017_DorenameLabel_use_20250305data("ALLday")
+CICIDS2017_DofeatureMapping_use_20250305data("ALLday")

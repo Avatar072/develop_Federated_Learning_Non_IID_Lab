@@ -7,7 +7,9 @@ from mytoolfunction import generatefolder,SaveDataframeTonpArray
 
 # 設定檔案路徑（請根據實際情況調整）
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
-csv_path = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\20250121\\Deleted79features\\10000筆資料\\ALLDay_train_dataframes_Deleted79features_20250121.csv"
+# csv_path = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\20250121\\Deleted79features\\10000筆資料\\ALLDay_train_dataframes_Deleted79features_20250121.csv"
+# 79feature_mapping到123
+csv_path = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\featureMapping\\20250317\\79feature_mapping到123\\ALLday_train_dataframes_featureMapping_20250317.csv"
 
 today = datetime.date.today()
 today = today.strftime("%Y%m%d")
