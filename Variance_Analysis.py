@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import os
 
 
 def EvaluateVariance(list_,file_path):
@@ -28,8 +29,8 @@ def EvaluateVariance(list_,file_path):
             print(f"will add next value\nlist_[{idx+1}]: {list_[idx+1]}")
         
         # # 取小數點後兩位
-        add_value  = round(add_value, 4)
-        mean_value = round(mean_value, 4)
+        # add_value  = round(add_value, 4)
+        # mean_value = round(mean_value, 4)
         print(f"current added_value: {add_value:.5f}")
         print(f"current mean_value: {mean_value:.5f}")
         # 找累加值
@@ -78,36 +79,108 @@ def EvaluateVariance(list_,file_path):
 
     # file_path = f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/Initial_Local_weights_{client_str}"
 
-    # 寫入文件
-    with open(file_path+"_mean_value.csv", "a+") as file:
-        file.write("mean_value,mean_value_List_min,mean_value_List_max\n")
-        for mean_value in mean_value_List:
-            file.write(f"{mean_value},{mean_value_List_min},{mean_value_List_max}\n")
+    # mean_value_file_name = file_path+"_mean_value.csv"
+    # variance_file_name = file_path+"_variance.csv"
+    # variance_square_file_name = file_path+"variance_square.csv"
+    # variance_square_threshold_file_name = file_path+"variance_square_threshold.csv"
 
-    with open(file_path+"_variance.csv", "a+") as file:
-        file.write("variance\n")
-        for variance in variance_List:
-            file.write(f"{variance}\n")
+    # file_exists_Param_mean_value = os.path.exists(mean_value_file_name)
+    # file_exists_variance_file_name = os.path.exists(variance_file_name)
+    # file_exists_variance_square_file_name = os.path.exists(variance_square_file_name)
+    # file_exists_variance_square_threshold_file_name = os.path.exists(variance_square_threshold_file_name)
 
-    with open(file_path+"variance_square.csv", "a+") as file:
-        file.write("variance_square\n")
-        for variance_square in variance_square_List:
-            file.write(f"{variance_square}\n")
 
-    with open(file_path+"variance_square_threshold.csv", "a+") as file:
-        file.write("variance_square_threshold\n")
-        for variance_square_threshold in variance_square_Threshold_List:
-            file.write(f"{variance_square_threshold}\n")
+    # if not file_exists_Param_mean_value:
+    #     with open(mean_value_file_name, "w", newline='') as file:
+    #         file.write("mean_value,mean_value_List_min,mean_value_List_max\n")
+
+    # if not file_exists_variance_file_name:
+    #     with open(variance_file_name, "w", newline='') as file:
+    #         file.write("variance\n")
     
+    # if not file_exists_variance_square_file_name:
+    #     with open(variance_square_file_name, "w", newline='') as file:
+    #         file.write("variance_square\n")
+    
+    # if not file_exists_variance_square_threshold_file_name:
+    #     with open(variance_square_threshold_file_name, "w", newline='') as file:
+    #         file.write("variance_square_threshold\n")
+
+    # # 寫入文件
+    # with open(mean_value_file_name, "a+") as file:
+    #     for mean_value in mean_value_List:
+    #         file.write(f"{mean_value},{mean_value_List_min},{mean_value_List_max}\n")
+
+    # with open(variance_file_name, "a+") as file:
+    #     for variance in variance_List:
+    #         file.write(f"{variance}\n")
+
+    # with open(variance_square_file_name, "a+") as file:
+    #     for variance_square in variance_square_List:
+    #         file.write(f"{variance_square}\n")
+
+    # with open(variance_square_threshold_file_name, "a+") as file:
+    #     for variance_square_threshold in variance_square_Threshold_List:
+    #         file.write(f"{variance_square_threshold}\n")
+
+    # 檔案路徑
+    import csv
+    file_name = file_path + "_combined_data.csv"
+
+    # 檢查文件是否存在
+    file_exists = os.path.exists(file_name)
+   # 如果文件不存在，則創建並寫入標題
+    if not file_exists:
+        with open(file_name, "a+", newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["mean_value", "mean_value_List_min", "mean_value_List_max", "variance", "variance_square", "variance_square_threshold"])
+    # 打開文件進行追加寫入
+    with open(file_name, "a+", newline='') as file:
+        writer = csv.writer(file)
+        
+        # 讀取現有行並轉換為集合，用來檢查是否有重複的資料
+        file.seek(0)  # 移動文件指針到開頭
+        # 檢查每一筆資料是否已存在於檔案中
+        existing_rows = set(tuple(row) for row in csv.reader(file))
+        
+        # 寫入資料
+        # for i in range(len(mean_value_List)):
+        #     data = [
+        #         mean_value_List[i],
+        #         mean_value_List_min,
+        #         mean_value_List_max,
+        #         variance_List[i],
+        #         variance_square_List[i],
+        #         variance_square_Threshold_List[i]
+        #     ]
+        #     # 如果資料不存在，就寫入
+        #     if tuple(data) not in existing_rows:
+        #         writer.writerow(data)
+        #         existing_rows.add(tuple(data))
+        # 取得最新資料
+        new_data = [
+            mean_value_List[-1],  # 假設您要的是最後一筆資料
+            mean_value_List_min,
+            mean_value_List_max,
+            variance_List[-1],
+            variance_square_List[-1],
+            variance_square_Threshold_List[-1]
+        ]   
+        # 如果資料不存在，就寫入
+        if tuple(new_data) not in existing_rows:
+            writer.writerow(new_data) 
+            print("Recode new data in csv")
+
+
     return variance_square_Threshold_List_max
 
 
 # 測試區
-# file_path = "./1245"
+file_path = "./1245"
 
 # 假設數據
-# df = pd.read_csv("E:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250319\\CICIDS2017_use_20250205_data_merge_label_FGSM_eps0.05測試_79_feature\\Inital_Local_weight_diff_client1.csv")
+df = pd.read_csv("E:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250319\\CICIDS2017_use_20250205_data_merge_label_FGSM_eps0.05測試_79_feature\\Inital_Local_weight_diff_client1.csv")
 # list_
 # list_ = df["dis_variation_Inital_Local"].head(10)
-# list_ = df["dis_variation_Inital_Local"].head(126)
-# test = EvaluateVariance(list_,file_path)
+list_ = df["dis_variation_Inital_Local"].head(126)
+test = EvaluateVariance(list_,file_path)
