@@ -471,7 +471,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = 0
         self.dis_smooth_Inital_Local = 0
         self.dis_variation_Inital_Local = 0
-        self.dis_variance_Inital_Local = 0
+        self.dis_variance_Inital_Local_threshold = 0
         self.threshold_variance_List = []
         self.UnAttack_dis_variation_Inital_Local = 0
         self.threshold_List = []
@@ -723,8 +723,9 @@ class FlowerClient(fl.client.NumPyClient):
                                                                 self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
 
             # 增加以變化量計算變異數
-            self.dis_variance_Inital_Local = EvaluateVariance(self.dis_variation_Inital_Local,dis_variance_Inital_Local_file_path)
-            print(Fore.RESET+Back.GREEN+Style.BRIGHT+f"self.dis_variance_Inital_Local:\t+{str(self.dis_variance_Inital_Local)}")
+            self.threshold_variance_List.append(self.dis_variation_Inital_Local)
+            self.dis_variance_Inital_Local_threshold = EvaluateVariance(self.threshold_variance_List,dis_variance_Inital_Local_file_path)
+            print(Fore.RESET+Back.GREEN+Style.BRIGHT+f"self.dis_variance_Inital_Local_threshold:\t+{str(self.dis_variance_Inital_Local_threshold)}")
 
         else:
             self.dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
@@ -732,8 +733,8 @@ class FlowerClient(fl.client.NumPyClient):
             
             # 增加以變化量計算變異數
             self.threshold_variance_List.append(self.dis_variation_Inital_Local)
-            self.dis_variance_Inital_Local = EvaluateVariance(self.threshold_variance_List,dis_variance_Inital_Local_file_path)
-            print(Fore.RESET+Back.GREEN+Style.BRIGHT+f"self.dis_variance_Inital_Local:\t+{str(self.dis_variance_Inital_Local)}")
+            self.dis_variance_Inital_Local_threshold = EvaluateVariance(self.threshold_variance_List,dis_variance_Inital_Local_file_path)
+            print(Fore.RESET+Back.GREEN+Style.BRIGHT+f"self.dis_variance_Inital_Local_threshold:\t+{str(self.dis_variance_Inital_Local_threshold)}")
            
             
         
@@ -790,6 +791,7 @@ class FlowerClient(fl.client.NumPyClient):
                            "Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,"
                            "UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,"
                            "dis_variation_Inital_Local,"
+                           "dis_variance_Inital_Local_threshold,"
                            "UnAttack_dis_variation_Inital_Local,"
                            "dis_each_ten_round_sum,"
                            "dis_each_ten_round_average,"
@@ -824,7 +826,8 @@ class FlowerClient(fl.client.NumPyClient):
                             f"{self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和（以距離計算）
                             f"{self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#上一回未訓練本地模型與本地訓練後本地模型（以距離計算）
                             f"{self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#最後一次正常本地模型 當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
-                            f"{self.dis_variation_Inital_Local},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
+                            f"{self.dis_variation_Inital_Local},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化量（以距離計算）
+                            f"{self.dis_variance_Inital_Local_threshold},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化量門檻值（以距離計算）
                             f"{self.UnAttack_dis_variation_Inital_Local},"#最後一次正常本地模型 當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
                             f"{self.dis_each_ten_round_sum},"#每10回合的當前回合未訓練本地模型與本地訓練後本地模型每層差異總和之加總
                             f"{self.dis_each_ten_round_average},"#每10回合的當前回合未訓練本地模型與本地訓練後本地模型每層差異總和之平均
@@ -996,7 +999,8 @@ class FlowerClient(fl.client.NumPyClient):
     def JudageAttack(self):
         # if self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis > self.dis_threshold_Inital_Local*1.1:
         # if self.dis_variation_Inital_Local > 1:# 不超過原本距離的變化之1倍
-        if self.dis_variation_Inital_Local > 0.5:# 不超過原本距離的變化之1倍
+        # if self.dis_variation_Inital_Local > 0.5:# 不超過原本距離的變化之1倍
+        if self.dis_variation_Inital_Local > self.dis_variance_Inital_Local_threshold:# 不超過原本距離的變異數之最大值2倍
 
             print(Fore.RED+Style.BRIGHT+Back.CYAN+f"global_round_{self.global_round}_occur Attack!!!")
             print(Fore.RED+Style.BRIGHT+Back.CYAN+f"Initial_and_AfterLocalTrain_Local_model_weight_diff_dis:{self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis}")
@@ -1201,7 +1205,8 @@ class FlowerClient(fl.client.NumPyClient):
         # 若accuracy大於0.9表示攻擊結束
         # if self.Local_train_accuracy >= 0.9:
         # 不行用accuracy來判斷攻擊是否結束因為 當節點資料量很少並發生攻擊時accuracy也是在0.9左右並持續下降
-        if self.dis_variation_Inital_Local < 1:# 不超過原本距離的變化之1倍表示攻擊結束
+        # if self.dis_variation_Inital_Local < 1:# 不超過原本距離的變化之1倍表示攻擊結束
+        if self.dis_variation_Inital_Local < self.dis_variance_Inital_Local_threshold:# 變異量不超過原本距離的變異數之最大值2倍表示攻擊結束
             self.bool_Unattack_Judage = True
             self.Record_UnAttack_counter = 0
 
