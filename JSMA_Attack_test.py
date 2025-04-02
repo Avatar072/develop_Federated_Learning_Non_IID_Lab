@@ -117,7 +117,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon 
         else:
             str_epsilon = f"epsilon_{epsilon}"
             plt.savefig(f"{save_filepath}/{str_epsilon}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
-        plt.show()
+        # plt.show()
 
 def save_to_csv(data, filepath):
     df = pd.DataFrame(data)
@@ -423,50 +423,45 @@ def main():
     )
 
     # 設定 JSMA 攻擊
-    # for epsilon in epsilons:
-    #     attack = ProjectedGradientDescent(
-    #         estimator=classifier,
-    #         eps=epsilon,
-    #         eps_step=0.5,
-    #         max_iter=10,
-    #         targeted=False,
-    #         num_random_init=0
-    #     )
-    # for epsilon in epsilons:
-    #     attack = FastGradientMethod(
-    #         estimator=classifier,
-    #         eps=epsilon
-    #     )
-    # for epsilon in epsilons:
-    #     attack = BasicIterativeMethod(
-    #         estimator=classifier,
-    #         eps=epsilon,
-    #         eps_step=0.01,  # 每步的步長，可以根據需求調整
-    #         max_iter=10     # JSMA 的迭代次數
-    #     )
-    # 設定 JSMA 攻擊
     # `theta` 控制修改幅度（-1到1的範圍），`gamma` 控制最大修改比例
-    # for epsilon in epsilons:
-    #     attack = SaliencyMapMethod(
-    #         classifier=classifier,
-    #         theta=0.1,        # 控制每次修改的步幅
-    #         gamma=epsilon       # 控制修改的最大比例
-    #     )
+    for epsilon in epsilons:
+        # 重新載入原始模型！重要！
+        # 確保每次攻擊都是基於原始未被修改的模型，避免前一次攻擊的殘留影響。
+        model.load_state_dict(torch.load(model_path))
 
-    attack = SaliencyMapMethod(
-            classifier=classifier,       
-            theta=0.05, # 控制每次修改的步幅
-            gamma=0.05# 控制修改的最大比例
+        attack = SaliencyMapMethod(
+            classifier=classifier,
+            theta=epsilon,        # 控制每次修改的步幅
+            gamma=0.05       # 控制修改的最大比例
         )
+
         # test執行攻擊並評估
-    # acc, successful_attacks = JSMA_attack_evaluation(
-    #         model, DEVICE, test_loader, classifier, attack, save_dir, epsilons[0], False
-    #     )
+        # acc, successful_attacks = JSMA_attack_evaluation(
+        #         model, DEVICE, test_loader, classifier, attack, save_dir, epsilon, False
+        # )
 
         # train執行攻擊並評估
-    acc, successful_attacks = JSMA_attack_evaluation(
-            model, DEVICE, train_loader, classifier, attack, save_dir, epsilons[0], True
+        acc, successful_attacks = JSMA_attack_evaluation(
+                model, DEVICE, train_loader, classifier, attack, save_dir, epsilon, True
+
         )
+    
+    # # 不用for為只生成一次攻擊的寫法
+    # attack = SaliencyMapMethod(
+    #         classifier=classifier,       
+    #         theta=0.5, # 控制每次修改的步幅
+    #         gamma=0.05# 控制修改的最大比例
+    #     )
+    #     # test執行攻擊並評估
+    # # acc, successful_attacks = JSMA_attack_evaluation(
+    # #         model, DEVICE, test_loader, classifier, attack, save_dir, epsilons[0], False
+    # #     )
+
+    #     # train執行攻擊並評估
+    # acc, successful_attacks = JSMA_attack_evaluation(
+    #         model, DEVICE, train_loader, classifier, attack, save_dir, epsilons[0], True
+
+    #     )
         
         # 模型權重需經過訓練後才會發生變化
         # 這邊經測試樣本只生成test的樣本未訓練

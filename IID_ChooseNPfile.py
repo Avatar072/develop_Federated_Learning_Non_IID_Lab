@@ -104,8 +104,14 @@ def CICIDS2018_IID_ChooseLoadNpArray(filepath,split_file, Choose_method):
         if (Choose_method == 'normal'):
             # 20250306 CICIDS2018 使用a=0.5
             # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\CICIDS2018\csv_data\Dirichlet\20250306
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\x_Dirichlet_client1_20250306.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\y_Dirichlet_client1_20250306.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\x_Dirichlet_client1_20250306.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\y_Dirichlet_client1_20250306.npy", allow_pickle=True)
+
+            # 20250329 CICIDS2018 使用a=0.1 after do labelencode 79 feature and all featrue minmax 75 25分
+            # 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\CICIDS2018\csv_data\Dirichlet\20250329
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250329\\alpha_0.1\\x_Dirichlet_client1_20250329.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250329\\alpha_0.1\\y_Dirichlet_client1_20250329.npy", allow_pickle=True)
 
 
         print("train_half1 x_train 的形狀:", x_train.shape)
@@ -116,8 +122,13 @@ def CICIDS2018_IID_ChooseLoadNpArray(filepath,split_file, Choose_method):
         if (Choose_method == 'normal'):
             # 20250306 CICIDS2018 使用a=0.5
             # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\CICIDS2018\csv_data\Dirichlet\20250306
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\x_Dirichlet_client2_20250306.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\y_Dirichlet_client2_20250306.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\x_Dirichlet_client2_20250306.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\y_Dirichlet_client2_20250306.npy", allow_pickle=True)
+            # 20250329 CICIDS2018 使用a=0.1 after do labelencode 79 feature and all featrue minmax 75 25分
+            # 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\CICIDS2018\csv_data\Dirichlet\20250329
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250329\\alpha_0.1\\x_Dirichlet_client2_20250329.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250329\\alpha_0.1\\y_Dirichlet_client2_20250329.npy", allow_pickle=True)
 
 
         print("train_half2 x_train 的形狀:", x_train.shape)
@@ -125,21 +136,24 @@ def CICIDS2018_IID_ChooseLoadNpArray(filepath,split_file, Choose_method):
         client_str = "client2"
         print("使用 train_half2 進行訓練")
 
-    elif split_file == 'client3_train':
-        if (Choose_method == 'normal'):
-            # 20250306 CICIDS2018 使用a=0.5
-            # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\CICIDS2018\csv_data\Dirichlet\20250306
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\x_Dirichlet_client3_20250306.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\y_Dirichlet_client3_20250306.npy", allow_pickle=True)
+    # elif split_file == 'client3_train':
+    #     # if (Choose_method == 'normal'):
+    #     #     # 20250306 CICIDS2018 使用a=0.5
+    #     #     # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\CICIDS2018\csv_data\Dirichlet\20250306
+    #     #     x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\x_Dirichlet_client3_20250306.npy", allow_pickle=True)
+    #     #     y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250306\\y_Dirichlet_client3_20250306.npy", allow_pickle=True)
 
-        print("train_half3 x_train 的形狀:", x_train.shape)
-        print("train_half3 y_train 的形狀:", y_train.shape)
-        client_str = "client3"
-        print("使用 train_half3 進行訓練")
+    #     print("train_half3 x_train 的形狀:", x_train.shape)
+    #     print("train_half3 y_train 的形狀:", y_train.shape)
+    #     client_str = "client3"
+    #     print("使用 train_half3 進行訓練")
 
 
-    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_20250106.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_20250106.npy", allow_pickle=True)
+    # x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_20250106.npy", allow_pickle=True)
+    # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_20250106.npy", allow_pickle=True)
+    # 0317 a=0.1
+    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_featureMapping_20250317.npy", allow_pickle=True)
+    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250317.npy", allow_pickle=True)
 
     print("use file", split_file)
     return x_train, y_train, x_test, y_test, client_str
@@ -155,15 +169,16 @@ def ChooseLoad_class_names(str_choose_dataset):
         #                     }  
 
         # # 0317 a=0.5
-        class_names_local = {0: 'Benign', 1: 'Bot', 2: 'DDoS', 3: 'DoS', 4: 'Infilteration', 5: 'Web Attack', 
+        class_names_local = {0: 'Benign', 1: 'Bot', 2: 'DDoS', 3: 'DoS', 4: 'Infiltration', 5: 'Web Attack', 
                              6: 'FTP-Patator', 7: 'SSH-Patator', 8: 'Heartbleed', 9: 'PortScan'
                             }  
         labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     
     elif str_choose_dataset == 'CICIDS2018':
+        # 0329 a=0.1
         class_names_local = {0: 'Benign', 1: 'Bot', 2: 'DDoS', 3: 'DoS', 
-                             4: 'Infilteration', 5: 'Web Attack',
+                             4: 'Infiltration', 5: 'Web Attack',
                              6: 'FTP-BruteForce', 7: 'SSH-Bruteforce'
                             }  
         labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7]
