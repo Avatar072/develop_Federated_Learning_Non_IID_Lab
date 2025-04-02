@@ -42,7 +42,7 @@ def SettingAderversarialConfig(choose_dataset):
         # CICIDS2017 load model
         # 設定 FGSM 攻擊 eps
         epsilons = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1.0]
-        # epsilons = [0.5]
+        # epsilons = [0.05]
         # BaseLine的正常model
         # feature 79
         # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2017\\20250121\\79feature\\BaseLine_After_local_train_model_bk.pth'
@@ -104,11 +104,14 @@ def SettingAderversarialConfig(choose_dataset):
         # 設定 FGSM 攻擊 eps
         epsilons = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1.0]
         # epsilons = [0.05]
-        model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2018\\20250106\\only_minmax\\BaseLine_After_local_train_model_bk.pth'
+        # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2018\\20250106\\only_minmax\\BaseLine_After_local_train_model_bk.pth'
         # D:\develop_Federated_Learning_Non_IID_Lab\single_AnalyseReportFolder\CICIDS2018\20250106\only_minmax\BaseLine\normal
-        labelCount = 15
-        # 20250121 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
-        print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f" with normal After Do labelencode and minmax and drop feature to 79 feature")
+        labelCount = 8
+        # 20250121 CIC-IDS2018 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+        # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f" with normal After Do labelencode and minmax and drop feature to 79 feature")
+        model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2018\\20250317\\BaseLine_After_local_train_model_feature123.pth'
+        # 20250329 CIC-IDS2018 after do labelencode and 79 feature and all featrue minmax 75 25分 featuremapping 123
+        print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f" with normal After Do labelencode and minmax and 79 featuremapping 123e")
         # CICIDS2018
         x_train, y_train, x_test, y_test, client_str = CICIDS2018_IID_ChooseLoadNpArray(filepath,'client1_train', 'normal')
         class_names, labels_to_calculate = ChooseLoad_class_names("CICIDS2018")    

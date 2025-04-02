@@ -429,7 +429,8 @@ def main():
     # epsilons = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
     # step_epsilons_list = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
     # epsilons = [0.05, 0.1]
-    step_epsilons = 0.05
+    # step_epsilons = 0.05
+    step_epsilons = 0.001
     for epsilon in epsilons:
         # 重新載入原始模型！重要！
         # 確保每次攻擊都是基於原始未被修改的模型，避免前一次攻擊的殘留影響。
@@ -450,7 +451,8 @@ def main():
                 estimator=classifier,
                 eps=epsilon,
                 eps_step=step_epsilons,
-                max_iter=100,
+                # max_iter=100,
+                max_iter=50,
                 targeted=False,
                 num_random_init=0
         )
