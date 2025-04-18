@@ -30,8 +30,8 @@ client_str = "baseline_train"
 Choose_method = "normal"
 num_epochs = 1
 # choose_dataset = "CICIDS2017"
-# choose_dataset = "TONIOT"
-choose_dataset = "CICIDS2018"
+choose_dataset = "TONIOT"
+# choose_dataset = "CICIDS2018"
 
 # 設定設備
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -117,7 +117,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon 
         else:
             str_epsilon = f"epsilon_{epsilon}"
             plt.savefig(f"{save_filepath}/{str_epsilon}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
-        plt.show()
+        # plt.show()
 
 def save_to_csv(data, filepath):
     df = pd.DataFrame(data)
@@ -430,7 +430,9 @@ def main():
     # step_epsilons_list = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3,1.0]
     # epsilons = [0.05, 0.1]
     # step_epsilons = 0.05
-    step_epsilons = 0.001
+    # step_epsilons = 0.001  #when eps = 0.05
+    # step_epsilons = 0.0002 #when eps = 0.01
+    step_epsilons = 0.01     #when eps = 0.5
     for epsilon in epsilons:
         # 重新載入原始模型！重要！
         # 確保每次攻擊都是基於原始未被修改的模型，避免前一次攻擊的殘留影響。

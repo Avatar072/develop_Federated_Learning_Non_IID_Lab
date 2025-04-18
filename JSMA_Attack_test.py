@@ -446,18 +446,18 @@ def main():
 
         )
     
-    # # 不用for為只生成一次攻擊的寫法
+    # 不用for為只生成一次攻擊的寫法
     # attack = SaliencyMapMethod(
     #         classifier=classifier,       
-    #         theta=0.5, # 控制每次修改的步幅
+    #         theta=0.05, # 控制每次修改的步幅
     #         gamma=0.05# 控制修改的最大比例
     #     )
-    #     # test執行攻擊並評估
-    # # acc, successful_attacks = JSMA_attack_evaluation(
-    # #         model, DEVICE, test_loader, classifier, attack, save_dir, epsilons[0], False
-    # #     )
+        # test執行攻擊並評估
+    # acc, successful_attacks = JSMA_attack_evaluation(
+    #         model, DEVICE, test_loader, classifier, attack, save_dir, epsilons[0], False
+    #     )
 
-    #     # train執行攻擊並評估
+        # train執行攻擊並評估
     # acc, successful_attacks = JSMA_attack_evaluation(
     #         model, DEVICE, train_loader, classifier, attack, save_dir, epsilons[0], True
 
