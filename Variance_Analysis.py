@@ -54,6 +54,7 @@ def EvaluateVariance(list_,file_path):
         variance_square_List.append(variance_square)
         # variance_square_threshold = variance_square*2 #*2表示允許範圍值
         variance_square_threshold = variance_square*3 #*3表示允許範圍值
+        # variance_square_threshold = variance_square*4 #*4表示允許範圍值
         variance_square_threshold = round(variance_square_threshold, 5)
         variance_square_Threshold_List.append(variance_square_threshold)
         variance_square_Threshold_List_max = np.max(variance_square_Threshold_List)
