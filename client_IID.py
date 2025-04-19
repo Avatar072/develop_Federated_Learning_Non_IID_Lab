@@ -212,10 +212,11 @@ print("Maximum label value:", max(y_train))
 
 # 定義訓練和評估函數
 def train(net, trainloader, epochs):
+    record_final_epochs_round_counter = 0
     print("train")
     criterion = nn.CrossEntropyLoss()
     # optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
-    if client_str == "client3":  
+    if client_str == "client1":  
         # 調整測試 lr學習率 weight_decay為L2正規化的強度，這裡設為0.01
         # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001, weight_decay=0.01)
         # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001, weight_decay=0.0001)
@@ -238,10 +239,11 @@ def train(net, trainloader, epochs):
             output = net(images)
             labels = labels.long()
             loss = criterion(output, labels)
-            loss.backward()
+            loss.backward()# 以train loss更新權重 反向傳播
             optimizer.step()
             ###訓練的過程    
-        test_accuracy = test(net, local_testloader, start_IDS, client_str, "local_test",False)
+        record_final_epochs_round_counter+=1#用於紀錄最後一次epochs的loss與Recall
+        test_accuracy = test(net, local_testloader, start_IDS, client_str, "local_test",False,0,record_final_epochs_round_counter)
         print(f"訓練週期 [{epoch+1}/{epochs}] - 測試準確度: {test_accuracy:.4f}")
         # 存每次global round 初次的epochs的model
         # 用於觀測當前epochs內距離變化，初次的epochs的model與完成Local train的mode1之距離變化
@@ -250,14 +252,14 @@ def train(net, trainloader, epochs):
 
     return test_accuracy
 
-def test(net, testloader, start_time, client_str, str_globalOrlocal, bool_plot_confusion_matrix, int_record_round = 0):
+def test(net, testloader, start_time, client_str, str_globalOrlocal, bool_plot_confusion_matrix, int_record_round = 0,int_final_epochs_loss_and_Reacll_record_counter=0):
     print(Fore.GREEN+Style.BRIGHT+"進入test function")
     correct = 0
     total = 0
     loss = 0  # 初始化損失值為0
     ave_loss = 0
     # 迭代測試資料集
-    with torch.no_grad():
+    with torch.no_grad(): #不讓模型更新把梯度關閉
         criterion = nn.CrossEntropyLoss()
         for data in testloader:
             images, labels = data[0].to(DEVICE), data[1].to(DEVICE)
@@ -323,7 +325,16 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal, bool_plot_c
             with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
                 file.write(f"{RecordAccuracy}\n")
 
+            if int_final_epochs_loss_and_Reacll_record_counter==50: #50表示最後一個epochs時做紀錄
+                with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/loss-baseline_{client_str}_local_final_epochs.csv", "a+") as file:
+                    file.write(f"{ave_loss}\n")
             
+                with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}_local_final_epochs.csv", "a+") as file:
+                    file.write(f"{RecordRecall}\n")
+        
+            # 將整體準確率和其他資訊寫入 "accuracy-baseline.csv" 文件
+            with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
+                file.write(f"{RecordAccuracy}\n")
             # 產生分類報告
             GenrateReport = classification_report(y_true, y_pred, digits=4, output_dict=True)
             # 將字典轉換為 DataFrame 並轉置
