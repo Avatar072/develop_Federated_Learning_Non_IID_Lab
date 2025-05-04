@@ -220,7 +220,12 @@ def train(net, trainloader, epochs):
         # 調整測試 lr學習率 weight_decay為L2正規化的強度，這裡設為0.01
         # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001, weight_decay=0.01)
         # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001, weight_decay=0.0001)
+        # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001, weight_decay=0.001)
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001)
+        # optimizer = torch.optim.SGD(net.parameters(), lr=0.0001, momentum=0.0)
+        # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.00008)
+
+
 
 
     else:
@@ -762,10 +767,10 @@ class FlowerClient(fl.client.NumPyClient):
             self.dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
                                                                 self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
 
-            # 增加以變化量計算變異數
-            self.threshold_variance_List.append(self.dis_variation_Inital_Local)
-            self.dis_variance_Inital_Local_threshold = EvaluateVariance(self.threshold_variance_List,dis_variance_Inital_Local_file_path)
-            print(Fore.RESET+Back.GREEN+Style.BRIGHT+f"self.dis_variance_Inital_Local_threshold:\t+{str(self.dis_variance_Inital_Local_threshold)}")
+            # 增加以變化量計算變異數 不能將攻擊發生期間的變化量納入門檻值計算
+            # self.threshold_variance_List.append(self.dis_variation_Inital_Local)
+            # self.dis_variance_Inital_Local_threshold = EvaluateVariance(self.threshold_variance_List,dis_variance_Inital_Local_file_path)
+            # print(Fore.RESET+Back.GREEN+Style.BRIGHT+f"self.dis_variance_Inital_Local_threshold:\t+{str(self.dis_variance_Inital_Local_threshold)}")
 
         else:
             self.dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
@@ -1234,16 +1239,16 @@ class FlowerClient(fl.client.NumPyClient):
                 # y_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.1/y_train_Dirichlet_client1_a0.1_theta0.1_gamma_0.05.npy", allow_pickle=True)
 
                 # # TONIOT iid Dirichlet 0.1 c1 to JSMA theta 0.5 gamma 0.05
-                print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.5  by genrate by 123_feature Label merge BaseLine normal model")
-                x_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.1/x_train_Dirichlet_client1_a0.1_theta0.5_gamma_0.05.npy", allow_pickle=True)
-                y_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.1/y_train_Dirichlet_client1_a0.1_theta0.5_gamma_0.05.npy", allow_pickle=True)
+                # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.5  by genrate by 123_feature Label merge BaseLine normal model")
+                # x_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.1/x_train_Dirichlet_client1_a0.1_theta0.5_gamma_0.05.npy", allow_pickle=True)
+                # y_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.1/y_train_Dirichlet_client1_a0.1_theta0.5_gamma_0.05.npy", allow_pickle=True)
 
 
                 #################################0.5 TONIOT JSMA################################
                 # # TONIOT iid Dirichlet 0.5 c1 to JSMA theta 0.01 gamma 0.05
-                # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.01  by genrate by 123_feature Label merge BaseLine normal model")
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.5/x_train_Dirichlet_client1_a0.5_theta0.01_gamma_0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.5/y_train_Dirichlet_client1_a0.5_theta0.01_gamma_0.05.npy", allow_pickle=True)
+                print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.01  by genrate by 123_feature Label merge BaseLine normal model")
+                x_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.5/x_train_Dirichlet_client1_a0.5_theta0.01_gamma_0.05.npy", allow_pickle=True)
+                y_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.5/y_train_Dirichlet_client1_a0.5_theta0.01_gamma_0.05.npy", allow_pickle=True)
 
 
                 # # TONIOT iid Dirichlet 0.5 c1 to JSMA theta 0.05 gamma 0.05
@@ -1349,7 +1354,8 @@ class FlowerClient(fl.client.NumPyClient):
         # if self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis > self.dis_threshold_Inital_Local*1.1:
         # if self.dis_variation_Inital_Local > 1:# 不超過原本距離的變化之1倍
         # if self.dis_variation_Inital_Local > 0.5:# 不超過原本距離的變化之1倍
-        if self.dis_variation_Inital_Local > self.dis_variance_Inital_Local_threshold:# 不超過原本距離的變異數之最大值2倍
+        # if self.dis_variation_Inital_Local > self.dis_variance_Inital_Local_threshold:# 不超過原本距離的變異數之最大值2倍
+        if self.dis_variation_Inital_Local > 0.5:# 不超過原本距離的變異數之最大值0.3倍固定測試
 
             print(Fore.RED+Style.BRIGHT+Back.CYAN+f"global_round_{self.global_round}_occur Attack!!!")
             print(Fore.RED+Style.BRIGHT+Back.CYAN+f"Initial_and_AfterLocalTrain_Local_model_weight_diff_dis:{self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis}")
@@ -1560,7 +1566,8 @@ class FlowerClient(fl.client.NumPyClient):
         # if self.Local_train_accuracy >= 0.9:
         # 不行用accuracy來判斷攻擊是否結束因為 當節點資料量很少並發生攻擊時accuracy也是在0.9左右並持續下降
         # if self.dis_variation_Inital_Local < 1:# 不超過原本距離的變化之1倍表示攻擊結束
-        if self.dis_variation_Inital_Local < self.dis_variance_Inital_Local_threshold:# 變異量不超過原本距離的變異數之最大值2倍表示攻擊結束
+        # if self.dis_variation_Inital_Local < self.dis_variance_Inital_Local_threshold:# 變異量不超過原本距離的變異數之最大值2倍表示攻擊結束
+        if self.dis_variation_Inital_Local < 0.5:# 變異量不超過原本距離的變異數之最大值2倍表示攻擊結束
             self.bool_Unattack_Judage = True
             self.Record_UnAttack_counter = 0
 
@@ -1659,7 +1666,7 @@ net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 
 # 启动Flower客户端
 fl.client.start_numpy_client(
-    server_address="127.0.0.1:53387",
+    server_address="127.0.0.1:53388",
     # server_address="192.168.1.137:53388",
     client=FlowerClient(),
     
