@@ -133,15 +133,20 @@ print(smoothed_data)
 # print(f"手動計算: {' + '.join(f'|{x:.2f}|' for x in diff)} = {l1_distance:.4f}")
 # print(f"使用 torch.norm(p=1): {torch.norm(vector1 - vector2, p=1).item():.4f}")
 # 提取前126行數據
-df = pd.read_csv("E:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250319\\CICIDS2017_use_20250205_data_merge_label_FGSM_eps0.05測試_79_feature\\Inital_Local_weight_diff_client1.csv")
+df = pd.read_csv("E:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250319\\CICIDS2017_use_20250205_data_merge_label_FGSM_eps0.05測試_79_feature\\Inital_Local_weight_diff_client1_count.csv")
 # list_
 # list_ = df["dis_variation_Inital_Local"].head(10)
 # list_ = df["dis_variation_Inital_Local"]
 
 # 累加平均值計算
 # 從第11個數字開始計算累加平均值（忽略前10個數字）
-df["cumulative_mean"] = df["dis_variation_Inital_Local"][10:].expanding().mean()
-# df["cumulative_mean"] = df["dis_variation_Inital_Local"].expanding().mean()
+# 先過濾掉前10個數字
+df_filtered = df["dis_variation_Inital_Local"][10:]
+
+# 再過濾掉第125到第200個數字（注意索引從10開始，所以需要調整索引位置）
+# df_filtered = df_filtered.drop(df_filtered.index[124-10:199-10])
+# 計算剩餘數據的累加平均值
+df["cumulative_mean"] = df_filtered.expanding().mean()
 
 # 計算每次計算的最大累加平均值
 df["cumulative_mean_max"] = df["cumulative_mean"].expanding().max()
@@ -160,8 +165,24 @@ df["squared_difference"] = df["difference"] ** 2
 
 # 計算每次計算後的最大 squared_difference
 df["max_squared_difference"] = df["squared_difference"].expanding().max()
+
+# 修改公式:Delta=𝑎∗max_squared_difference*K+(1-a)*D為迪利克雷分布的a值0.5或0.1根據距離變化量，給定值2或是1
+# 迪利克雷分布的a值0.1 D=1
+# 迪利克雷分布的a值0.5 D=2
+
+#  計算 scale_factor
+# scale_factor = df["max_squared_difference"] / df["cumulative_mean_max"] 
+# df["scale_factor"] = df.apply(lambda row: max(1, row['max_squared_difference'] / row['cumulative_mean_max']) * 3, axis=1)
+# df["scale_factor"] = max(1, scale_factor ) * 3
 # *k倍
-df["max_squared_difference"]=df["max_squared_difference"]*3
+df["Delta_K_2"]=0.5*df["max_squared_difference"]*2+0.5*2
+df["Delta_K_3"]=0.5*df["max_squared_difference"]*3+0.5*2
+df["Delta_K_4"]=0.5*df["max_squared_difference"]*4+0.5*2
+# df["Delta_K_5"]=0.5*df["max_squared_difference"]*5+0.50.1*2
+# df["Delta_a=0.1"]=0.5*df["max_squared_difference"]*2+0.5*1
+# df["Delta_a=0.5"]=0.5*df["max_squared_difference"]*2+0.5+0.5*2
+# df["Delta"]=0.5*df["max_squared_difference"]*2+0.1*2
+
 # 顯示結果
 print("\ncumulative_mean, cumulative_mean_max, difference, squared_difference, max_squared_difference:")
 print(df)
