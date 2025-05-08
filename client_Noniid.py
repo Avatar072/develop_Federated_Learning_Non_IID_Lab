@@ -29,6 +29,9 @@ from mytoolfunction import ChooseUseModel, getStartorEndtime,EvaluateVariation
 from collections import Counter
 from Add_ALL_LayerToCount import DoCountModelWeightSum,evaluateWeightDifferences
 from Add_ALL_LayerToCount import Calculate_Weight_Diffs_Distance_OR_Absolute
+from NonIID_ChooseNPfile import CICIDS2017_NonIID_ChooseLoadNpArray, CICIDS2018_NonIID_ChooseLoadNpArray,TONIOT_NonIID_ChooseLoadNpArray, NonIID_ChooseLoad_class_names
+from Variance_Analysis import EvaluateVariance
+
 from colorama import Fore, Back, Style, init
 import configparser
 
@@ -54,23 +57,8 @@ print(Fore.YELLOW+Style.BRIGHT+f"start_attack_round: {start_attack_round}")
 print(Fore.YELLOW+Style.BRIGHT+f"end_attack_round: {end_attack_round}")
 print(Fore.YELLOW+Style.BRIGHT+f"save_model_round: {save_model_round}")
 
-#CICIIDS2017 or Edge 62個特徵
-# labelCount = 15
-#TONIOT 44個特徵
-# labelCount = 10
-#CICIIDS2019
-# labelCount = 13
-#Wustl 41個特徵
-# labelCount = 5
-#Kub 36個特徵
-# labelCount = 4
-#CICIIDS2017、TONIOT、CICIIDS2019 聯集
-# labelCount = 35
-
 # CICIDS2017、CICIDS2018、TONIOT 聯集
 labelCount = 19
-# CICIIDS2017、TONIOT、EdgwIIOT 聯集
-# labelCount = 31
 
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
 start_IDS = time.time()
@@ -95,56 +83,71 @@ file, num_epochs,Choose_method = ParseCommandLineArgs(["dataset_split", "epochs"
 print(f"Dataset: {file}")
 print(f"Number of epochs: {num_epochs}")
 print(f"Choose_method: {Choose_method}")
-x_train, y_train, client_str = ChooseLoadNpArray(filepath, file, Choose_method)
+# x_train, y_train, client_str = ChooseLoadNpArray(filepath, file, Choose_method)
+
+
+# 初始化變數為None或空列表
+x_train =  np.array([]) # 預設初始化為一個空陣列
+y_train =  np.array([]) # 預設初始化為一個空陣列
+
+x_test = np.array([])  # 預設初始化為一個空陣列
+y_test = np.array([])  # 預設初始化為一個空陣列
+
+client_str = ""
+# 預設初始化 class_names
+class_names_global, class_names_local, labels_to_calculate = None, None, None
+
+labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+
+try:
+    # CICIDS2017
+    if choose_dataset == "CICIDS2017":
+        print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
+        x_train, y_train, x_test, y_test, client_str = CICIDS2017_NonIID_ChooseLoadNpArray(filepath, file, Choose_method)
+        class_names_local, class_names_global = NonIID_ChooseLoad_class_names("CICIDS2017")
+        
+    # CICIDS2018
+    if choose_dataset == "CICIDS2018":
+        print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
+        x_train, y_train, x_test, y_test, client_str = CICIDS2018_NonIID_ChooseLoadNpArray(filepath, file, Choose_method)
+        class_names_local, class_names_global = NonIID_ChooseLoad_class_names("CICIDS2018")
+
+    # TONIOT
+    if choose_dataset == "TONIOT":
+        print(Fore.YELLOW+Style.BRIGHT+f"use dataset: {choose_dataset}")
+        x_train, y_train, x_test, y_test, client_str = TONIOT_NonIID_ChooseLoadNpArray(filepath, file, Choose_method)
+        class_names_local, class_names_global = NonIID_ChooseLoad_class_names("TONIOT")
+except Exception as e:
+    print(f"An error occurred: {e}")
+finally:
+    # 確保資料加載成功
+    if y_train is None or len(y_train) == 0:
+            raise ValueError("Failed to load y_train for "+f"{choose_dataset}")
+    else:
+            print("Execution finished.")                  
+
 
 counter = Counter(y_train)
 y_train = y_train.astype(int)
-print(counter)
+print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal train筆數",counter) 
 today = datetime.date.today()
 today = today.strftime("%Y%m%d")
 current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
-
 # generatefolder(filepath, "\\FL_AnalyseReportfolder")
 generatefolder(f"./FL_AnalyseReportfolder/", today)
 generatefolder(f"./FL_AnalyseReportfolder/{today}/{current_time}/", client_str)
 generatefolder(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/", Choose_method)
 getStartorEndtime("starttime",start_IDS,f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}")
-labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
 
-if client_str == "client1":
-    # labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLday_test_featureMapping_20250317.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLday_test_featureMapping_20250317.npy", allow_pickle=True)
-
-    # labelCount = 10
-    counter = Counter(y_test)
-    print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)
-
-if client_str == "client2":
-    # labels_to_calculate = [0, 1, 2, 3, 4, 5, 10, 11]
-    x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_featureMapping_20250317.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250317_ChangeLabelencode.npy", allow_pickle=True)
-
-    # labelCount = 8
-    counter = Counter(y_test)
-    print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)
-if client_str == "client3":
-    # labels_to_calculate = [0, 2, 3, 12, 13, 14, 15, 16, 17, 18]
-    print(Fore.BLUE+Style.BRIGHT+"Loading TONIOT" +f"test with normal After Do labelencode and minmax")
-    x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)
-    y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_test_featureMapping_20250317_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)
-
-    # labelCount = 10
-    counter = Counter(y_test)
-    print(Fore.GREEN+Style.BRIGHT+client_str+"\tlocal test筆數",counter)                    
-
-# 20240317 CICIDS2017 和 CICIDS2018 原79 feature 和TONIOT原 44 feature
 # 20240317 CICIDS2017 和 CICIDS2018 和TONIOT after do labelencode and minmax  75 25分 and feature mapping to 123 feature
 global_x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_TONIOT_test\\merged_x_Non_IID_ALL_test.npy", allow_pickle=True)
 global_y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017_and_CICIDS2018_TONIOT_test\\merged_y_Non_IID_ALL_test.npy", allow_pickle=True)   
 
 counter = Counter(global_y_test)
 print(Fore.GREEN+Style.BRIGHT+client_str+"\tglobal test筆數",counter)
+
+# 先統一使用global的class name 方便繪圖
+class_names_local = class_names_global
 
 x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
 y_train = torch.from_numpy(y_train).type(torch.LongTensor)
@@ -169,16 +172,30 @@ print("Maximum label value:", max(y_train))
 
 # 定義訓練和評估函數
 def train(net, trainloader, epochs):
+    record_final_epochs_round_counter = 0
     print("train")
     criterion = nn.CrossEntropyLoss()
     # optimizer = torch.optim.SGD(net.parameters(), lr=0.01)
-    if client_str == "client3":  
+    if client_str == "client1":  
+        # 調整測試 lr學習率 weight_decay為L2正規化的強度，這裡設為0.01
+        # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001, weight_decay=0.01)
+        # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001, weight_decay=0.0001)
+        # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001, weight_decay=0.001)
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001)
+        # optimizer = torch.optim.SGD(net.parameters(), lr=0.0001, momentum=0.0)
+        # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.00008)
+
+
+
+
     else:
         # 學長的參數
         # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.001)
-        # 調整測試
+        # 調整測試 lr學習率 weight_decay為L2正規化的強度，這裡設為0.01
+        # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001, weight_decay=0.01)
+        # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001, weight_decay=0.0001)
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=0.0001)
+
 
     for epoch in range(epochs):
         print("epoch",epoch)
@@ -187,48 +204,48 @@ def train(net, trainloader, epochs):
             output = net(images)
             labels = labels.long()
             loss = criterion(output, labels)
-            loss.backward()
+            loss.backward()# 以train loss更新權重 反向傳播
             optimizer.step()
             ###訓練的過程    
-        test_accuracy = test(net, local_testloader, start_IDS, client_str, "local_test",False)
+        record_final_epochs_round_counter+=1#用於紀錄最後一次epochs的loss與Recall
+        test_accuracy = test(net, local_testloader, start_IDS, client_str, "local_test",False,0,record_final_epochs_round_counter)
         print(f"訓練週期 [{epoch+1}/{epochs}] - 測試準確度: {test_accuracy:.4f}")
         # 存每次global round 初次的epochs的model
         # 用於觀測當前epochs內距離變化，初次的epochs的model與完成Local train的mode1之距離變化
-        if epoch == 0:
+        if epoch == 1:
             torch.save(net.state_dict(), f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/Initial_Local.pth")
 
     return test_accuracy
 
-
-def test(net, testloader, start_time, client_str, str_globalOrlocal, bool_plot_confusion_matrix, int_record_round = 0):
+def test(net, testloader, start_time, client_str, str_globalOrlocal, bool_plot_confusion_matrix, int_record_round = 0,int_final_epochs_loss_and_Reacll_record_counter=0):
     print(Fore.GREEN+Style.BRIGHT+"進入test function")
     correct = 0
     total = 0
-    loss = 0  # 初始化损失值为0
+    loss = 0  # 初始化損失值為0
     ave_loss = 0
-    # 迭代测试数据集
-    with torch.no_grad():
+    # 迭代測試資料集
+    with torch.no_grad(): #不讓模型更新把梯度關閉
         criterion = nn.CrossEntropyLoss()
         for data in testloader:
             images, labels = data[0].to(DEVICE), data[1].to(DEVICE)
         
-            # 使用神经网络模型进行前向传播
+            # 使用神經網路模型進行前向傳播
             outputs = net(images)
         
-            # 计算损失
+            # 計算損失
             loss += criterion(outputs, labels).item()
         
-            # 计算预测的类别
+            # 計算預測的類別
             _, predicted = torch.max(outputs.data, 1)
         
-            # 统计总样本数和正确分类的样本数
+            # 統計總樣本數和正確分類的樣本數
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
         
-            # 计算滑动平均损失
+            # 計算滑動平均損失
             ave_loss = ave_loss * 0.9 + loss * 0.1
 
-            # 将标签和预测结果转换为 NumPy 数组
+            # 將標籤和預測結果轉換為 NumPy 數組
             y_true = labels.data.cpu().numpy()
             y_pred = predicted.data.cpu().numpy()
         
@@ -236,11 +253,9 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal, bool_plot_c
             acc = classification_report(y_true, y_pred, digits=4, output_dict=True)
             # print("correct:\n",correct)
             # print("total:\n",total)
-            #print("acc:\n",acc)
-            # 将每个类别的召回率写入 "recall-baseline.csv" 文件
-            # RecordRecall是用来存储每个类别的召回率（recall）值的元组
-            # RecordAccuracy是用来存储其他一些数据的元组，包括整体的准确率（accuracy）
-            #RecordRecall = []
+            # print("acc:\n",acc)
+            # 將每個類別的召回率寫入 "recall-baseline.csv" 文件
+
             RecordRecall = ()
             RecordAccuracy = ()
 
@@ -254,7 +269,7 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal, bool_plot_c
                     if label_str in acc:  # 檢查標籤是否存在於分類報告中
                         RecordRecall = RecordRecall + (acc[label_str]['recall'],)
 
-            # global testn算所有的Label
+            # global test算所有的Label
             elif str_globalOrlocal =="global_test":
                 for i in range(labelCount):
                     RecordRecall = RecordRecall + (acc[str(i)]['recall'],)
@@ -263,18 +278,28 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal, bool_plot_c
             RecordAccuracy = RecordAccuracy + (correct / total, time.time() - start_time,)
             RecordRecall = str(RecordRecall)[1:-1]
 
-            # 标志来跟踪是否已经添加了标题行
+            # 標誌來追蹤是否已經添加了標題行
             header_written = False
             with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/loss-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
                 file.write(f"{ave_loss}\n")
-            
+
             with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
                 file.write(f"{RecordRecall}\n")
         
-            # 将总体准确率和其他信息写入 "accuracy-baseline.csv" 文件
+            # 將整體準確率和其他資訊寫入 "accuracy-baseline.csv" 文件
             with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
                 file.write(f"{RecordAccuracy}\n")
 
+            if int_final_epochs_loss_and_Reacll_record_counter==50: #50表示最後一個epochs時做紀錄
+                with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/loss-baseline_{client_str}_local_final_epochs.csv", "a+") as file:
+                    file.write(f"{ave_loss}\n")
+            
+                with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}_local_final_epochs.csv", "a+") as file:
+                    file.write(f"{RecordRecall}\n")
+        
+            # 將整體準確率和其他資訊寫入 "accuracy-baseline.csv" 文件
+            with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-baseline_{client_str}_{str_globalOrlocal}.csv", "a+") as file:
+                file.write(f"{RecordAccuracy}\n")
             # 產生分類報告
             GenrateReport = classification_report(y_true, y_pred, digits=4, output_dict=True)
             # 將字典轉換為 DataFrame 並轉置
@@ -293,6 +318,11 @@ def test(net, testloader, start_time, client_str, str_globalOrlocal, bool_plot_c
 
 # 畫混淆矩陣
 def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion_matrix = False, int_record_round = 0):
+
+    # 若要更改全域變數的內容就需要這樣宣告，若只是單純讀值這樣就好
+    global class_names_local
+    global class_names_global
+
     #混淆矩陣
     if bool_plot_confusion_matrix:
 
@@ -300,134 +330,17 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         # class_names：類別標籤的清單，通常是一個包含每個類別名稱的字串清單。這將用作 Pandas 資料幀的行索引和列索引，
         # 以標識混淆矩陣中每個類別的位置。  同樣的類別標籤的清單，它作為列索引的標籤，這是可選的，
         # 如果不提供這個參數，將使用行索引的標籤作為列索引
-
+        # 初始化宣告arr
+        arr = confusion_matrix(y_true, y_pred, labels=labels_to_calculate)
         # 使用指定的標籤計算混淆矩陣
         if str_globalOrlocal == "local_test" or str_globalOrlocal == "global_model_local_test":
             arr = confusion_matrix(y_true, y_pred, labels=labels_to_calculate)
         elif str_globalOrlocal == "global_test":
             arr = confusion_matrix(y_true, y_pred)
-        # 預設初始化 class_names
-        class_names_local = None
-        class_names_global = None
 
         # 如果 class_names 未提供，根據 labels_to_calculate 動態生成
         if class_names_local is None:
             class_names_local = {label: f"Class_{label}" for label in labels_to_calculate}
-            if client_str == "client1"or (client_str == "client1"and str_globalOrlocal == "global_model_local_test"):    
-                class_names_local = {
-                                # 0: '0_BENIGN', 
-                                # 1: '1_Bot', 
-                                # 2: '2_DDoS', 
-                                # 3: '3_DoS GoldenEye', 
-                                # 4: '4_DoS Hulk', 
-                                # 5: '5_DoS Slowhttptest', 
-                                # 6: '6_DoS slowloris', 
-                                # 7: '7_Infilteration', 
-                                # 8: '8_Web Attack', 
-                                # 9: '9_Heartbleed', 
-                                # 10: '10_PortScan',  
-                                # 12: '12_FTP-Patator',  
-                                # 14: '14_SSH-Patator'
-                                0: 'Benign', 
-                                1: 'Bot', 
-                                2: 'DDoS', 
-                                3: 'DoS', 
-                                4: 'Infiltration', 
-                                5: 'Web Attack', 
-                                6: 'FTP-Patator', 
-                                7: 'SSH-Patator', 
-                                8: 'Heartbleed', 
-                                9: 'PortScan', 
-                                10: 'FTP-BruteForce', 
-                                11: 'SSH-Bruteforce', 
-                                12: 'Backdoor', 
-                                13: 'Injection', 
-                                14: 'Mitm',
-                                15: 'Password',
-                                16: 'Ransomware',
-                                17: 'Scanning',
-                                18: 'XSS'
-                            }  
-            # CICIDS2018 Union
-            elif client_str == "client2"or (client_str == "client2"and str_globalOrlocal == "global_model_local_test"):    
-                class_names_local = {
-                                # 0: '0_BENIGN', 
-                                # 1: '1_Bot', 
-                                # 2: '2_DDoS', 
-                                # 3: '3_DoS GoldenEye', 
-                                # 4: '4_DoS Hulk', 
-                                # 5: '5_DoS Slowhttptest', 
-                                # 6: '6_DoS slowloris', 
-                                # 7: '7_Infilteration', 
-                                # 8: '8_Web Attack',
-                                # 11: '11_FTP-BruteForce', 
-                                # 13: '13_SSH-Bruteforce'
-                                0: 'Benign', 
-                                1: 'Bot', 
-                                2: 'DDoS', 
-                                3: 'DoS', 
-                                4: 'Infiltration', 
-                                5: 'Web Attack', 
-                                6: 'FTP-Patator', 
-                                7: 'SSH-Patator', 
-                                8: 'Heartbleed', 
-                                9: 'PortScan', 
-                                10: 'FTP-BruteForce', 
-                                11: 'SSH-Bruteforce', 
-                                12: 'Backdoor', 
-                                13: 'Injection', 
-                                14: 'Mitm',
-                                15: 'Password',
-                                16: 'Ransomware',
-                                17: 'Scanning',
-                                18: 'XSS'
-                            }  
-            # # CICIDS2019 Union
-            elif client_str == "client3" or (client_str == "client3"and str_globalOrlocal == "global_model_local_test"):    
-                class_names_local = {
-                               0: 'Benign', 
-                                1: 'Bot', 
-                                2: 'DDoS', 
-                                3: 'DoS', 
-                                4: 'Infiltration', 
-                                5: 'Web Attack', 
-                                6: 'FTP-Patator', 
-                                7: 'SSH-Patator', 
-                                8: 'Heartbleed', 
-                                9: 'PortScan', 
-                                10: 'FTP-BruteForce', 
-                                11: 'SSH-Bruteforce', 
-                                12: 'Backdoor', 
-                                13: 'Injection', 
-                                14: 'Mitm',
-                                15: 'Password',
-                                16: 'Ransomware',
-                                17: 'Scanning',
-                                18: 'XSS'
-                            }   
-            #  # CICIDS2017 CICIDS2018 TONIOT Union
-            if str_globalOrlocal == "global_test":
-                class_names_global = {
-                                0: 'Benign', 
-                                1: 'Bot', 
-                                2: 'DDoS', 
-                                3: 'DoS', 
-                                4: 'Infiltration', 
-                                5: 'Web Attack', 
-                                6: 'FTP-Patator', 
-                                7: 'SSH-Patator', 
-                                8: 'Heartbleed', 
-                                9: 'PortScan', 
-                                10: 'FTP-BruteForce', 
-                                11: 'SSH-Bruteforce', 
-                                12: 'Backdoor', 
-                                13: 'Injection', 
-                                14: 'Mitm',
-                                15: 'Password',
-                                16: 'Ransomware',
-                                17: 'Scanning',
-                                18: 'XSS'
-                                }     
         else:
             # 寫法
             # {key: value for key in iterable if condition}
@@ -437,9 +350,11 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
             # iterable：可迭代對象（例如列表、集合等）。
             # if condition（可選）：條件過濾，只有滿足條件的條目才會包含在新字典中。
             # 過濾 class_names 僅保留 labels_to_calculate
-            class_names = {label: class_names[label] for label in labels_to_calculate if label in class_names}
-            # CICIDS2017 Union
-            
+            class_names_local = {label: class_names_local[label] for label in labels_to_calculate if label in class_names_local}
+            class_names_global = {label: class_names_global[label] for label in labels_to_calculate if label in class_names_global}            
+
+        # 初始化宣告df 
+        df_cm = pd.DataFrame(arr, index=class_names_local.values(), columns=class_names_local.values())    
         # df_cm的PD.DataFrame 接受三個參數：
         if str_globalOrlocal == "local_test" or str_globalOrlocal == "global_model_local_test":
             df_cm = pd.DataFrame(arr, index=class_names_local.values(), columns=class_names_local.values())
@@ -482,7 +397,8 @@ def draw_confusion_matrix(y_true, y_pred, str_globalOrlocal, bool_plot_confusion
         # left, right, top, bottom 控制圖像在畫布上的邊距
         plt.subplots_adjust(left=0.2, right=0.8, top=0.9, bottom=0.2)
         # 保存圖像到指定路徑
-        
+        if int_record_round != 0:
+            plt.savefig(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_{str_globalOrlocal}_attack_round_{int_record_round}_confusion_matrix.png")
         plt.savefig(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/{client_str}_epochs_{num_epochs}_{str_globalOrlocal}_confusion_matrix.png")
         plt.close('all')
         # plt.show()
@@ -523,11 +439,13 @@ class FlowerClient(fl.client.NumPyClient):
         self.Previous_Unattack_Global_vs_Local_total_weight_diff_dis = 0 #用於保存上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以距離)
         self.Current_Global_vs_Local_total_weight_diff_dis = 0 #當前回合全局模型與本地端模型間權重差異總和
         self.Previous_and_Current_Local_model_weight_diff_dis = 0 #當前回合本地端模型與上一回合本地端模型權重差異總和
+        self.Previous_and_Current_Global_model_weight_diff_dis = 0 #當前回合全局模型與上一回合全局模型權重差異總和
         self.Previous_diff_dis_Temp = 0
         self.Record_Previous_Global_vs_Local_total_weight_diff_dis = 0
         self.dis_variation = 0
         self.dis_variation_Global_Local = 0
         self.dis_variation_Previous_and_Current_Local_model = 0
+        self.dis_variation_Previous_and_Current_Global_model = 0
         self.Record_dis_variation = 0
         self.Unattck_dis_variation = 0
         self.LastRound_UnattackCounter = 0 # 用來計數最後一次的正常FedAvg後的模型
@@ -540,11 +458,14 @@ class FlowerClient(fl.client.NumPyClient):
         self.Unattck_dis_variation_Global_Local = 0
         self.Unattck_dis_variation_Previous_and_Current_Local_model = 0
         self.Record_Previous_Local_weight_diff_dis = 0
+        self.Record_Previous_Global_weight_diff_dis = 0
         self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = 0
         self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = 0
         self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = 0
         self.dis_smooth_Inital_Local = 0
         self.dis_variation_Inital_Local = 0
+        self.dis_variance_Inital_Local_threshold = 0
+        self.threshold_variance_List = []
         self.UnAttack_dis_variation_Inital_Local = 0
         self.threshold_List = []
         self.each_ten_round_sum = 0
@@ -675,15 +596,18 @@ class FlowerClient(fl.client.NumPyClient):
         self.Record_Previous_Global_vs_Local_total_weight_diff_dis = self.Current_Global_vs_Local_total_weight_diff_dis
         # 需紀錄上一回合Local train後與Local train的模型間權重差異總和，這邊權重可能已遭受到攻擊而汙染
         self.Record_Previous_Local_weight_diff_dis = self.Previous_and_Current_Local_model_weight_diff_dis
+        # 需紀錄上一回合FedAVG後與當前FedAVG後的模型間權重差異總和，這邊權重可能已遭受到攻擊而汙染
+        self.Record_Previous_Global_weight_diff_dis = self.Previous_and_Current_Global_model_weight_diff_dis
         # 需紀錄每一回未Local train後與Local train的模型間權重差異總和，這邊權重可能已遭受到攻擊而汙染
         self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis = self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis
         print(Fore.GREEN+Style.BRIGHT+"Record_Previous_total_FedAVG_weight_sum", self.Record_Previous_total_FedAVG_weight_sum)
         print(Fore.GREEN+Style.BRIGHT+"Record_Previous_Global_vs_Local_total_weight_diff_dis", self.Record_Previous_Global_vs_Local_total_weight_diff_dis)
         print(Fore.GREEN+Style.BRIGHT+"Record_Previous_Local_weight_diff_dis", self.Record_Previous_Local_weight_diff_dis)
+        print(Fore.GREEN+Style.BRIGHT+"Record_Previous_Global_weight_diff_dis", self.Record_Previous_Global_weight_diff_dis)
         print(Fore.GREEN+Style.BRIGHT+"Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis", self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
 
     ##########################################計算兩個模型的每層權重差距 將每層權重差距值相加（以歐基里德距離(distance)計算）##########################################
-    def Euclidean_distance(self,weights_after_Localtrain,After_FedAVG_model,Previous_round_Local_weights):
+    def Euclidean_distance(self,weights_after_Localtrain,After_FedAVG_model,Previous_round_Local_weights,Previous_round_Global_weights):
         # Calculate_Weight_Diffs_Distance_OR_Absolute True表示計算L2範數 False表示計算歐基里德距離
 
         #########################################################################以歐基里德距離#####################################################################
@@ -702,6 +626,13 @@ class FlowerClient(fl.client.NumPyClient):
                                                                                                           "distance",
                                                                                                            False)
 
+        # 計算兩個模型的每層權重差距 當前每一回合全局端模型與上一回合全局模型間權重差異總和(以歐基里德距離)
+        diff_dis_csv_file_path = f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/Global_weight_diffs_dis_{client_str}.csv"
+        weight_diffs_dis, self.Previous_and_Current_Global_model_weight_diff_dis = Calculate_Weight_Diffs_Distance_OR_Absolute(After_FedAVG_model,
+                                                                                                           Previous_round_Global_weights,
+                                                                                                           diff_dis_csv_file_path,
+                                                                                                          "distance",
+                                                                                                           False)
         
         # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
         self.dis_smooth_Global_Local = self.Current_Global_vs_Local_total_weight_diff_dis*0.2 + self.Record_Previous_Global_vs_Local_total_weight_diff_dis*0.8
@@ -717,6 +648,8 @@ class FlowerClient(fl.client.NumPyClient):
         self.dis_variation_Previous_and_Current_Local_model = EvaluateVariation(self.Previous_and_Current_Local_model_weight_diff_dis,
                                                                         self.Record_Previous_Local_weight_diff_dis)
     
+        self.dis_variation_Previous_and_Current_Global_model = EvaluateVariation(self.Previous_and_Current_Global_model_weight_diff_dis,
+                                                                        self.Record_Previous_Global_weight_diff_dis)
     ##########################################計算兩個模型的每層權重差距 將每層權重差距值相加（以歐基里德距離(distance)計算）##########################################
     def Unattack_Euclidean_distance(self,weights_after_Localtrain,Last_round_Unattack_After_FedAVG_model,Last_round_Local_model_unattack):
         # 計算兩個模型的每層權重差距 上一回合聚合後的未受攻擊汙染的全局模型與本地端模型間權重差異總和(以歐基里德距離)
@@ -770,6 +703,8 @@ class FlowerClient(fl.client.NumPyClient):
                                                                                                                      "distance",
                                                                                                                      False)
         
+        # 增加以變化量計算變異數
+        dis_variance_Inital_Local_file_path = f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/dis_variance_Initial_Local_{client_str}"
         # UnAttack_weights_after_Localtrain = weights_after_Localtrain
         # if (not self.bool_Unattack_Judage):
         #     UnAttack_weights_after_Localtrain = torch.load(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/Unattack_AfterLocaltrain.pth")
@@ -784,18 +719,28 @@ class FlowerClient(fl.client.NumPyClient):
         # 類似weight average算法計算閥值 當前回合距離佔20% 上一回合距離佔80%
         self.dis_smooth_Inital_Local = self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis*0.2 + self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis*0.8
 
-        #  算每一回合權重距離變化的百分比  
-            # 百分比變化=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )×100%  
+        #  算每一回合權重距離變化
+        # 變化量=(當前可能受到攻擊的距離−上一回合聚合後的未受攻擊距離/上一回合聚合後的未受攻擊距離 )
         if (not self.bool_Unattack_Judage):
             #  self.UnAttack_dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
             #                                                     self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
             self.dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
                                                                 self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
 
+            # 增加以變化量計算變異數 不能將攻擊發生期間的變化量納入門檻值計算
+            # self.threshold_variance_List.append(self.dis_variation_Inital_Local)
+            # self.dis_variance_Inital_Local_threshold = EvaluateVariance(self.threshold_variance_List,dis_variance_Inital_Local_file_path)
+            # print(Fore.RESET+Back.GREEN+Style.BRIGHT+f"self.dis_variance_Inital_Local_threshold:\t+{str(self.dis_variance_Inital_Local_threshold)}")
+
         else:
             self.dis_variation_Inital_Local = EvaluateVariation(self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,
                                                                 self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis)
             
+            # 增加以變化量計算變異數
+            self.threshold_variance_List.append(self.dis_variation_Inital_Local)
+            self.dis_variance_Inital_Local_threshold = EvaluateVariance(self.threshold_variance_List,dis_variance_Inital_Local_file_path)
+            print(Fore.RESET+Back.GREEN+Style.BRIGHT+f"self.dis_variance_Inital_Local_threshold:\t+{str(self.dis_variance_Inital_Local_threshold)}")
+           
             
         
         # 計算平均10 round的門檻值
@@ -851,10 +796,12 @@ class FlowerClient(fl.client.NumPyClient):
                            "Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,"
                            "UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis,"
                            "dis_variation_Inital_Local,"
+                           "dis_variance_Inital_Local_threshold,"
                            "UnAttack_dis_variation_Inital_Local,"
                            "dis_each_ten_round_sum,"
                            "dis_each_ten_round_average,"
                            "dis_threshold_Inital_Local,"
+                           "dis_variation_Previous_Current_Global,"
                            "dis_smooth_Inital_Local\n")
 
 
@@ -885,77 +832,37 @@ class FlowerClient(fl.client.NumPyClient):
                             f"{self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和（以距離計算）
                             f"{self.Record_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#上一回未訓練本地模型與本地訓練後本地模型（以距離計算）
                             f"{self.UnAttack_Initial_and_AfterLocalTrain_Local_model_weight_diff_dis},"#最後一次正常本地模型 當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
-                            f"{self.dis_variation_Inital_Local},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
+                            f"{self.dis_variation_Inital_Local},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化量（以距離計算）
+                            f"{self.dis_variance_Inital_Local_threshold},"#當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化量門檻值（以距離計算）
                             f"{self.UnAttack_dis_variation_Inital_Local},"#最後一次正常本地模型 當前回合未訓練本地模型與本地訓練後本地模型每層差異總和變化百分比（以距離計算）
                             f"{self.dis_each_ten_round_sum},"#每10回合的當前回合未訓練本地模型與本地訓練後本地模型每層差異總和之加總
                             f"{self.dis_each_ten_round_average},"#每10回合的當前回合未訓練本地模型與本地訓練後本地模型每層差異總和之平均
                             f"{self.dis_threshold_Inital_Local},"#每10回合的當前回合未訓練本地模型與本地訓練後本地模型每層差異總和之平均佔50%+當前回合距離佔50%
+                            f"{self.dis_variation_Previous_and_Current_Global_model},"#上一回全局模型模型與與當前全局模型（以距離計算）
                             f"{self.dis_smooth_Inital_Local}\n")#類似weight average算法計算閥值 當前回合距離佔20% 上一回合模型距離佔80%
 
     def Setting_Adversarial_Attack(self, start_round, end_round,bool_enabel,client_id):
         if bool_enabel:
             print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"client_id: {client_id}")
             if (self.global_round >= start_round and self.global_round <= end_round and client_id == "client1"):
-                # 20250121 CIC-IDS2017 after do labelencode and all featrue minmax 75 25分 do Do feature drop to 79 feature DOFGSM
-                # Non-iid
-                # print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2017 after do labelencode do Drop feature" +f"cicids2017 with normal attack type")
-                # x_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_x.npy", allow_pickle=True)
-                # y_train_attacked = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_FGSM_y.npy", allow_pickle=True)
-                # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.01
-                x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
-                y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.01.npy", allow_pickle=True)
-                # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05.npy", allow_pickle=True)
-                
-                # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.05 use c1 normal model
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05_c1.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05_c1.npy", allow_pickle=True)
-
-                # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.1
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.1.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.1.npy", allow_pickle=True)
-
-                # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.5
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.5.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.5.npy", allow_pickle=True)
-                
-                # CICIDS2017 iid Dirichlet 0.5 c1 to PGD eps 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
-
-                # CICIDS2017 iid Dirichlet 0.5 c1 to GDA sigma 0.5
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/x_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/GDA/Npfile/Dirichlet/y_Dirichlet_client1_GDA_sigma_0.5.npy", allow_pickle=True)
-
-                # CICIDS2017 iid Dirichlet 0.5 c1 to JSMA theta 0.05 gamma 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_theta0.05_gamma_0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_theta0.05_gamma_0.05.npy", allow_pickle=True)
-
-                
-                # CICIDS2017 iid Dirichlet 0.1 c1 to FGSM eps 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_a=0.1_client1_eps0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_a=0.1_client1_eps0.05.npy", allow_pickle=True)
-
-                # CICIDS2017 iid Dirichlet 0.1 c1 to PGD eps 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.1_eps0.05_step_eps_0.05.npy", allow_pickle=True)
-
-                # CICIDS2017 iid Dirichlet 0.1 c1 to JSMA theta 0.05 gamma 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.1_theta0.05_gamma_0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.1_theta0.05_gamma_0.05.npy", allow_pickle=True)
-
-                # CICIDS2018 iid Dirichlet 0.5 c1 to FGSM eps 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/Dirichlet/x_train_Dirichlet_a_0.5_client1_eps0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/Dirichlet/y_train_Dirichlet_a_0.5_client1_eps0.05.npy", allow_pickle=True)
-
-                # CICIDS2018 iid Dirichlet 0.5 c1 to PGD eps 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.5_eps0.05_step_eps_0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.5_eps0.05_step_eps_0.05.npy", allow_pickle=True)
-
-                # CICIDS2018 iid Dirichlet 0.5 c1 to JSMA theta 0.05 gamma 0.05
-                # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Dirichlet/x_train_Dirichlet_client1_a0.5_theta0.05_gamma_0.05.npy", allow_pickle=True)
-                # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Dirichlet/y_train_Dirichlet_client1_a0.5_theta0.05_gamma_0.05.npy", allow_pickle=True)
+                if choose_dataset == "CICIDS2017":
+                    #################################0.1 CICIDS2017 FGSM################################
+                    # CICIDS2017 iid Dirichlet 0.1 c1 to FGSM eps 0.01 use 123 feature mapping normal model
+                    print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.01 by genrate by 123_feature Label merge BaseLine normal model")
+                    x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_eps_0.01_Added_Noniid_Label_x.npy", allow_pickle=True)
+                    y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_eps_0.01_Added_Noniid_Label_y.npy", allow_pickle=True)
+                if choose_dataset == "CICIDS2018":
+                    #################################0.5 CICIDS2018 JSMA################################
+                    # CICIDS2018 iid Dirichlet 0.5 c1 to JSMA theta 0.5 gamma 0.05
+                    print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta0.5/gamma 0.05 by genrate by 123_feature Label merge BaseLine normal model")
+                    x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.5/Noniid/train_Dirichlet_client1_a0.5_theta0.5_gamma_0.05_Added_Noniid_Label_x.npy", allow_pickle=True)
+                    y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.5/Noniid/train_Dirichlet_client1_a0.5_theta0.5_gamma_0.05_Added_Noniid_Label_y.npy", allow_pickle=True)
+                if choose_dataset == "TONIOT":
+                    #################################0.1 TONIOT PGD################################
+                    # TONIOT iid Dirichlet 0.1 c1 to PGD eps 0.01
+                    print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.01 step_eps 0.0002 by genrate by 123_feature Label merge BaseLine normal model")
+                    x_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_Added_Noniid_Label_x.npy", allow_pickle=True)
+                    y_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_Added_Noniid_Label_y.npy", allow_pickle=True)
 
                 x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
                 y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)
@@ -1044,7 +951,9 @@ class FlowerClient(fl.client.NumPyClient):
     def JudageAttack(self):
         # if self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis > self.dis_threshold_Inital_Local*1.1:
         # if self.dis_variation_Inital_Local > 1:# 不超過原本距離的變化之1倍
-        if self.dis_variation_Inital_Local > 0.5:# 不超過原本距離的變化之1倍
+        # if self.dis_variation_Inital_Local > 0.5:# 不超過原本距離的變化之1倍
+        # if self.dis_variation_Inital_Local > self.dis_variance_Inital_Local_threshold:# 不超過原本距離的變異數之最大值2倍
+        if self.dis_variation_Inital_Local > 0.5:# 不超過原本距離的變異數之最大值0.3倍固定測試
 
             print(Fore.RED+Style.BRIGHT+Back.CYAN+f"global_round_{self.global_round}_occur Attack!!!")
             print(Fore.RED+Style.BRIGHT+Back.CYAN+f"Initial_and_AfterLocalTrain_Local_model_weight_diff_dis:{self.Initial_and_AfterLocalTrain_Local_model_weight_diff_dis}")
@@ -1121,8 +1030,8 @@ class FlowerClient(fl.client.NumPyClient):
         #####################################################對抗式攻擊設定#################################################   
         # True表示設定攻擊 Fasle表示使用正常資料
         # trainloader = self.Setting_Adversarial_Attack(start_attack_round, end_attack_round,True,self.client_id)
-        trainloader = self.Setting_Adversarial_Attack(start_attack_round, end_attack_round,False,self.client_id)
-        # trainloader = self.Setting_Adversarial_Attack(start_attack_round, end_attack_round,set_attack,self.client_id)
+        # trainloader = self.Setting_Adversarial_Attack(start_attack_round, end_attack_round,False,self.client_id)
+        trainloader = self.Setting_Adversarial_Attack(start_attack_round, end_attack_round,set_attack,self.client_id)
         # 紀錄攻擊開始前後的report
         # +1是因為這邊是初始權重剛下載下來還未Local train，攻擊會在Local train後才生效
         if self.global_round == (start_attack_round):
@@ -1183,7 +1092,12 @@ class FlowerClient(fl.client.NumPyClient):
         # 用當前回合的全局模型和當前訓練後本地模型
         # 用前一次的本地模型和當前訓練後本地模型
         ####################################################歐基里德距離-模型每層差異求總和#################################################  
-        self.Euclidean_distance(weights_after_Localtrain,After_FedAVG_model,Previous_round_Local_weights)
+        if self.global_round > 1:
+            Previous_round_Global_weights = torch.load(f'./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/gobal_model_Before_local_train_model_round_{self.global_round-1}.pth')
+        else:
+            Previous_round_Global_weights = net.state_dict()  # 避免第一輪讀取不存在的檔案
+        
+        self.Euclidean_distance(weights_after_Localtrain,After_FedAVG_model,Previous_round_Local_weights,Previous_round_Global_weights)
         ####################################################歐基里德距離-模型每層差異求總和#################################################  
         
         ###################################################未本地訓練階段與本地訓練後差異#################################################
@@ -1205,7 +1119,7 @@ class FlowerClient(fl.client.NumPyClient):
             #     Last_round_Unattack_After_FedAVG_model = torch.load(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/fedavg_unattack_124.pth")
             #     Last_round_Local_model_unattack = torch.load(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/Last_round_Local_model_unattack_124.pth")
             self.Last_round_Local_model_unattack = torch.load(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/Unattack_AfterLocaltrain.pth")
-            self.Last_round_Unattack_After_FedAVG_model = torch.load(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/Force_Save_fedavg_unattack_{start_attack_round-1}.pth")
+            # self.Last_round_Unattack_After_FedAVG_model = torch.load(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/Force_Save_fedavg_unattack_{start_attack_round-1}.pth")
 
             ####################################################歐基里德距離-模型每層差異求總和#################################################  
             self.Unattack_Euclidean_distance(weights_after_Localtrain,self.Last_round_Unattack_After_FedAVG_model,self.Last_round_Local_model_unattack)
@@ -1249,7 +1163,9 @@ class FlowerClient(fl.client.NumPyClient):
         # 若accuracy大於0.9表示攻擊結束
         # if self.Local_train_accuracy >= 0.9:
         # 不行用accuracy來判斷攻擊是否結束因為 當節點資料量很少並發生攻擊時accuracy也是在0.9左右並持續下降
-        if self.dis_variation_Inital_Local < 1:# 不超過原本距離的變化之1倍表示攻擊結束
+        # if self.dis_variation_Inital_Local < 1:# 不超過原本距離的變化之1倍表示攻擊結束
+        # if self.dis_variation_Inital_Local < self.dis_variance_Inital_Local_threshold:# 變異量不超過原本距離的變異數之最大值2倍表示攻擊結束
+        if self.dis_variation_Inital_Local < 0.5:# 變異量不超過原本距離的變異數之最大值2倍表示攻擊結束
             self.bool_Unattack_Judage = True
             self.Record_UnAttack_counter = 0
 
@@ -1348,8 +1264,8 @@ net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 
 # 启动Flower客户端
 fl.client.start_numpy_client(
-    # server_address="127.0.0.1:53388",
-    server_address="192.168.1.137:53388",
+    server_address="127.0.0.1:53388",
+    # server_address="192.168.1.137:53388",
     client=FlowerClient(),
     
 )
