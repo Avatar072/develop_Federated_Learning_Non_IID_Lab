@@ -845,24 +845,38 @@ class FlowerClient(fl.client.NumPyClient):
         if bool_enabel:
             print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"client_id: {client_id}")
             if (self.global_round >= start_round and self.global_round <= end_round and client_id == "client1"):
-                if choose_dataset == "CICIDS2017":
+                # if choose_dataset == "CICIDS2017":
                     #################################0.1 CICIDS2017 FGSM################################
                     # CICIDS2017 iid Dirichlet 0.1 c1 to FGSM eps 0.01 use 123 feature mapping normal model
-                    print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.01 by genrate by 123_feature Label merge BaseLine normal model")
-                    x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_eps_0.01_Added_Noniid_Label_x.npy", allow_pickle=True)
-                    y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_eps_0.01_Added_Noniid_Label_y.npy", allow_pickle=True)
+                    # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.01 by genrate by 123_feature Label merge BaseLine normal model")
+                    # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_eps_0.01_Added_Noniid_Label_x.npy", allow_pickle=True)
+                    # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_eps_0.01_Added_Noniid_Label_y.npy", allow_pickle=True)
+                    #################################0.5 CICIDS2017 FGSM################################
+                    # CICIDS2017 iid Dirichlet 0.5 c1 to FGSM eps 0.01 use 123 feature mapping normal model
+                    # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.01 by genrate by 123_feature Label merge BaseLine normal model")
+                    # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/a_0.5/Noniid/train_Dirichlet_client1_a0.5_eps_0.01_Added_Noniid_Label_x.npy", allow_pickle=True)
+                    # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/Dirichlet/123_feature/a_0.5/Noniid/train_Dirichlet_client1_a0.5_eps_0.01_Added_Noniid_Label_y.npy", allow_pickle=True)
+                    #################################total CICIDS2017 JSMA################################
+                    # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta =0.01 by genrate by 123_feature Label merge BaseLine normal model")
+                    # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Noniid/train_CICIDS2017_theta0.01_gamma_0.05_Added_Noniid_Label_x.npy", allow_pickle=True)
+                    # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/Noniid/train_CICIDS2017_theta0.01_gamma_0.05_Added_Noniid_Label_y.npy", allow_pickle=True)
+
                 if choose_dataset == "CICIDS2018":
                     #################################0.5 CICIDS2018 JSMA################################
                     # CICIDS2018 iid Dirichlet 0.5 c1 to JSMA theta 0.5 gamma 0.05
-                    print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta0.5/gamma 0.05 by genrate by 123_feature Label merge BaseLine normal model")
-                    x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.5/Noniid/train_Dirichlet_client1_a0.5_theta0.5_gamma_0.05_Added_Noniid_Label_x.npy", allow_pickle=True)
-                    y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.5/Noniid/train_Dirichlet_client1_a0.5_theta0.5_gamma_0.05_Added_Noniid_Label_y.npy", allow_pickle=True)
-                if choose_dataset == "TONIOT":
-                    #################################0.1 TONIOT PGD################################
-                    # TONIOT iid Dirichlet 0.1 c1 to PGD eps 0.01
-                    print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.01 step_eps 0.0002 by genrate by 123_feature Label merge BaseLine normal model")
-                    x_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_Added_Noniid_Label_x.npy", allow_pickle=True)
-                    y_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_Added_Noniid_Label_y.npy", allow_pickle=True)
+                    # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta0.5/gamma 0.05 by genrate by 123_feature Label merge BaseLine normal model")
+                    # x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.5/Noniid/train_Dirichlet_client1_a0.5_theta0.5_gamma_0.05_Added_Noniid_Label_x.npy", allow_pickle=True)
+                    # y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Dirichlet/123_feature/a_0.5/Noniid/train_Dirichlet_client1_a0.5_theta0.5_gamma_0.05_Added_Noniid_Label_y.npy", allow_pickle=True)
+                    #################################total CICIDS2018 JSMA################################
+                    print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta =0.01 by genrate by 123_feature Label merge BaseLine normal model")
+                    x_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Noniid/train_CICIDS2018_theta0.01_gamma_0.05_Added_Noniid_Label_x.npy", allow_pickle=True)
+                    y_train_attacked = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/Noniid/train_CICIDS2018_theta0.01_gamma_0.05_Added_Noniid_Label_y.npy", allow_pickle=True)
+                # if choose_dataset == "TONIOT":
+                #     #################################0.1 TONIOT PGD################################
+                #     # TONIOT iid Dirichlet 0.1 c1 to PGD eps 0.01
+                #     print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.01 step_eps 0.0002 by genrate by 123_feature Label merge BaseLine normal model")
+                #     x_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_Added_Noniid_Label_x.npy", allow_pickle=True)
+                #     y_train_attacked = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/Noniid/train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_Added_Noniid_Label_y.npy", allow_pickle=True)
 
                 x_train_attacked = torch.from_numpy(x_train_attacked).type(torch.FloatTensor).to(DEVICE)
                 y_train_attacked = torch.from_numpy(y_train_attacked).type(torch.LongTensor).to(DEVICE)

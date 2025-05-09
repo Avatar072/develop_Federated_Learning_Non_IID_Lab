@@ -106,9 +106,9 @@ def SettingAderversarialConfig(choose_dataset):
         # 設定 FGSM 攻擊 eps
         # epsilons = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1.0]
         # epsilons = [0.01, 0.5, 1.0]
-        # epsilons = [0.01]
+        epsilons = [0.01]
         # epsilons = [0.05]
-        epsilons = [0.5]
+        # epsilons = [0.5]
         # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\single_AnalyseReportFolder\\CICIDS2018\\20250106\\only_minmax\\BaseLine_After_local_train_model_bk.pth'
         # D:\develop_Federated_Learning_Non_IID_Lab\single_AnalyseReportFolder\CICIDS2018\20250106\only_minmax\BaseLine\normal
         labelCount = 8
@@ -127,9 +127,9 @@ def SettingAderversarialConfig(choose_dataset):
         # all_feature_minmax
         # 設定 FGSM 攻擊 eps
         # epsilons = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1.0]
-        # epsilons = [0.01]
+        epsilons = [0.01]
         # epsilons = [0.05]
-        epsilons = [0.5]
+        # epsilons = [0.5]
 
         labelCount = 10
         print(Fore.BLUE+Style.BRIGHT+"Loading TONIOT" +f" with normal After Do labelencode and minmax and 44 featuremapping 123 feature")

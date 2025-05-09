@@ -13,15 +13,22 @@ def CICIDS2017_NonIID_ChooseLoadNpArray(filepath,split_file, Choose_method):
 
     if split_file == 'client1_train':
         if (Choose_method == 'normal'):
+            
+            # 使用total train 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017 total train" +f"{split_file} with normal After Do labelencode and minmax 79 feature do feature mapping to 123 feature")
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_y.npy", allow_pickle=True)
+
+
             # # 20250317使用是a=0.1 123 feature
             # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do labelencode and minmax and a=0.1 123 feature do Label group")
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250317\\alpha_0.1\\Noniid\\client1_Dirichlet_Added_Noniid_Label_x.npy", allow_pickle=True)
             # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250317\\alpha_0.1\\Noniid\\client1_Dirichlet_Added_Noniid_Label_y.npy", allow_pickle=True)
 
-            # # 20250317使用是a=0.5 123 feature
-            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do labelencode and minmax and a=0.5 123 feature do Label group")
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250317\\alpha_0.5\\Noniid\\client1_Dirichlet_Added_Noniid_Label_x.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250317\\alpha_0.5\\Noniid\\client1_Dirichlet_Added_Noniid_Label_y.npy", allow_pickle=True)
+            # # # 20250317使用是a=0.5 123 feature
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2017" +f"{split_file} with normal After Do labelencode and minmax and a=0.5 123 feature do Label group")
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250317\\alpha_0.5\\Noniid\\client1_Dirichlet_Added_Noniid_Label_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Dirichlet\\20250317\\alpha_0.5\\Noniid\\client1_Dirichlet_Added_Noniid_Label_y.npy", allow_pickle=True)
 
 
         print("train_half1 x_train 的形狀:", x_train.shape)
@@ -72,12 +79,17 @@ def CICIDS2018_NonIID_ChooseLoadNpArray(filepath,split_file, Choose_method):
         print("使用 train_half1 進行訓練")
     elif split_file == 'client2_train':
         if (Choose_method == 'normal'):
+            # 使用total train 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018 total train" +f"{split_file} with normal After Do labelencode and minmax 79 feature do feature mapping to 123 feature")
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_featureMapping_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_featureMapping_y.npy", allow_pickle=True)
+
             # 20250329 CICIDS2018 使用a=0.5 after do labelencode 79 feature and all featrue minmax 75 25分
             # 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
             # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\CICIDS2018\csv_data\Dirichlet\20250329
-            print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018 a=0.5" +f"{split_file} with normal After Do labelencode and minmax 79 feature do feature mapping to 123 feature")
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250329\\alpha_0.5\\Noniid\\client2_Dirichlet_Added_Noniid_Label_x.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250329\\alpha_0.5\\Noniid\\client2_Dirichlet_Added_Noniid_Label_y.npy", allow_pickle=True)
+            # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018 a=0.5" +f"{split_file} with normal After Do labelencode and minmax 79 feature do feature mapping to 123 feature")
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250329\\alpha_0.5\\Noniid\\client2_Dirichlet_Added_Noniid_Label_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\csv_data\\Dirichlet\\20250329\\alpha_0.5\\Noniid\\client2_Dirichlet_Added_Noniid_Label_y.npy", allow_pickle=True)
 
         print("train_half2 x_train 的形狀:", x_train.shape)
         print("train_half2 y_train 的形狀:", y_train.shape)
@@ -93,7 +105,6 @@ def CICIDS2018_NonIID_ChooseLoadNpArray(filepath,split_file, Choose_method):
 def TONIOT_NonIID_ChooseLoadNpArray(filepath,split_file, Choose_method):
     if split_file == 'client1_train':
         if (Choose_method == 'normal'):
-            
             # 20250414 TONIOT 使用a=0.1 after do labelencode 44 feature and all featrue minmax 75 25分
             # 44 feature use Label meraged BaseLine data do feature mapping to 123 feature
             # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\TONIOT\Dirichlet\20250414
@@ -107,13 +118,17 @@ def TONIOT_NonIID_ChooseLoadNpArray(filepath,split_file, Choose_method):
         print("使用 train_half1 進行訓練")
     elif split_file == 'client2_train':
         if (Choose_method == 'normal'):
-            
+            print(Fore.BLUE+Style.BRIGHT+"Loading TONIOT total train" +f"{split_file} with normal After Do labelencode and minmax 79 feature do feature mapping to 123 feature")
+            # 44 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\Noniid\\TONIIOT_AddedLabel_featureMapping_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\Noniid\\TONIIOT_AddedLabel_featureMapping_y.npy", allow_pickle=True)
+
             # 20250414 TONIOT 使用a=0.1 after do labelencode 44 feature and all featrue minmax 75 25分
             # 44 feature use Label meraged BaseLine data do feature mapping to 123 feature
             # D:\develop_Federated_Learning_Non_IID_Lab\data\dataset_AfterProcessed\TONIOT\Dirichlet\20250414
-            print(Fore.BLUE+Style.BRIGHT+"Loading TONIOT a=0.1" +f"{split_file} with normal After Do labelencode and minmax 44 feature do feature mapping to 123 feature")
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Dirichlet\\20250414\\alpha_0.1\\Noniid\\client2_Dirichlet_Added_Noniid_Label_x.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Dirichlet\\20250414\\alpha_0.1\\Noniid\\client2_Dirichlet_Added_Noniid_Label_y.npy", allow_pickle=True)
+            # print(Fore.BLUE+Style.BRIGHT+"Loading TONIOT a=0.1" +f"{split_file} with normal After Do labelencode and minmax 44 feature do feature mapping to 123 feature")
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Dirichlet\\20250414\\alpha_0.1\\Noniid\\client2_Dirichlet_Added_Noniid_Label_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Dirichlet\\20250414\\alpha_0.1\\Noniid\\client2_Dirichlet_Added_Noniid_Label_y.npy", allow_pickle=True)
 
         print("train_half2 x_train 的形狀:", x_train.shape)
         print("train_half2 y_train 的形狀:", y_train.shape)

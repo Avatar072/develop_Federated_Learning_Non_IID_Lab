@@ -175,9 +175,9 @@ df["max_squared_difference"] = df["squared_difference"].expanding().max()
 # df["scale_factor"] = df.apply(lambda row: max(1, row['max_squared_difference'] / row['cumulative_mean_max']) * 3, axis=1)
 # df["scale_factor"] = max(1, scale_factor ) * 3
 # *k倍
-df["Delta_K_2"]=0.5*df["max_squared_difference"]*2+0.5*2
-df["Delta_K_3"]=0.5*df["max_squared_difference"]*3+0.5*2
-df["Delta_K_4"]=0.5*df["max_squared_difference"]*4+0.5*2
+df["Delta_K_2"]=0.5*df["max_squared_difference"]*2+0.5*1
+df["Delta_K_3"]=0.5*df["max_squared_difference"]*3+0.5*1
+df["Delta_K_4"]=0.5*df["max_squared_difference"]*4+0.5*1
 # df["Delta_K_5"]=0.5*df["max_squared_difference"]*5+0.50.1*2
 # df["Delta_a=0.1"]=0.5*df["max_squared_difference"]*2+0.5*1
 # df["Delta_a=0.5"]=0.5*df["max_squared_difference"]*2+0.5+0.5*2
