@@ -35,9 +35,9 @@ start_IDS = time.time()
 client_str = "baseline_train"
 Choose_method = "normal"
 num_epochs = 1
-choose_dataset = "CICIDS2017"
+# choose_dataset = "CICIDS2017"
 # choose_dataset = "TONIOT"
-# choose_dataset = "CICIDS2018"
+choose_dataset = "CICIDS2018"
 
 # labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 

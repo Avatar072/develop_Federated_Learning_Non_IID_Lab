@@ -843,6 +843,16 @@ def ChooseUseModel(model_type, input, ouput):
             def __init__(self):
                 super(MLP, self).__init__()
                  # 每層512神經元 for cicids2017
+                # self.layer1 = nn.Linear(input, 512)
+                # self.dropout1 = nn.Dropout(p=0.2)  # 第一層 Dropout
+                # self.fc2 = nn.Linear(512, 512)
+                # self.dropout2 = nn.Dropout(p=0.2)  # 第二層 Dropout
+                # self.fc3 = nn.Linear(512, 512)
+                # self.dropout3 = nn.Dropout(p=0.2)  # 第三層 Dropout
+                # self.fc4 = nn.Linear(512, 512)
+                # self.dropout4 = nn.Dropout(p=0.2)  # 第四層 Dropout
+                # self.layer5 = nn.Linear(512, ouput)
+                # # 每層64神經元 for Toniot
                 self.layer1 = nn.Linear(input, 512)
                 self.dropout1 = nn.Dropout(p=0.2)  # 第一層 Dropout
                 self.fc2 = nn.Linear(512, 512)
@@ -852,12 +862,6 @@ def ChooseUseModel(model_type, input, ouput):
                 self.fc4 = nn.Linear(512, 512)
                 self.dropout4 = nn.Dropout(p=0.2)  # 第四層 Dropout
                 self.layer5 = nn.Linear(512, ouput)
-                # # 每層64神經元 for Toniot
-                # self.layer1 = nn.Linear(input, 64)
-                # self.fc2 = nn.Linear(64, 64)
-                # self.fc3 = nn.Linear(64, 64)
-                # self.fc4 = nn.Linear(64, 64)
-                # self.layer5 = nn.Linear(64, ouput)
                 # # 隱藏層分別配置了 40 、 30 和 15 個神經元 for CICIDS2019
                 # self.layer1 = nn.Linear(input, 40)
                 # self.fc2 = nn.Linear(40, 30)
@@ -868,21 +872,25 @@ def ChooseUseModel(model_type, input, ouput):
             def forward(self, x):
                 # relu激活函数
                 # 输出范围在 (0, max) 之间
-                x = F.relu(self.layer1(x))
-                x = self.dropout1(x)  # 第一層 Dropout
-                x = F.relu(self.fc2(x))
-                x = self.dropout2(x)  # 第二層 Dropout
-                x = F.relu(self.fc3(x))
-                x = self.dropout3(x)  # 第三層 Dropout
-                x = F.relu(self.fc4(x))
-                x = self.dropout4(x)  # 第四層 Dropout
+                # x = F.relu(self.layer1(x))
+                # x = self.dropout1(x)  # 第一層 Dropout
+                # x = F.relu(self.fc2(x))
+                # x = self.dropout2(x)  # 第二層 Dropout
+                # x = F.relu(self.fc3(x))
+                # x = self.dropout3(x)  # 第三層 Dropout
+                # x = F.relu(self.fc4(x))
+                # x = self.dropout4(x)  # 第四層 Dropout
+                
                 # 修改后的代码使用Sigmoid激活函数每層64神經元 for Toniot
                 # 输出范围在 (0, 1) 之间
-                # x = F.sigmoid(self.layer1(x))
-                # x = F.sigmoid(self.fc2(x))
-                # x = F.sigmoid(self.fc3(x))
-                # x = F.sigmoid(self.fc4(x))
-                # x = self.sigmoid(self.output(x))  # 使用 Sigmoid 作為輸出層激活函數
+                x = F.sigmoid(self.layer1(x))
+                x = self.dropout1(x)  # 第一層 Dropout。
+                x = F.sigmoid(self.fc2(x))
+                x = self.dropout2(x)  # 第二層 Dropout
+                x = F.sigmoid(self.fc3(x))
+                x = self.dropout3(x)  # 第三層 Dropout
+                x = F.sigmoid(self.fc4(x))
+                x = self.dropout4(x)  # 第四層 Dropout
                 x = self.layer5(x)
                 return x
         return MLP()  # 返回創建的model instance

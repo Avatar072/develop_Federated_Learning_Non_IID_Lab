@@ -29,8 +29,8 @@ def EvaluateVariance(list_,file_path):
             print(f"will add next value\nlist_[{idx+1}]: {list_[idx+1]}")
         
         # # 取小數點後兩位
-        # add_value  = round(add_value, 4)
-        # mean_value = round(mean_value, 4)
+        add_value  = round(add_value, 4)
+        mean_value = round(mean_value, 4)
         print(f"current added_value: {add_value:.5f}")
         print(f"current mean_value: {mean_value:.5f}")
         # 找累加值
@@ -52,7 +52,9 @@ def EvaluateVariance(list_,file_path):
 
         variance_square = round(variance_square, 5)
         variance_square_List.append(variance_square)
-        variance_square_threshold = variance_square*2 #*2表示允許範圍值
+        # variance_square_threshold = variance_square*2 #*2表示允許範圍值
+        variance_square_threshold = variance_square*3 #*3表示允許範圍值
+        # variance_square_threshold = variance_square*4 #*4表示允許範圍值
         variance_square_threshold = round(variance_square_threshold, 5)
         variance_square_Threshold_List.append(variance_square_threshold)
         variance_square_Threshold_List_max = np.max(variance_square_Threshold_List)
@@ -176,11 +178,11 @@ def EvaluateVariance(list_,file_path):
 
 
 # 測試區
-file_path = "./1245"
+# file_path = "./1245"
 
-# 假設數據
-df = pd.read_csv("E:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250319\\CICIDS2017_use_20250205_data_merge_label_FGSM_eps0.05測試_79_feature\\Inital_Local_weight_diff_client1.csv")
-# list_
-# list_ = df["dis_variation_Inital_Local"].head(10)
-list_ = df["dis_variation_Inital_Local"].head(126)
-test = EvaluateVariance(list_,file_path)
+# # 假設數據
+# df = pd.read_csv("E:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250319\\CICIDS2017_use_20250205_data_merge_label_FGSM_eps0.05測試_79_feature\\Inital_Local_weight_diff_client1.csv")
+# # list_
+# # list_ = df["dis_variation_Inital_Local"].head(10)
+# list_ = df["dis_variation_Inital_Local"].head(126)
+# test = EvaluateVariance(list_,file_path)

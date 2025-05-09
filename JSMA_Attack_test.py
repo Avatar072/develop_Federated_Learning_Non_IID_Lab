@@ -30,8 +30,8 @@ client_str = "baseline_train"
 Choose_method = "normal"
 num_epochs = 1
 # choose_dataset = "CICIDS2017"
-# choose_dataset = "TONIOT"
-choose_dataset = "CICIDS2018"
+choose_dataset = "TONIOT"
+# choose_dataset = "CICIDS2018"
 
 # 設定設備
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -43,6 +43,32 @@ current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
 
 # 傳入Adversarial_Attack相關參數
 epsilons, model_path, labelCount, class_names, labels_to_calculate, x_train, y_train, x_test, y_test = SettingAderversarialConfig(choose_dataset)
+
+# x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_x.npy", allow_pickle=True)
+# y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_y.npy", allow_pickle=True)
+# CICIDS2017 total train after featuremapping
+# x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLday_train_featureMapping_20250317.npy", allow_pickle=True)
+# y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLday_train_featureMapping_20250317.npy", allow_pickle=True)
+
+# CICIDS2018 total triain
+# print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f" with normal After Do labelencode and minmax do Label meraged and feature mapping")
+# x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_featureMapping_20250317.npy", allow_pickle=True)
+# y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_featureMapping_20250317.npy", allow_pickle=True)
+# # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_featureMapping_20250317_ChangeLabelencode.npy", allow_pickle=True)
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_featureMapping_20250317.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250317.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250317_ChangeLabelencode.npy", allow_pickle=True)
+
+# TONIOT total triain
+# 20250317 TONIoT after do labelencode and all featrue minmax 75 25分 44 feature do backdoor和ddos互相更換encode值 feature mapping to 123 feature
+print(Fore.BLUE+Style.BRIGHT+"Loading TONIOT" +f" with normal After Do labelencode and minmax do Label meraged and feature mapping")
+x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)
+y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)   
+# y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)   
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)   
+
+
 # 轉換為張量
 x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
 y_train = torch.from_numpy(y_train).type(torch.LongTensor)
@@ -117,7 +143,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon 
         else:
             str_epsilon = f"epsilon_{epsilon}"
             plt.savefig(f"{save_filepath}/{str_epsilon}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
-        plt.show()
+        # plt.show()
 
 def save_to_csv(data, filepath):
     df = pd.DataFrame(data)
@@ -196,7 +222,9 @@ def test(net,testloader, start_time, client_str,plot_confusion_matrix):
             RecordAccuracy = ()
            
             for i in range(labelCount):
-                RecordRecall = RecordRecall + (acc[str(i)]['recall'],)
+                label_str = str(i)  # 將標籤轉為字串
+                if label_str in acc:  # 檢查標籤是否存在於分類報告中
+                    RecordRecall = RecordRecall + (acc[str(i)]['recall'],)
                  
             RecordAccuracy = RecordAccuracy + (accuracy, time.time() - start_time,)
             RecordRecall = str(RecordRecall)[1:-1]
@@ -423,42 +451,36 @@ def main():
     )
 
     # 設定 JSMA 攻擊
-    # for epsilon in epsilons:
-    #     attack = ProjectedGradientDescent(
-    #         estimator=classifier,
-    #         eps=epsilon,
-    #         eps_step=0.5,
-    #         max_iter=10,
-    #         targeted=False,
-    #         num_random_init=0
-    #     )
-    # for epsilon in epsilons:
-    #     attack = FastGradientMethod(
-    #         estimator=classifier,
-    #         eps=epsilon
-    #     )
-    # for epsilon in epsilons:
-    #     attack = BasicIterativeMethod(
-    #         estimator=classifier,
-    #         eps=epsilon,
-    #         eps_step=0.01,  # 每步的步長，可以根據需求調整
-    #         max_iter=10     # JSMA 的迭代次數
-    #     )
-    # 設定 JSMA 攻擊
     # `theta` 控制修改幅度（-1到1的範圍），`gamma` 控制最大修改比例
     # for epsilon in epsilons:
+    #     # 重新載入原始模型！重要！
+    #     # 確保每次攻擊都是基於原始未被修改的模型，避免前一次攻擊的殘留影響。
+    #     model.load_state_dict(torch.load(model_path))
+
     #     attack = SaliencyMapMethod(
     #         classifier=classifier,
-    #         theta=0.1,        # 控制每次修改的步幅
-    #         gamma=epsilon       # 控制修改的最大比例
+    #         theta=epsilon,        # 控制每次修改的步幅
+    #         gamma=0.05       # 控制修改的最大比例
     #     )
 
+    #     # test執行攻擊並評估
+    #     # acc, successful_attacks = JSMA_attack_evaluation(
+    #     #         model, DEVICE, test_loader, classifier, attack, save_dir, epsilon, False
+    #     # )
+
+    #     # train執行攻擊並評估
+    #     acc, successful_attacks = JSMA_attack_evaluation(
+    #             model, DEVICE, train_loader, classifier, attack, save_dir, epsilon, True
+
+    #     )
+    
+    # 不用for為只生成一次攻擊的寫法
     attack = SaliencyMapMethod(
             classifier=classifier,       
-            theta=0.05, # 控制每次修改的步幅
+            theta=0.01, # 控制每次修改的步幅
             gamma=0.05# 控制修改的最大比例
         )
-        # test執行攻擊並評估
+    #     test執行攻擊並評估
     # acc, successful_attacks = JSMA_attack_evaluation(
     #         model, DEVICE, test_loader, classifier, attack, save_dir, epsilons[0], False
     #     )
@@ -466,6 +488,7 @@ def main():
         # train執行攻擊並評估
     acc, successful_attacks = JSMA_attack_evaluation(
             model, DEVICE, train_loader, classifier, attack, save_dir, epsilons[0], True
+
         )
         
         # 模型權重需經過訓練後才會發生變化
