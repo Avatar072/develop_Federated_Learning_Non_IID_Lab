@@ -366,8 +366,9 @@ net = ChooseUseModel("MLP", x_train.shape[1], labelCount).to(DEVICE)
 # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\Force_Save_fedavg_unattack_24.pth'
 # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\Local_model_After_local_train_25.pth'
 # model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\Local_model_After_local_train_40.pth'
-model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\BaseLine_After_local_train_model_bk.pth'
-
+# model_path = 'D:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250225\\BaseLine_After_local_train_model_bk.pth'
+model_path = 'E:\\develop_Federated_Learning_Non_IID_Lab\\FL_AnalyseReportfolder\\20250219\\Local_model_After_local_train_model_300_bk.pth'
+# E:\develop_Federated_Learning_Non_IID_Lab\FL_AnalyseReportfolder\20250219
 
 
 

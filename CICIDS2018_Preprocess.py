@@ -430,6 +430,17 @@ def DoBaselinesplit(df,train_dataframes,test_dataframes):
     train_dataframes = pd.concat([train_dataframes,train_label_SQL_Injection])
     return train_dataframes,test_dataframes
 
+def DoBaselinesplitAfter_LabelMerge(df,train_dataframes,test_dataframes):
+    List_train_Label = []
+    List_test_Label = []
+    for i in range(8):
+        train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
+        List_train_Label.append(train_label_split)
+        List_test_Label.append(test_label_split)         
+
+    train_dataframes = pd.concat(List_train_Label)
+    test_dataframes = pd.concat(List_test_Label)
+    return train_dataframes,test_dataframes
 # do Labelencode and minmax 
 def DoSplitAllfeatureAfterMinMax(df,choose_merge_days,bool_Noniid):  
     train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%
@@ -896,7 +907,7 @@ def forBaseLineUseData(choose_merge_days,bool_Noniid):
 # True for BaseLine
 # False for Noniid
 # forBaseLineUseData("csv_data",False)
-forBaseLineUseData("csv_data",True)
+# forBaseLineUseData("csv_data",True)
 # forBaseLineUseBinaryData("csv_data",True)
 
 # DoAllfeatureOrSelectfeature(afterminmax_dataset,False)

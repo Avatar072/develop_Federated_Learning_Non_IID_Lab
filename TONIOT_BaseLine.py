@@ -54,17 +54,17 @@ print(Fore.YELLOW+Style.BRIGHT+f"Choose_method: {Choose_method}")
 
 # 載入train
 # 正常
-# Choose_Attacktype = "normal"
-# Choose_Attacktype = Choose_method
-# Attack_method = None
+Choose_Attacktype = "normal"
+Choose_Attacktype = Choose_method
+Attack_method = None
 
 # Evasion_Attack
 # Choose_Attacktype = "Evasion_Attack"
 # Choose_Attacktype = Choose_method
 # Attack_method = "JSMA"
 
-Choose_Attacktype = "Poisoning_Attack"
-Attack_method = "Backdoor"
+# Choose_Attacktype = "Poisoning_Attack"
+# Attack_method = "Backdoor"
 x_train, y_train, client_str  =ChooseLoadTrainNpArray(Load_dataset, split_file, filepath, Choose_Attacktype, Attack_method)
 
 # 載入test
@@ -193,6 +193,12 @@ def test(net, testloader, start_time, client_str,plot_confusion_matrix):
 
             # 標誌來跟踪是否已經添加了標題行
             header_written = False
+            with open(f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/{Choose_method}/loss-baseline_{client_str}.csv", "a+") as file:
+                if not header_written:
+                    # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
+                    header_written = True
+                file.write(str(ave_loss) + "\n")
+            
             with open(f"./single_AnalyseReportFolder/TONIOT/{today}/{current_time}/{client_str}/{Choose_method}/recall-baseline_{client_str}.csv", "a+") as file:
                 if not header_written:
                     # file.write("標籤," + ",".join([str(i) for i in range(labelCount)]) + "\n")
@@ -230,31 +236,18 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         arr = confusion_matrix(y_true, y_pred)
         #TONIoT
         class_names = {
-                        # 0: 'BENIGN', 
+                        # 0: 'Benign', 
                         # 1: 'DDoS', 
-                        0: 'normal', 
-                        1: 'ddoS',
-                        2: 'backdoor', 
-                        3: 'dos', 
-                        4: 'injection', 
-                        5: 'mitm', 
-                        6: 'password', 
-                        7: 'ransomware', 
-                        8: 'scanning', 
-                        9: 'xss', 
-                        # 10: '10_PortScan', 
-                        # 11: '11_SSH-Patator', 
-                        # 12: '12_Web Attack Brute Force', 
-                        # 13: '13_Web Attack Sql Injection', 
-                        # 14: '14_Web Attack XSS'
-                        # 15: '15_backdoor',
-                        # 16: '16_dos',
-                        # 17: '17_injection',
-                        # 18: '18_mitm',
-                        # 19: '19_password',
-                        # 20: '20_ransomware',
-                        # 21: '21_scanning',
-                        # 22: '22_xss'
+                        0: 'Normal', 
+                        1: 'Backdoor',
+                        2: 'DDoS', 
+                        3: 'Dos', 
+                        4: 'Injection', 
+                        5: 'Mitm', 
+                        6: 'Password', 
+                        7: 'Ransomware', 
+                        8: 'Scanning', 
+                        9: 'XSS'
                         } 
         # df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names)
         df_cm = pd.DataFrame(arr, index=class_names.values(), columns=class_names.values())

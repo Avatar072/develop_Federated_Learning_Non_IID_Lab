@@ -747,6 +747,34 @@ def DoBaselinesplit(df,train_dataframes,test_dataframes):
     print("test",test_dataframes['Label'].value_counts())
     return train_dataframes,test_dataframes
 
+def DoBaselinesplitAfter_LabelMerge(df,train_dataframes,test_dataframes):
+    # 把Label encode mode  分別取出Label的數據分 train:75% test:25%
+    List_train_Label = []
+    List_test_Label = []
+    for i in range(10):
+        # 4:Infiltration 8:Heartbleed                
+        if i == 4 or i == 8:
+            continue
+        train_label_split, test_label_split = splitweakLabelbalance(i,df,0.25)
+        List_train_Label.append(train_label_split)
+        List_test_Label.append(test_label_split)         
+
+    train_dataframes = pd.concat(List_train_Label)
+    test_dataframes = pd.concat(List_test_Label)
+
+    # Label encode mode  分別取出Label等於4、8的數據 對6633分
+    train_label_Infiltration, test_label_Infiltration = splitweakLabelbalance(4,df,0.33)
+    train_label_Heartbleed, test_label_Heartbleed = splitweakLabelbalance(8,df,0.33)
+
+    # # 刪除Label相當於4、8的行
+    test_dataframes = test_dataframes[~test_dataframes['Label'].isin([4, 8])]
+    train_dataframes = train_dataframes[~train_dataframes['Label'].isin([4, 8])]
+    # 合併Label4、8回去
+    test_dataframes = pd.concat([test_dataframes, test_label_Heartbleed, test_label_Infiltration])
+    train_dataframes = pd.concat([train_dataframes,train_label_Heartbleed, train_label_Infiltration])
+    print("test",test_dataframes['Label'].value_counts())
+    return train_dataframes,test_dataframes
+
 # do Labelencode and minmax 
 def DoSplitAllfeatureAfterMinMax(df,choose_merge_days,bool_Noniid):  
     train_dataframes, test_dataframes = train_test_split(df, test_size=0.2, random_state=42)#test_size=0.2表示将数据集分成测试集的比例为20%

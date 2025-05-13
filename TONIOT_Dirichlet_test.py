@@ -7,18 +7,16 @@ from mytoolfunction import generatefolder,SaveDataframeTonpArray
 
 # 設定檔案路徑（請根據實際情況調整）
 filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
-# csv_path = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\20250121\\Deleted79features\\10000筆資料\\ALLDay_train_dataframes_Deleted79features_20250121.csv"
-# 79feature_mapping到123
-csv_path = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\featureMapping\\20250317\\79feature_mapping到123\\ALLday_train_dataframes_featureMapping_20250317.csv"
-
+# 44feature_mapping到123
+csv_path = filepath + "\\dataset_AfterProcessed\\TONIOT\\featureMapping\\20250317\\原44feature_mapping到123\\TONIOT_train_dataframes_featureMapping_20250317.csv"
 today = datetime.date.today()
 today = today.strftime("%Y%m%d")
 current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
 # 在D:\\Labtest20230911\\data\\dataset_original產生天日期的資料夾
 generatefolder(filepath + "\\", "dataset_AfterProcessed")
-generatefolder(filepath + "\\dataset_AfterProcessed\\", "CICIDS2017")
-generatefolder(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\", today)
-generatefolder(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\", current_time)
+generatefolder(filepath + "\\dataset_AfterProcessed\\", "TONIOT")
+generatefolder(filepath + "\\dataset_AfterProcessed\\TONIOT\\Dirichlet\\", today)
+generatefolder(filepath + f"\\dataset_AfterProcessed\\TONIOT\\Dirichlet\\{today}\\", current_time)
 
 
 # 讀取 CSV 檔案
@@ -31,8 +29,8 @@ print(df_grouped)
 
 # 設定 Dirichlet 分布的 alpha 值
 # 20250205
-# alpha = 0.5
-alpha = 0.1
+alpha = 0.5
+# alpha = 0.1
 # alpha = 5.0
 
 # 用來儲存分配後，各 client 的資料索引
@@ -79,7 +77,7 @@ print(df_client2['Label'].value_counts())
 print(sum(df_client2['Label'].value_counts()))
 
 # filepath = "D:\\develop_Federated_Learning_Non_IID_Lab\\data"
-df_client1.to_csv(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\{current_time}\\client1.csv", index=False)
-df_client2.to_csv(filepath + f"\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\{current_time}\\client2.csv", index=False)
-SaveDataframeTonpArray(df_client1, f"{filepath}\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\{current_time}\\", "Dirichlet_client1",today)
-SaveDataframeTonpArray(df_client2, f"{filepath}\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Dirichlet\\{today}\\{current_time}\\", "Dirichlet_client2",today)
+df_client1.to_csv(filepath + f"\\dataset_AfterProcessed\\TONIOT\\Dirichlet\\{today}\\{current_time}\\client1.csv", index=False)
+df_client2.to_csv(filepath + f"\\dataset_AfterProcessed\\TONIOT\\Dirichlet\\{today}\\{current_time}\\client2.csv", index=False)
+SaveDataframeTonpArray(df_client1, f"{filepath}\\dataset_AfterProcessed\\TONIOT\\Dirichlet\\{today}\\{current_time}\\", "Dirichlet_client1",today)
+SaveDataframeTonpArray(df_client2, f"{filepath}\\dataset_AfterProcessed\\TONIOT\\Dirichlet\\{today}\\{current_time}\\", "Dirichlet_client2",today)

@@ -35,9 +35,9 @@ start_IDS = time.time()
 client_str = "baseline_train"
 Choose_method = "normal"
 num_epochs = 1
-choose_dataset = "CICIDS2017"
+# choose_dataset = "CICIDS2017"
 # choose_dataset = "TONIOT"
-# choose_dataset = "CICIDS2018"
+choose_dataset = "CICIDS2018"
 
 # labels_to_calculate = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 
@@ -129,7 +129,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False,epsilon 
         else:
             str_epsilon = f"epsilon_{epsilon}"
             plt.savefig(f"{save_filepath}/{str_epsilon}/{client_str}_epochs_{num_epochs}_epsilon_{epsilon}_confusion_matrix.png")
-        plt.show()
+        # plt.show()
 
 def save_to_csv(data, filepath):
     df = pd.DataFrame(data)

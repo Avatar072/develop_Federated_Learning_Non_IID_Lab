@@ -352,8 +352,13 @@ def ChooseLoadNpArray(filepath,split_file, Choose_method):
             # 20250113 CIC-IDS2017 after do labelencode all featrue minmax 75 25分 do PCA Non-iid 
             # 20250121 CIC-IDS2017 after do labelencode and all featrue minmax 75 25分 do Do feature drop to 79 feature 
             # Non-iid
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_x.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_y.npy", allow_pickle=True)
+
+            # 20250317 CIC-IDS2017 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+            # 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_y.npy", allow_pickle=True)
 
         elif (Choose_method == 'SMOTE'):
             # # # # 20240317 Chi-square 45 SMOTE  K=5         
@@ -448,9 +453,13 @@ def ChooseLoadNpArray(filepath,split_file, Choose_method):
             # 20250113 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do PCA Non-iid
             # 20250121 CIC-IDS2018 after do labelencode and all featrue minmax 75 25分 do Do feature drop to 79 feature 
             # Non-iid
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_x.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_y.npy", allow_pickle=True)
-            
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            # 20250317 CIC-IDS2018 after do labelencode and except str and drop feature to 79 feature and all featrue minmax 75 25分
+            # 79 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_featureMapping_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\Noniid\\CICIDS2018_AddedLabel_Noniid_featureMapping_y.npy", allow_pickle=True)
+
         elif (Choose_method == 'SMOTE'):
             # # # 20240317 Chi-square 45 SMOTE  K=5          
             # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\Tuesday_and_Wednesday_and_Thursday\\x_train_half2_SMOTE_Tuesday_and_Wednesday_and_Thursday_ALL_Label_20240317.npy", allow_pickle=True)
@@ -545,10 +554,13 @@ def ChooseLoadNpArray(filepath,split_file, Choose_method):
             
             # 20250121 01-12 and 03-11 merge ALLDay CIC-IDS2019 after do labelencode  and all featrue minmax 75 25分 Do feature drop to 79 feature 
             # Non-iid
-            print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do feature drop" +f"{split_file} with normal attack type")
-            x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_x.npy", allow_pickle=True)
-            y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_y.npy", allow_pickle=True)
-            
+            # print(Fore.GREEN+Style.BRIGHT+"Loading CICIDS2019 after do labelencode do feature drop" +f"{split_file} with normal attack type")
+            # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_x.npy", allow_pickle=True)
+            # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2019\\ALLDay\\Npfile\\Noniid\\CICIDS2019_AddedLabel_Noniid_y.npy", allow_pickle=True)
+            # 20250317 CIC-IDS2018 after do labelencode and 44 feature and all featrue minmax 75 25分
+            # 44 feature use Label meraged BaseLine data do feature mapping to 123 feature
+            x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\Noniid\\TONIIOT_AddedLabel_featureMapping_x.npy", allow_pickle=True)
+            y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\Noniid\\TONIIOT_AddedLabel_featureMapping_y.npy", allow_pickle=True)
 
         elif (Choose_method == 'SMOTE'):
             # # 20240324 Chi-square 45 SMOTE  K=5          
@@ -760,9 +772,13 @@ def splitdatasetbalancehalf(train_dataframes, label):
 
     return df1,df2
 
-def splitweakLabelbalance(weakLabel,original_dataset,size):
-    # label_data = original_dataset[original_dataset['type'] == weakLabel]
-    label_data = original_dataset[original_dataset['Label'] == weakLabel]
+def splitweakLabelbalance(weakLabel,original_dataset,size, bool_TONIOT=False):
+    print(f"bool_TONIOT is: {bool_TONIOT}")  # 打印檢查
+    # TONIOT用type那句
+    if bool_TONIOT:
+        label_data = original_dataset[original_dataset['type'] == weakLabel]
+    else:
+        label_data = original_dataset[original_dataset['Label'] == weakLabel]
     # 使用train_test_split分別劃分取Label相等8、9、13、14的數據
     train_label, test_label = train_test_split(label_data, test_size=size, random_state=42)
     return train_label, test_label
@@ -827,6 +843,16 @@ def ChooseUseModel(model_type, input, ouput):
             def __init__(self):
                 super(MLP, self).__init__()
                  # 每層512神經元 for cicids2017
+                # self.layer1 = nn.Linear(input, 512)
+                # self.dropout1 = nn.Dropout(p=0.2)  # 第一層 Dropout
+                # self.fc2 = nn.Linear(512, 512)
+                # self.dropout2 = nn.Dropout(p=0.2)  # 第二層 Dropout
+                # self.fc3 = nn.Linear(512, 512)
+                # self.dropout3 = nn.Dropout(p=0.2)  # 第三層 Dropout
+                # self.fc4 = nn.Linear(512, 512)
+                # self.dropout4 = nn.Dropout(p=0.2)  # 第四層 Dropout
+                # self.layer5 = nn.Linear(512, ouput)
+                # # 每層64神經元 for Toniot
                 self.layer1 = nn.Linear(input, 512)
                 self.dropout1 = nn.Dropout(p=0.2)  # 第一層 Dropout
                 self.fc2 = nn.Linear(512, 512)
@@ -836,12 +862,6 @@ def ChooseUseModel(model_type, input, ouput):
                 self.fc4 = nn.Linear(512, 512)
                 self.dropout4 = nn.Dropout(p=0.2)  # 第四層 Dropout
                 self.layer5 = nn.Linear(512, ouput)
-                # # 每層64神經元 for Toniot
-                # self.layer1 = nn.Linear(input, 64)
-                # self.fc2 = nn.Linear(64, 64)
-                # self.fc3 = nn.Linear(64, 64)
-                # self.fc4 = nn.Linear(64, 64)
-                # self.layer5 = nn.Linear(64, ouput)
                 # # 隱藏層分別配置了 40 、 30 和 15 個神經元 for CICIDS2019
                 # self.layer1 = nn.Linear(input, 40)
                 # self.fc2 = nn.Linear(40, 30)
@@ -852,21 +872,25 @@ def ChooseUseModel(model_type, input, ouput):
             def forward(self, x):
                 # relu激活函数
                 # 输出范围在 (0, max) 之间
-                x = F.relu(self.layer1(x))
-                x = self.dropout1(x)  # 第一層 Dropout
-                x = F.relu(self.fc2(x))
-                x = self.dropout2(x)  # 第二層 Dropout
-                x = F.relu(self.fc3(x))
-                x = self.dropout3(x)  # 第三層 Dropout
-                x = F.relu(self.fc4(x))
-                x = self.dropout4(x)  # 第四層 Dropout
+                # x = F.relu(self.layer1(x))
+                # x = self.dropout1(x)  # 第一層 Dropout
+                # x = F.relu(self.fc2(x))
+                # x = self.dropout2(x)  # 第二層 Dropout
+                # x = F.relu(self.fc3(x))
+                # x = self.dropout3(x)  # 第三層 Dropout
+                # x = F.relu(self.fc4(x))
+                # x = self.dropout4(x)  # 第四層 Dropout
+                
                 # 修改后的代码使用Sigmoid激活函数每層64神經元 for Toniot
                 # 输出范围在 (0, 1) 之间
-                # x = F.sigmoid(self.layer1(x))
-                # x = F.sigmoid(self.fc2(x))
-                # x = F.sigmoid(self.fc3(x))
-                # x = F.sigmoid(self.fc4(x))
-                # x = self.sigmoid(self.output(x))  # 使用 Sigmoid 作為輸出層激活函數
+                x = F.sigmoid(self.layer1(x))
+                x = self.dropout1(x)  # 第一層 Dropout。
+                x = F.sigmoid(self.fc2(x))
+                x = self.dropout2(x)  # 第二層 Dropout
+                x = F.sigmoid(self.fc3(x))
+                x = self.dropout3(x)  # 第三層 Dropout
+                x = F.sigmoid(self.fc4(x))
+                x = self.dropout4(x)  # 第四層 Dropout
                 x = self.layer5(x)
                 return x
         return MLP()  # 返回創建的model instance
@@ -1160,7 +1184,9 @@ def DoReStoreNpFileToCsv(x_train, y_train,x_test,y_test,Str_ChooseDataset):
         # 合併 x 和 y DataFrame
         df_train_combined = pd.concat([df_train_x, df_train_y], axis=1)
         df_test_combined = pd.concat([df_test_x,df_test_y ], axis=1)
-
+        # axis=0 代表按行合併，即將測試集數據加到訓練集的後面。
+        # axis=0：按行合併（默認值），將數據上下拼接
+        # axis=1：按列合併，將數據左右拼接。
         df_combined = pd.concat([df_train_combined, df_test_combined], axis=0)
         df_combined.to_csv(f'./Restore_{Str_ChooseDataset}.csv', index=False)
         df_combined = pd.read_csv(f'./Restore_{Str_ChooseDataset}.csv')
