@@ -238,7 +238,7 @@ def draw_confusion_matrix(y_true, y_pred, plot_confusion_matrix = False):
         class_names = {
                         # 0: 'Benign', 
                         # 1: 'DDoS', 
-                        0: 'Normal', 
+                        0: 'Benign', 
                         1: 'Backdoor',
                         2: 'DDoS', 
                         3: 'Dos', 

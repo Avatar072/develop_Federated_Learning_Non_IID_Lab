@@ -114,15 +114,80 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
         # print(generatefolder(save_filename, "Noniid"))
         # save_filename =f"{save_filename}/Noniid/train_Dirichlet_client1_a0.5_eps_0.01_Added_Noniid_Label"
 
-        #######total train CICIDS2017 JSMA################################
+        #######total train CICIDS2017 JSMA theta 0.01################################
         # CICIDS2017 total train 0.5 to JSMA_Attack theta =0.01 use 123 feature mapping normal model
         # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta =0.01 by genrate by 123_feature Label merge BaseLine normal model")
-        x_train = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/x_train_CICIDS2017_theta0.01_gamma_0.05.npy", allow_pickle=True)
-        y_train = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/y_train_CICIDS2017_theta0.01_gamma_0.05.npy", allow_pickle=True)
-        save_filename = f"./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/"
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/x_train_CICIDS2017_theta0.01_gamma_0.05.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/y_train_CICIDS2017_theta0.01_gamma_0.05.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2017_theta0.01_gamma_0.05_Added_Noniid_Label"
+
+        #######total train CICIDS2017 FGSM eps 0.01################################
+        # CICIDS2017 total train to FGSM_Attack eps =0.01 use 123 feature mapping normal model
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.01 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/x_train_CICIDS2017_FGSM_eps0.01.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/y_train_CICIDS2017_FGSM_eps0.01.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2017_FGSM_eps0.01_Added_Noniid_Label"
+
+        #######total train CICIDS2017 PGD eps 0.01################################
+        # CICIDS2017 total train  to PGD_Attack eps =0.01 use 123 feature mapping normal model
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.01 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/x_train_CICIDS2017_PGD_eps0.01.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/y_train_CICIDS2017_PGD_eps0.01.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2017_PGD_eps0.01_Added_Noniid_Label"
+
+        #######total train CICIDS2017 FGSM eps 0.5################################
+        # CICIDS2017 total train to FGSM_Attack eps =0.5 use 123 feature mapping normal model
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps =0.5 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/x_train_CICIDS2017_FGSM_eps0.5.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/y_train_CICIDS2017_FGSM_eps0.5.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2017/FGSM_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2017_FGSM_eps0.5_Added_Noniid_Label"
+
+        #######total train CICIDS2017 JSMA theta 0.01################################
+        # CICIDS2017 total train  to JSMA_Attack theta =0.5 use 123 feature mapping normal model
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta =0.5 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/x_train_CICIDS2017_theta0.5_gamma_0.05.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/y_train_CICIDS2017_theta0.5_gamma_0.05.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2017/JSMA_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2017_theta0.5_gamma_0.05_Added_Noniid_Label"
+
+        #######total train CICIDS2017 PGD eps 0.5################################
+        # CICIDS2017 total train  to PGD_Attack eps =0.5 use 123 feature mapping normal model
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.5 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/x_train_CICIDS2017_PGD_eps0.5.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/y_train_CICIDS2017_PGD_eps0.5.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2017_PGD_eps0.5_Added_Noniid_Label"
+
+
+        #################################0.5 CICIDS2017 PGD################################
+        # CICIDS2017 iid Dirichlet 0.5 c1 to PGD eps 0.01 step_eps 0.0002 use 123 feature mapping normal model
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.01 step_eps 0.0002 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.5/x_train_Dirichlet_client1_a0.5_esp0.01_step_0.0002.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.5/y_train_Dirichlet_client1_a0.5_esp0.01_step_0.0002.npy", allow_pickle=True)
+
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_0.5CICIDS2017_PGD_eps0.01_Added_Noniid_Label"
+
+        # CICIDS2017 iid Dirichlet 0.5 c1 to PGD eps 0.5 step_eps 0.01 use 123 feature mapping normal model
+        print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.5 step_eps 0.01 by genrate by 123_feature Label merge BaseLine normal model")
+        x_train = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.5/x_train_Dirichlet_client1_a0.5_esp0.5_step_0.01.npy", allow_pickle=True)
+        y_train = np.load("./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.5/y_train_Dirichlet_client1_a0.5_esp0.5_step_0.01.npy", allow_pickle=True)
+
+        save_filename = f"./Adversarial_Attack_Test/CICIDS2017/PGD_Attack/Npfile/"
         print(generatefolder(save_filename, "Noniid"))
-        save_filename =f"{save_filename}/Noniid/train_CICIDS2017_theta0.01_gamma_0.05_Added_Noniid_Label"
-        
+        save_filename =f"{save_filename}/Noniid/train_0.5CICIDS2017_PGD_eps0.5_Added_Noniid_Label"
+
         # do FGSM
         # save_filename = filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLDay\\Npfile\\Noniid\\" + today + "\\CICIDS2017_AddedLabel_Noniid_FGSM"
         # Add TONIOT CICIDS2019
@@ -178,15 +243,72 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
 
         #################################0.1 TONIOT PGD################################
         # TONIOT iid Dirichlet 0.1 c1 to PGD eps 0.01
-        print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.01 step_eps 0.0002 by genrate by 123_feature Label merge BaseLine normal model")
-        x_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/x_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002.npy", allow_pickle=True)
-        # y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/y_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002.npy", allow_pickle=True)
-        y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/ChangeLabelencode/y_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_ChangeLabelencode.npy", allow_pickle=True)
-        save_filename = f"./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/"
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.01 step_eps 0.0002 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/x_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/y_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/ChangeLabelencode/y_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_Added_Noniid_Label"
+        
+        #################################total train TONIOT JSMA################################
+        # TONIOT NonIID total train to JSMA theta 0.5 gamma 0.05
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta0.01/gamma 0.05 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/x_train_TONIOT_theta0.01_gamma_0.05.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/y_train_TONIOT_theta0.01_gamma_0.05.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/ChangeLabelencode/y_train_TONIOT_theta0.01_gamma_0.05_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_TONIOT_theta0.01_gamma_0.05_Added_Noniid_Label"
+
+        #################################total train TONIOT FGSM################################
+        # TONIOT NonIID total train to FGSM eps 0.01
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps0.01 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/x_train_TONIOT_FGSM_eps0.01.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/y_train_TONIOT_FGSM_eps0.01.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/ChangeLabelencode/y_train_TONIOT_FGSM_eps0.01_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_TONIOT_FGSM_eps0.01_Added_Noniid_Label"
+        #################################total train TONIOT PGD################################
+        # TONIOT NonIID total train to PGD eps 0.01
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps0.01 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/x_train_TONIOT_PGD_eps0.01.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/y_train_TONIOT_PGD_eps0.01.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/ChangeLabelencode/y_train_TONIOT_PGD_eps0.01_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_TONIOT_PGD_eps0.01_Added_Noniid_Label"
+        #################################total train TONIOT FGSM eps 0.5################################
+        # TONIOT NonIID total train to FGSM eps 0.5
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps0.5 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/x_train_TONIOT_FGSM_eps0.5.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/y_train_TONIOT_FGSM_eps0.5.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/ChangeLabelencode/y_train_TONIOT_FGSM_eps0.5_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_TONIOT_FGSM_eps0.5_Added_Noniid_Label"
+
+        #################################total train TONIOT JSMA theta 0.5################################
+        # TONIOT NonIID total train to JSMA theta 0.5 gamma 0.05
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta0.5/gamma 0.05 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/x_train_TONIOT_theta0.5_gamma_0.05.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/y_train_TONIOT_theta0.5_gamma_0.05.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/ChangeLabelencode/y_train_TONIOT_theta0.5_gamma_0.05_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_TONIOT_theta0.5_gamma_0.05_Added_Noniid_Label"
+
+        #################################total train TONIOT PGD################################
+        # TONIOT NonIID total train to PGD eps 0.5
+        print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps0.5 by genrate by 123_feature Label merge BaseLine normal model")
+        x_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/x_train_TONIOT_PGD_eps0.5.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/y_train_TONIOT_PGD_eps0.5.npy", allow_pickle=True)
+        y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/ChangeLabelencode/y_train_TONIOT_PGD_eps0.5_ChangeLabelencode.npy", allow_pickle=True)
+        save_filename = f"./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/"
         print(generatefolder(save_filename, "Noniid"))
-        save_filename =f"{save_filename}/Noniid/train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_Added_Noniid_Label"
-        
-        
+        save_filename =f"{save_filename}/Noniid/train_TONIOT_PGD_eps0.5_Added_Noniid_Label"
+
         # Add CICIDS2017 CICIDS2019
         # add_Labels = np.array([1,3,4,5,6,7,8,9,10,11,12,13,14,23,24,25,26,27,28,29,30,31,32,33,34])
         # Add CICIDS2019
@@ -253,14 +375,63 @@ def DoAddLabelToTrainData(Str_ChooseDataset, Int_add_Label_count=None):
         # save_filename =f"{save_filename}/Noniid/train_Dirichlet_client1_a0.5_theta0.5_gamma_0.05_Added_Noniid_Label"
 
         #################################total train CICIDS2018 JSMA################################
+        # CICIDS2018 NonIID total train to JSMA theta 0.01 gamma 0.05
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta0.01/gamma 0.05 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/x_train_CICIDS2018_theta0.01_gamma_0.05.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/y_train_CICIDS2018_theta0.01_gamma_0.05.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/ChangeLabelencode/y_train_CICIDS2018_theta0.01_gamma_0.05_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2018_theta0.01_gamma_0.05_Added_Noniid_Label"
+
+        #################################total train CICIDS2018 FGSM################################
+        # CICIDS2018 NonIID total train to FGSM eps 0.01
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps 0.01 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/x_train_CICIDS2018_FGSM_eps0.01.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/y_train_CICIDS2018_FGSM_eps0.01.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/ChangeLabelencode/y_train_CICIDS2018_FGSM_eps0.01_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2018_FGSM_eps0.01_Added_Noniid_Label"
+        #################################total train CICIDS2018 PGD################################
+        # CICIDS2018 NonIID total train to PGD eps 0.01
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps 0.01 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/x_train_CICIDS2018_PGD_eps0.01.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/y_train_CICIDS2018_PGD_eps0.01.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/ChangeLabelencode/y_train_CICIDS2018_PGD_eps0.01_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2018_PGD_eps0.01_Added_Noniid_Label"
+
+        #################################total train CICIDS2018 FGSM eps 0.5################################
+        # CICIDS2018 NonIID total train to FGSM eps 0.5
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"FGSM_Attack eps 0.5 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/x_train_CICIDS2018_FGSM_eps0.5.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/y_train_CICIDS2018_FGSM_eps0.5.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/ChangeLabelencode/y_train_CICIDS2018_FGSM_eps0.5_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2018_FGSM_eps0.5_Added_Noniid_Label"
+        
+        #################################total train CICIDS2018 JSMA theta 0.5################################
         # CICIDS2018 NonIID total train to JSMA theta 0.5 gamma 0.05
-        print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta0.01/gamma 0.05 by genrate by 123_feature Label merge BaseLine normal model")
-        x_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/x_train_CICIDS2018_theta0.01_gamma_0.05.npy", allow_pickle=True)
-        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/y_train_CICIDS2018_theta0.01_gamma_0.05.npy", allow_pickle=True)
-        y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/ChangeLabelencode/y_train_CICIDS2018_theta0.01_gamma_0.05_ChangeLabelencode.npy", allow_pickle=True)
-        save_filename = f"./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/"
+        # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"JSMA_Attack theta0.5/gamma 0.05 by genrate by 123_feature Label merge BaseLine normal model")
+        # x_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/x_train_CICIDS2018_theta0.5_gamma_0.05.npy", allow_pickle=True)
+        # # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/y_train_CICIDS2018_theta0.5_gamma_0.05.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/ChangeLabelencode/y_train_CICIDS2018_theta0.5_gamma_0.05_ChangeLabelencode.npy", allow_pickle=True)
+        # save_filename = f"./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/"
+        # print(generatefolder(save_filename, "Noniid"))
+        # save_filename =f"{save_filename}/Noniid/train_CICIDS2018_theta0.5_gamma_0.05_Added_Noniid_Label"
+
+        #################################total train CICIDS2018 PGD################################
+        # CICIDS2018 NonIID total train to PGD eps 0.5
+        print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps 0.5 by genrate by 123_feature Label merge BaseLine normal model")
+        x_train = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/x_train_CICIDS2018_PGD_eps0.5.npy", allow_pickle=True)
+        # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/y_train_CICIDS2018_PGD_eps0.5.npy", allow_pickle=True)
+        y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/ChangeLabelencode/y_train_CICIDS2018_PGD_eps0.5_ChangeLabelencode.npy", allow_pickle=True)
+        save_filename = f"./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/"
         print(generatefolder(save_filename, "Noniid"))
-        save_filename =f"{save_filename}/Noniid/train_CICIDS2018_theta0.01_gamma_0.05_Added_Noniid_Label"
+        save_filename =f"{save_filename}/Noniid/train_CICIDS2018_PGD_eps0.5_Added_Noniid_Label"
 
         # Add CICIDS2017 CICIDS2019
         # add_Labels = np.array([9,10,11,12,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31])
@@ -493,11 +664,37 @@ def TONIoTNpfileChangeLabelEncodeValue():
     
     #################################0.1 TONIOT PGD################################
     # TONIOT iid Dirichlet 0.1 c1 to PGD eps 0.01
-    print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.01 step_eps 0.0002 by genrate by 123_feature Label merge BaseLine normal model")
-    # x_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/x_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002.npy", allow_pickle=True)
-    y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/y_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002.npy", allow_pickle=True)
-    save_filename = f"./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/"
-    print(generatefolder(save_filename, "ChangeLabelencode"))
+    # print(Fore.BLACK+Style.BRIGHT+Back.YELLOW+f"PGD_Attack eps =0.01 step_eps 0.0002 by genrate by 123_feature Label merge BaseLine normal model")
+    # # x_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/x_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002.npy", allow_pickle=True)
+    # y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/y_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002.npy", allow_pickle=True)
+    # save_filename = f"./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/Dirichlet/123_feature/a_0.1/"
+    # print(generatefolder(save_filename, "ChangeLabelencode"))
+
+    # TONIOT total train to JSMA theta 0.01 gamma 0.05 After do feature mapping 123 feature   
+    # y_train = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/y_train_TONIOT_theta0.01_gamma_0.05.npy", allow_pickle=True)
+    # save_filename = "./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/"
+    # print(generatefolder(save_filename, "ChangeLabelencode"))
+
+    # TONIOT total train to FGSM eps 0.01 After do feature mapping 123 feature   
+    # y_train = np.load("./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/y_train_TONIOT_FGSM_eps0.01.npy", allow_pickle=True)
+    # save_filename = "./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/"
+    # print(generatefolder(save_filename, "ChangeLabelencode"))
+    # TONIOT total train to PGD eps 0.01 After do feature mapping 123 feature   
+    # y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/y_train_TONIOT_PGD_eps0.01.npy", allow_pickle=True)
+    # save_filename = "./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/"
+    # print(generatefolder(save_filename, "ChangeLabelencode"))
+    # TONIOT total train to FGSM eps 0.5 After do feature mapping 123 feature   
+    # y_train = np.load("./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/y_train_TONIOT_FGSM_eps0.5.npy", allow_pickle=True)
+    # save_filename = "./Adversarial_Attack_Test/TONIOT/FGSM_Attack/Npfile/"
+
+    # TONIOT total train to JSMA theta 0.5 gamma 0.05 After do feature mapping 123 feature   
+    # y_train = np.load("./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/y_train_TONIOT_theta0.5_gamma_0.05.npy", allow_pickle=True)
+    # save_filename = "./Adversarial_Attack_Test/TONIOT/JSMA_Attack/Npfile/"
+    # print(generatefolder(save_filename, "ChangeLabelencode"))
+
+    # TONIOT total train to PGD eps 0.5 After do feature mapping 123 feature   
+    y_train = np.load("./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/y_train_TONIOT_PGD_eps0.5.npy", allow_pickle=True)
+    save_filename = "./Adversarial_Attack_Test/TONIOT/PGD_Attack/Npfile/"
 
     y_train_After_Change = np.where(y_train == 1, 12,
                                     np.where(y_train == 4, 13,
@@ -528,8 +725,26 @@ def TONIoTNpfileChangeLabelEncodeValue():
     # np.save(f"{save_filename}\\y_Dirichlet_client1_20250414_ChangeLabelencode.npy", y_train_After_Change)
     # np.save(f"{save_filename}\\y_Dirichlet_client2_20250414_ChangeLabelencode.npy", y_train_After_Change)
 
-    #np.savey_train After do feature mapping  Dirichlet aphla =0.1 c1 to PGD eps 0.01
-    np.save(f"{save_filename}\\ChangeLabelencode\\y_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_ChangeLabelencode.npy", y_train_After_Change)
+    #np.save y_train After do feature mapping  Dirichlet aphla =0.1 c1 to PGD eps 0.01
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_Dirichlet_client1_a0.1_esp0.01_step_0.0002_ChangeLabelencode.npy", y_train_After_Change)
+
+    #np.save y_train After do feature mapping  Do JSMA theta 0.01
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_TONIOT_theta0.01_gamma_0.05_ChangeLabelencode.npy", y_train_After_Change)
+
+    #np.save y_train After do feature mapping  Do FGSM eps 0.01
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_TONIOT_FGSM_eps0.01_ChangeLabelencode.npy", y_train_After_Change)
+
+    #np.save y_train After do feature mapping  Do PGD eps 0.01
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_TONIOT_PGD_eps0.01_ChangeLabelencode.npy", y_train_After_Change)
+
+    #np.save y_train After do feature mapping  Do FGSM eps 0.5
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_TONIOT_FGSM_eps0.5_ChangeLabelencode.npy", y_train_After_Change)
+
+    #np.save y_train After do feature mapping  Do JSMA theta 0.5
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_TONIOT_theta0.5_gamma_0.05_ChangeLabelencode.npy", y_train_After_Change)
+
+    #np.save y_train After do feature mapping  Do PGD eps 0.5
+    np.save(f"{save_filename}\\ChangeLabelencode\\y_train_TONIOT_PGD_eps0.5_ChangeLabelencode.npy", y_train_After_Change)
 
     y_train_unique_values = np.unique(y_train_After_Change)
     print("唯一值数量:", len(y_train_unique_values))
@@ -662,10 +877,34 @@ def CICIDS2018NpfileChangeLabelEncodeValue():
     # print(generatefolder(save_filename, "ChangeLabelencode"))
 
     # CICIDS2018 total train to JSMA theta 0.01 gamma 0.05 After do feature mapping 123 feature   
-    y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/y_train_CICIDS2018_theta0.01_gamma_0.05.npy", allow_pickle=True)
-    save_filename = "./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/"
-    print(generatefolder(save_filename, "ChangeLabelencode"))
+    # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/y_train_CICIDS2018_theta0.01_gamma_0.05.npy", allow_pickle=True)
+    # save_filename = "./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/"
+    # print(generatefolder(save_filename, "ChangeLabelencode"))
 
+    # CICIDS2018 total train to FGSM eps 0.01 After do feature mapping 123 feature   
+    # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/y_train_CICIDS2018_FGSM_eps0.01.npy", allow_pickle=True)
+    # save_filename = "./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/"
+    # print(generatefolder(save_filename, "ChangeLabelencode"))
+
+    # CICIDS2018 total train to PGD eps 0.01 After do feature mapping 123 feature   
+    # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/y_train_CICIDS2018_PGD_eps0.01.npy", allow_pickle=True)
+    # save_filename = "./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/"
+    # print(generatefolder(save_filename, "ChangeLabelencode"))
+
+    # CICIDS2018 total train to FGSM eps 0.5 After do feature mapping 123 feature   
+    # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/y_train_CICIDS2018_FGSM_eps0.5.npy", allow_pickle=True)
+    # save_filename = "./Adversarial_Attack_Test/CICIDS2018/FGSM_Attack/Npfile/"
+    # print(generatefolder(save_filename, "ChangeLabelencode"))
+
+    # CICIDS2018 total train to JSMA theta 0.5 gamma 0.05 After do feature mapping 123 feature   
+    # y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/y_train_CICIDS2018_theta0.5_gamma_0.05.npy", allow_pickle=True)
+    # save_filename = "./Adversarial_Attack_Test/CICIDS2018/JSMA_Attack/Npfile/"
+    # print(generatefolder(save_filename, "ChangeLabelencode"))
+
+    # CICIDS2018 total train to PGD eps 0.5 After do feature mapping 123 feature   
+    y_train = np.load("./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/y_train_CICIDS2018_PGD_eps0.5.npy", allow_pickle=True)
+    save_filename = "./Adversarial_Attack_Test/CICIDS2018/PGD_Attack/Npfile/"
+    print(generatefolder(save_filename, "ChangeLabelencode"))
 
     # 将 y_train和y_test進行Label encode值替換 for Noniid實驗
     y_train_After_Change = np.where(y_train == 6, 10,
@@ -695,8 +934,23 @@ def CICIDS2018NpfileChangeLabelEncodeValue():
     #np.savey_csv_data_train After do feature mapping  Dirichlet aphla =0.5 Do JSMA theta 0.5
     # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_Dirichlet_client1_a0.5_theta0.5_gamma_0.05_ChangeLabelencode.npy", y_train_After_Change)
     
-    #np.save y_csv_data_train After do feature mapping  Do JSMA theta 0.01
-    np.save(f"{save_filename}\\ChangeLabelencode\\y_train_CICIDS2018_theta0.01_gamma_0.05_ChangeLabelencode.npy", y_train_After_Change)
+    # #np.save y_csv_data_train After do feature mapping  Do JSMA theta 0.01
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_CICIDS2018_theta0.01_gamma_0.05_ChangeLabelencode.npy", y_train_After_Change)
+
+    # #np.save y_csv_data_train After do feature mapping  Do FGSM_eps0.01
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_CICIDS2018_FGSM_eps0.01_ChangeLabelencode.npy", y_train_After_Change)
+
+    # #np.save y_csv_data_train After do feature mapping  Do PGD_eps0.01
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_CICIDS2018_PGD_eps0.01_ChangeLabelencode.npy", y_train_After_Change)
+
+    # # #np.save y_csv_data_train After do feature mapping  Do FGSM_eps0.5
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_CICIDS2018_FGSM_eps0.5_ChangeLabelencode.npy", y_train_After_Change)
+
+    #np.save y_csv_data_train After do feature mapping  Do JSMA theta 0.5
+    # np.save(f"{save_filename}\\ChangeLabelencode\\y_train_CICIDS2018_theta0.5_gamma_0.05_ChangeLabelencode.npy", y_train_After_Change)
+
+    # #np.save y_csv_data_train After do feature mapping Do PGD_eps0.5
+    np.save(f"{save_filename}\\ChangeLabelencode\\y_train_CICIDS2018_PGD_eps0.5_ChangeLabelencode.npy", y_train_After_Change)
 
     y_train_unique_values = np.unique(y_train_After_Change)
     print("唯一值数量:", len(y_train_unique_values))
@@ -807,7 +1061,7 @@ def CICIDS2019NpfileChangeLabelEncodeValue():
 # CICIDS2018NpfileChangeLabelEncodeValue()
 # TONIoTNpfileChangeLabelEncodeValue()
 # CICIDS2019NpfileChangeLabelEncodeValue()
-# DoAddLabelToTrainData("CICIDS2017")
-DoAddLabelToTrainData("CICIDS2018")
+DoAddLabelToTrainData("CICIDS2017")
+# DoAddLabelToTrainData("CICIDS2018")
 # DoAddLabelToTrainData("CICIDS2019")
 # DoAddLabelToTrainData("TONIOT")

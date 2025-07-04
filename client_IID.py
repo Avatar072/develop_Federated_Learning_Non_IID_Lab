@@ -1405,6 +1405,9 @@ class FlowerClient(fl.client.NumPyClient):
         accuracy = test(net, global_testloader, start_IDS, client_str,f"global_test",True)
         # local test測試剛聚合完的全局模型
         test_global_inLocaltest_accuracy = test(net, local_testloader, start_IDS, client_str,f"global_model_local_test",True)
+        #  寫入Accuracy文件
+        with open(f"./FL_AnalyseReportfolder/{today}/{current_time}/{client_str}/{Choose_method}/accuracy-gobal_local_test_{client_str}.csv", "a+") as file:
+            file.write(f"{test_global_inLocaltest_accuracy}\n")
         self.Reocrd_global_model_accuracy = accuracy
         print(Fore.RED+Style.BRIGHT+"global_model_accuracy:"+str(accuracy))
         print(Fore.RED+Style.BRIGHT+"Reocrd_global_model_accuracy:"+str(self.Reocrd_global_model_accuracy))
