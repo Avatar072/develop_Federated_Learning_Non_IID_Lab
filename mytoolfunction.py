@@ -891,6 +891,7 @@ def ChooseUseModel(model_type, input, ouput):
                 x = self.dropout3(x)  # 第三層 Dropout
                 x = F.sigmoid(self.fc4(x))
                 x = self.dropout4(x)  # 第四層 Dropout
+                
                 x = self.layer5(x)
                 return x
         return MLP()  # 返回創建的model instance

@@ -43,6 +43,30 @@ current_time = time.strftime("%Hh%Mm%Ss", time.localtime())
 
 # 傳入Adversarial_Attack相關參數
 epsilons, model_path, labelCount, class_names, labels_to_calculate, x_train, y_train, x_test, y_test = SettingAderversarialConfig(choose_dataset)
+# x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_x.npy", allow_pickle=True)
+# y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_y.npy", allow_pickle=True)
+# CICIDS2017 total train after featuremapping
+# x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLday_train_featureMapping_20250317.npy", allow_pickle=True)
+# y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLday_train_featureMapping_20250317.npy", allow_pickle=True)
+
+# CICIDS2018 total triain
+# # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f" with normal After Do labelencode and minmax do Label meraged and feature mapping")
+# x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_train_featureMapping_20250317.npy", allow_pickle=True)
+# y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_featureMapping_20250317.npy", allow_pickle=True)
+# # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_train_featureMapping_20250317_ChangeLabelencode.npy", allow_pickle=True)
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\x_csv_data_test_featureMapping_20250317.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250317.npy", allow_pickle=True)
+# # y_test = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2018\\Npfile\\y_csv_data_test_featureMapping_20250317_ChangeLabelencode.npy", allow_pickle=True)
+
+# TONIOT total triain
+# 20250317 TONIoT after do labelencode and all featrue minmax 75 25分 44 feature do backdoor和ddos互相更換encode值 feature mapping to 123 feature
+print(Fore.BLUE+Style.BRIGHT+"Loading TONIOT" +f" with normal After Do labelencode and minmax do Label meraged and feature mapping")
+x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)
+y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)   
+# y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)   
+x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)
+y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)   
+
 # 轉換為張量
 x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
 y_train = torch.from_numpy(y_train).type(torch.LongTensor)

@@ -29,8 +29,8 @@ start_IDS = time.time()
 client_str = "baseline_train"
 Choose_method = "normal"
 num_epochs = 1
-# choose_dataset = "CICIDS2017"
-choose_dataset = "TONIOT"
+choose_dataset = "CICIDS2017"
+# choose_dataset = "TONIOT"
 # choose_dataset = "CICIDS2018"
 
 # 設定設備
@@ -47,8 +47,8 @@ epsilons, model_path, labelCount, class_names, labels_to_calculate, x_train, y_t
 # x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_x.npy", allow_pickle=True)
 # y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\Noniid\\CICIDS2017_AddedLabel_Noniid_featureMapping_y.npy", allow_pickle=True)
 # CICIDS2017 total train after featuremapping
-# x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLday_train_featureMapping_20250317.npy", allow_pickle=True)
-# y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLday_train_featureMapping_20250317.npy", allow_pickle=True)
+x_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\x_ALLday_train_featureMapping_20250317.npy", allow_pickle=True)
+y_train = np.load(filepath + "\\dataset_AfterProcessed\\CICIDS2017\\ALLday\\Npfile\\y_ALLday_train_featureMapping_20250317.npy", allow_pickle=True)
 
 # CICIDS2018 total triain
 # print(Fore.BLUE+Style.BRIGHT+"Loading CICIDS2018" +f" with normal After Do labelencode and minmax do Label meraged and feature mapping")
@@ -61,12 +61,12 @@ epsilons, model_path, labelCount, class_names, labels_to_calculate, x_train, y_t
 
 # TONIOT total triain
 # 20250317 TONIoT after do labelencode and all featrue minmax 75 25分 44 feature do backdoor和ddos互相更換encode值 feature mapping to 123 feature
-print(Fore.BLUE+Style.BRIGHT+"Loading TONIOT" +f" with normal After Do labelencode and minmax do Label meraged and feature mapping")
-x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)
-y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)   
-# y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)   
-x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)
-y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)   
+# print(Fore.BLUE+Style.BRIGHT+"Loading TONIOT" +f" with normal After Do labelencode and minmax do Label meraged and feature mapping")
+# x_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)
+# y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317.npy", allow_pickle=True)   
+# # y_train = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_train_featureMapping_20250317_ChangeLabelEncode_for_Noniid.npy", allow_pickle=True)   
+# x_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\x_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)
+# y_test = np.load(filepath + "\\dataset_AfterProcessed\\TONIOT\\Npfile\\y_TONIOT_test_featureMapping_20250317.npy", allow_pickle=True)   
 
 
 # 轉換為張量
@@ -477,7 +477,8 @@ def main():
     # 不用for為只生成一次攻擊的寫法
     attack = SaliencyMapMethod(
             classifier=classifier,       
-            theta=0.01, # 控制每次修改的步幅
+            # theta=0.01,控制每次修改的步幅
+            theta=0.5, # 控制每次修改的步幅
             gamma=0.05# 控制修改的最大比例
         )
     #     test執行攻擊並評估
